@@ -1,5 +1,5 @@
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Constants >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
-const CID = 'rc-v20220509';
+const CID = 'rdc-1652755589611';
 const ANCHOR_SELECTOR = 'h2,h3';
 const STYLES = {
   RDC_CONTAINER: 'rdc-container',
@@ -26,6 +26,7 @@ function TocStyles() {
             font-size: 14px;
             border-radius: 5px;
             background: #fff;
+            box-shadow: 0 1px 2px 0 #ccc;
         }
         
         .rdc-container .hidden {
@@ -109,7 +110,7 @@ function TocBody(anchorNodes) {
     const pl = `padding-left:${20 * level}px;`;
 
     return `<a href="${SYMBOL.HASH}${aNode.id}" style="${pl}" title="${title}">${title}</a>`;
-  }).join('');
+  }).join('') || `<p style="text-align: center;color: #ccc;">暂无数据</p>`;
 
   return `<div class="${STYLES.RDC_BODY}">${html}</div>`;
 }
@@ -155,6 +156,8 @@ function activeLink(hash) {
     node = data.tocLinkNodes[i];
   }
 
+  if (!node) return;
+
   data.tocLinkNodes.forEach(n => n.classList.remove(STYLES.ACTIVE));
   node.classList.add(STYLES.ACTIVE);
 }
@@ -185,6 +188,42 @@ function observeScroll() {
   window.addEventListener('scroll', () => activeLink());
 }
 
+/**
+ * 【trick】双击文章标题时加载并拷贝markdown内容，可按需移除
+ */
+function copyMdWhenClickHeader() {
+  function showMsg(errMsg = '') {
+    const node = document.createElement('p');
+    node.innerText = errMsg ? '❌ ' + errMsg : '✅ 复制成功';
+    node.style.cssText = 'position:fixed;padding:10px 40px;bottom:20px;right:20px;background:#fff;font-size:14px;color:#000000d9;border-radius:2px;z-index:9999;box-shadow:0 3px 6px -4px #0000001f,0 6px 16px #00000014,0 9px 28px 8px #0000000d;';
+    document.body.append(node);
+    setTimeout(() => node.remove(), 3000);
+  }
+
+  document.body.addEventListener('dblclick', (event) => {
+    if (event.target.tagName !== 'H1') return;
+
+    const name = location.href.replace(/^.+\/|\.html.*$/g, '');
+    const link = `https://raw.githubusercontent.com/reactjs/zh-hans.reactjs.org/main/content/docs/${name}.md`;
+
+    const ctrl = new AbortController(), SECONDS = 5;
+    const tid = setTimeout(() => ctrl.abort(), SECONDS * 1000);
+
+    fetch(link, {signal: ctrl.signal}).
+        then(res => res.ok && res.text()).
+        then(text => {
+          clearTimeout(tid);
+          text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '');
+          text = text.replace(/\n##/g, '\n#');
+
+          navigator.clipboard.writeText(text).
+              then(() => showMsg()).
+              catch(e => showMsg(e.message));
+        }).
+        catch(e => showMsg(ctrl.signal.aborted ? '请求超时' : e.message));
+  });
+}
+
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Main Entrance >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
 function start() {
   renderToc();
@@ -195,6 +234,7 @@ function start() {
 
   observeHashChange();
   observeScroll();
+  copyMdWhenClickHeader();
 }
 
 start();
