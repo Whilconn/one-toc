@@ -109,7 +109,7 @@ function TocBody(anchorNodes) {
     const pl = `padding-left:${20 * level}px;`;
 
     return `<a href="${SYMBOL.HASH}${aNode.id}" style="${pl}" title="${title}">${title}</a>`;
-  }).join('');
+  }).join('') || `<p style="text-align: center;color: #ccc;">暂无数据</p>`;
 
   return `<div class="${STYLES.RDC_BODY}">${html}</div>`;
 }
@@ -154,6 +154,8 @@ function activeLink(hash) {
     if (i < 0) i = data.anchorsTop.length - 1;
     node = data.tocLinkNodes[i];
   }
+
+  if (!node) return;
 
   data.tocLinkNodes.forEach(n => n.classList.remove(STYLES.ACTIVE));
   node.classList.add(STYLES.ACTIVE);
