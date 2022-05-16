@@ -187,6 +187,24 @@ function observeScroll() {
   window.addEventListener('scroll', () => activeLink());
 }
 
+/**
+ * 点击文章标题时加载并拷贝markdown内容
+ * trick，可按需移除
+ */
+function copyMdWhenClickHeader() {
+  document.body.addEventListener('click', (event) => {
+    if (event.target.tagName !== 'H1') return;
+
+    const name = location.href.replace(/^.+\/|\.html.*$/g, '');
+    const link = `https://raw.githubusercontent.com/reactjs/zh-hans.reactjs.org/main/content/docs/${name}.md`;
+
+    fetch(link).then(res => res.text()).then(text => {
+      text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '').replace(/\n##/g, '\n#');
+      navigator.clipboard.writeText(text).catch(e => alert(e.message));
+    }).catch(e => alert(e.message));
+  });
+}
+
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Main Entrance >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
 function start() {
   renderToc();
@@ -197,6 +215,7 @@ function start() {
 
   observeHashChange();
   observeScroll();
+  copyMdWhenClickHeader();
 }
 
 start();
