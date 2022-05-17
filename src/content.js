@@ -26,6 +26,7 @@ function TocStyles() {
             font-size: 14px;
             border-radius: 5px;
             background: #fff;
+            box-shadow: 0 1px 2px 0 #ccc;
         }
         
         .rdc-container .hidden {
@@ -192,9 +193,9 @@ function observeScroll() {
  */
 function copyMdWhenClickHeader() {
   function showMsg(errMsg = '') {
-    const node = document.createElement('b');
+    const node = document.createElement('p');
     node.innerText = errMsg ? '❌ ' + errMsg : '✅ 复制成功';
-    node.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:9999;';
+    node.style.cssText = 'position:fixed;padding:10px 40px;bottom:20px;right:20px;background:#fff;font-size:14px;color:#000000d9;border-radius:2px;z-index:9999;box-shadow:0 3px 6px -4px #0000001f,0 6px 16px #00000014,0 9px 28px 8px #0000000d;';
     document.body.append(node);
     setTimeout(() => node.remove(), 3000);
   }
