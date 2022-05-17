@@ -188,11 +188,18 @@ function observeScroll() {
 }
 
 /**
- * 点击文章标题时加载并拷贝markdown内容
- * trick，可按需移除
+ * 【trick】双击文章标题时加载并拷贝markdown内容，可按需移除
  */
 function copyMdWhenClickHeader() {
-  document.body.addEventListener('click', (event) => {
+  function showMsg(errMsg = '') {
+    const node = document.createElement('b');
+    node.innerText = errMsg ? '❌ ' + errMsg : '✅ 复制成功';
+    node.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:9999;';
+    document.body.append(node);
+    setTimeout(() => node.remove(), 3000);
+  }
+
+  document.body.addEventListener('dblclick', (event) => {
     if (event.target.tagName !== 'H1') return;
 
     const name = location.href.replace(/^.+\/|\.html.*$/g, '');
@@ -205,11 +212,14 @@ function copyMdWhenClickHeader() {
         then(res => res.ok && res.text()).
         then(text => {
           clearTimeout(tid);
-          text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '').
-              replace(/\n##/g, '\n#');
-          navigator.clipboard.writeText(text).catch(e => alert(e.message));
+          text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '');
+          text = text.replace(/\n##/g, '\n#');
+
+          navigator.clipboard.writeText(text).
+              then(() => showMsg()).
+              catch(e => showMsg(e.message));
         }).
-        catch(e => ctrl.signal.aborted ? alert('请求超时') : alert(e.message));
+        catch(e => showMsg(ctrl.signal.aborted ? '请求超时' : e.message));
   });
 }
 
