@@ -1,5 +1,5 @@
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Constants >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
-const CID = 'rc-v20220509';
+const CID = 'rdc-1652755589611';
 const ANCHOR_SELECTOR = 'h2,h3';
 const STYLES = {
   RDC_CONTAINER: 'rdc-container',
@@ -198,10 +198,18 @@ function copyMdWhenClickHeader() {
     const name = location.href.replace(/^.+\/|\.html.*$/g, '');
     const link = `https://raw.githubusercontent.com/reactjs/zh-hans.reactjs.org/main/content/docs/${name}.md`;
 
-    fetch(link).then(res => res.text()).then(text => {
-      text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '').replace(/\n##/g, '\n#');
-      navigator.clipboard.writeText(text).catch(e => alert(e.message));
-    }).catch(e => alert(e.message));
+    const ctrl = new AbortController(), SECONDS = 5;
+    const tid = setTimeout(() => ctrl.abort(), SECONDS * 1000);
+
+    fetch(link, {signal: ctrl.signal}).
+        then(res => res.ok && res.text()).
+        then(text => {
+          clearTimeout(tid);
+          text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '').
+              replace(/\n##/g, '\n#');
+          navigator.clipboard.writeText(text).catch(e => alert(e.message));
+        }).
+        catch(e => ctrl.signal.aborted ? alert('请求超时') : alert(e.message));
   });
 }
 
