@@ -1,3 +1,6 @@
+import './copy-react-docs';
+import { config } from './config';
+
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Constants >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
 const CID = 'rdc-1652755589611';
 const ANCHOR_SELECTOR = 'h2,h3';
@@ -9,7 +12,7 @@ const STYLES = {
   ACTIVE: 'active',
   HIDDEN: 'hidden',
 };
-const SYMBOL = {HASH: '#'};
+const SYMBOL = { HASH: '#' };
 
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Styles >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
 function TocStyles() {
@@ -18,6 +21,12 @@ function TocStyles() {
 
   const ellipsis = `text-overflow: ellipsis;overflow: hidden;white-space: nowrap;`;
   return `<style>
+        .rdc-container, .rdc-container * {
+            margin: 0;
+            padding: 0;
+            line-height: initial;
+        }
+
         .rdc-container {
             position: fixed;
             width: 260px;
@@ -26,9 +35,10 @@ function TocStyles() {
             font-size: 14px;
             border-radius: 5px;
             background: #fff;
-            box-shadow: 0 1px 2px 0 #ccc;
+            box-shadow: 0 0 2px 0 #ccc;
+            z-index: 9999;
         }
-        
+
         .rdc-container .hidden {
             display: none;
         }
@@ -39,7 +49,7 @@ function TocStyles() {
             font-weight: bold;
             ${ellipsis}
         }
-        
+
         .rdc-body {
             padding: 15px;
             max-height: calc(100vh - ${top}px - 80px);
@@ -52,16 +62,16 @@ function TocStyles() {
             color: #333;
             ${ellipsis}
         }
-        
+
         .rdc-body a:hover {
             color: #007fff;
         }
-        
+
         .rdc-body a.active {
             color: #007fff;
             font-weight: bold;
         }
-        
+
         .rdc-footer {
             padding: 5px;
             text-align: center;
@@ -80,12 +90,13 @@ const data = {
 };
 
 function resetData(anchorNodes, tocLinkNodes) {
-  const top = window.scrollY, OFFSET = 50;
+  const top = window.scrollY,
+    OFFSET = 50;
   const anchorsTop = anchorNodes.map((n, i) => {
     if (i >= anchorNodes.length - 1) return Infinity;
     return top + anchorNodes[i + 1].getBoundingClientRect().top - OFFSET;
   });
-  Object.assign(data, {anchorNodes, tocLinkNodes, anchorsTop});
+  Object.assign(data, { anchorNodes, tocLinkNodes, anchorsTop });
 }
 
 // remove old toc container
@@ -102,15 +113,18 @@ function TocContainer(...htmlList) {
 }
 
 function TocBody(anchorNodes) {
-  const html = anchorNodes.map(aNode => {
-    const title = aNode.innerText;
+  const html =
+    anchorNodes
+      .map((aNode) => {
+        const title = aNode.innerText;
 
-    // level
-    const level = +aNode.tagName.replace(/[a-z]/ig, '') - 2;
-    const pl = `padding-left:${20 * level}px;`;
+        // level
+        const level = +aNode.tagName.replace(/[a-z]/gi, '') - 2;
+        const pl = `padding-left:${20 * level}px;`;
 
-    return `<a href="${SYMBOL.HASH}${aNode.id}" style="${pl}" title="${title}">${title}</a>`;
-  }).join('') || `<p style="text-align: center;color: #ccc;">暂无数据</p>`;
+        return `<a href="${SYMBOL.HASH}${aNode.id}" style="${pl}" title="${title}">${title}</a>`;
+      })
+      .join('') || `<p style="text-align: center;color: #ccc;">暂无数据</p>`;
 
   return `<div class="${STYLES.RDC_BODY}">${html}</div>`;
 }
@@ -121,9 +135,12 @@ function TocFooter() {
 
 function renderToc() {
   removeTocContainer();
-  if (!/^\/(docs|blog)/.test(location.pathname)) return;
+  const url = location.href.replace(/https?:\/\//, '');
+  if (config.whiteList.every((w) => !url.startsWith(w))) return;
 
   const anchorNodes = [...document.querySelectorAll(ANCHOR_SELECTOR)];
+  anchorNodes.forEach((n, i) => (n.id = n.id || `heading-${i}`));
+
   const html = TocContainer(TocStyles(), TocBody(anchorNodes), TocFooter());
   document.body.insertAdjacentHTML('beforeend', html);
 
@@ -135,7 +152,7 @@ function renderToc() {
 
   const footerNode = container.lastElementChild;
   footerNode.addEventListener('click', () => {
-    [tocBodyNode, ...footerNode.children].forEach(n => {
+    [tocBodyNode, ...footerNode.children].forEach((n) => {
       n.classList.toggle(STYLES.HIDDEN);
     });
   });
@@ -147,18 +164,18 @@ function renderToc() {
  */
 function activeLink(hash) {
   let node = null;
-  if (hash) node = data.tocLinkNodes.find(n => n.href.includes(hash));
+  if (hash) node = data.tocLinkNodes.find((n) => n.href.includes(hash));
 
   if (!node) {
     const scrollTop = window.scrollY;
-    let i = data.anchorsTop.findIndex(top => scrollTop < top);
+    let i = data.anchorsTop.findIndex((top) => scrollTop < top);
     if (i < 0) i = data.anchorsTop.length - 1;
     node = data.tocLinkNodes[i];
   }
 
   if (!node) return;
 
-  data.tocLinkNodes.forEach(n => n.classList.remove(STYLES.ACTIVE));
+  data.tocLinkNodes.forEach((n) => n.classList.remove(STYLES.ACTIVE));
   node.classList.add(STYLES.ACTIVE);
 }
 
@@ -188,54 +205,16 @@ function observeScroll() {
   window.addEventListener('scroll', () => activeLink());
 }
 
-/**
- * 【trick】双击文章标题时加载并拷贝markdown内容，可按需移除
- */
-function copyMdWhenClickHeader() {
-  function showMsg(errMsg = '') {
-    const node = document.createElement('p');
-    node.innerText = errMsg ? '❌ ' + errMsg : '✅ 复制成功';
-    node.style.cssText = 'position:fixed;padding:10px 40px;bottom:20px;right:20px;background:#fff;font-size:14px;color:#000000d9;border-radius:2px;z-index:9999;box-shadow:0 3px 6px -4px #0000001f,0 6px 16px #00000014,0 9px 28px 8px #0000000d;';
-    document.body.append(node);
-    setTimeout(() => node.remove(), 3000);
-  }
-
-  document.body.addEventListener('dblclick', (event) => {
-    if (event.target.tagName !== 'H1') return;
-
-    const name = location.href.replace(/^.+\/|\.html.*$/g, '');
-    const link = `https://raw.githubusercontent.com/reactjs/zh-hans.reactjs.org/main/content/docs/${name}.md`;
-
-    const ctrl = new AbortController(), SECONDS = 5;
-    const tid = setTimeout(() => ctrl.abort(), SECONDS * 1000);
-
-    fetch(link, {signal: ctrl.signal}).
-        then(res => res.ok && res.text()).
-        then(text => {
-          clearTimeout(tid);
-          text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '');
-          text = text.replace(/\n##/g, '\n#');
-
-          navigator.clipboard.writeText(text).
-              then(() => showMsg()).
-              catch(e => showMsg(e.message));
-        }).
-        catch(e => showMsg(ctrl.signal.aborted ? '请求超时' : e.message));
-  });
-}
-
 /**>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Main Entrance >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>**/
 function start() {
   renderToc();
 
   const target = document.querySelector('title');
   const observer = new MutationObserver(() => renderToc());
-  observer.observe(target, {childList: true});
+  observer.observe(target, { childList: true });
 
   observeHashChange();
   observeScroll();
-  copyMdWhenClickHeader();
 }
 
 start();
-
