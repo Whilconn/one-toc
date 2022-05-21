@@ -1,13 +1,12 @@
 {
-  "name": "React Docs Toc",
-  "description": "Append Toc To React Docs Websites",
+  "name": "OneToc",
+  "description": "Toc For Websites.",
   "version": "1.0.0",
   "manifest_version": 3,
   "content_scripts": [
     {
       "matches": [
-        "https://*.reactjs.org/*",
-        "https://react.docschina.org/*"
+        "*://*/*"
       ],
       "js": [
         "content.js"
