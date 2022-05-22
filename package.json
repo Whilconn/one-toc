@@ -1,7 +1,7 @@
 {
-  "name": "react-docs-toc",
+  "name": "one-toc",
   "version": "1.0.0",
-  "description": "为react官方文档添加文档目录的chrome插件",
+  "description": "为网站添加文档目录的chrome插件",
   "main": "index.js",
   "scripts": {
     "start": "rollup --config scripts/rollup.config.dev.js --watch",
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Whilconn/react-docs-toc.git"
+    "url": "git+https://github.com/Whilconn/one-toc.git"
   },
   "keywords": [],
   "author": "whilconn",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Whilconn/react-docs-toc/issues"
+    "url": "https://github.com/Whilconn/one-toc/issues"
   },
-  "homepage": "https://github.com/Whilconn/react-docs-toc#readme",
+  "homepage": "https://github.com/Whilconn/one-toc#readme",
   "devDependencies": {
     "prettier": "^2.6.2",
     "rollup": "^2.74.1",

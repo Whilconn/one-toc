@@ -5,7 +5,7 @@ const [SRC, DEST] = ['src', 'dist'];
 export default {
   input: `${SRC}/content.js`,
   output: {
-    file: `${DEST}/content.js`,
+    dir: DEST,
     format: 'iife',
   },
   plugins: [
