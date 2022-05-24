@@ -9,5 +9,8 @@ export const config = {
     'my.oschina.net/u',
     'www.cnblogs.com/',
     'www.infoq.cn/article',
+    'blog.csdn.net/',
+    'blog.51cto.com/',
+    'github.com/',
   ],
 };

@@ -2,7 +2,7 @@ import { config } from './config';
 import { TocStyles } from './styles';
 import { calcHeaderHeight, resetState, state } from './state';
 import { addEvent, removeAllEvents } from './events';
-import { ANCHOR_SELECTOR, CID, STYLES, SYMBOL } from './constants';
+import { ANCHOR_SELECTORS, CID, STYLES, SYMBOL } from './constants';
 
 function TocContainer(...htmlList) {
   return `<nav id="${CID}" class="${STYLES.TOC_CONTAINER}">
@@ -90,7 +90,14 @@ export function renderToc() {
   const url = location.href.replace(/https?:\/\//, '');
   if (config.whiteList.every((w) => !url.startsWith(w))) return;
 
-  const anchorNodes = [...document.querySelectorAll(ANCHOR_SELECTOR)];
+  let anchorNodes = [];
+  const [articleSelectors, headSelectors] = ANCHOR_SELECTORS;
+  for (const a of articleSelectors) {
+    const selector = headSelectors.map((h) => `${a} ${h}`).join(SYMBOL.COMMA);
+    anchorNodes = [...document.querySelectorAll(selector)];
+    if (anchorNodes.length) break;
+  }
+
   anchorNodes.forEach((n, i) => (n.id = n.id || `toc-heading-${i}`));
 
   const headerHeight = calcHeaderHeight();
