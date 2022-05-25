@@ -1,0 +1,30 @@
+.toc-root {
+  position: fixed;
+  z-index: 999999;
+}
+
+.toc-container {
+  &, * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1.15;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    font-style: normal;
+  }
+
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  font-size: 14px;
+  z-index: 999999;
+
+  &.toc-expanded {
+    display: flex;
+    flex-direction: column;
+    width: 260px;
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0 0 2px 0 #ccc;
+  }
+}

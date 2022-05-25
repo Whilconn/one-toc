@@ -1,34 +1,83 @@
 # one-toc
-为react官方文档添加文档目录的chrome插件
+TOC(Table Of Content) for websites.
+<br><br>
+Append TOC to the websites such as technical documentation, technical blogs, etc. to provide a better reading experience.
+<br><br>
+为技术文档、技术博客等网站添加导航目录的浏览器插件，提供更好的阅读体验。
+<br><br>
+![](screenshots/1.png)
 
-- header 偏移
-  - 默认偏移量：60px
-  - header高度覆盖默认
-- 锚点控制
-  - id、name
-  - 点击事件控制
-- 解析错误：非内容区域的h2、h3被解析为锚点
-- 没有目录的网站
-  - 知乎：https://zhuanlan.zhihu.com/p/502951532
-  - 简书：https://www.jianshu.com/p/a2cb1e3a79be
-  - oschina：https://my.oschina.net/u/4843764/blog/5528481
-  - infoq：https://www.infoq.cn/article/BwXyBWmqroBpkrEdvV1l
-    - TODO：ajax加载数据，目录渲染不出数据
-  - react-doc：https://zh-hans.reactjs.org/
-- 有目录的网站
-  - 掘金：https://juejin.cn/post/7076377297623711757
-  - 思否：https://segmentfault.com/a/1190000041806654
-- 有目录体验略尴尬
-  - cnblogs：https://www.cnblogs.com/teach/p/16295605.html
-    - 默认关闭，hover标题时出现开启按钮
-  - csdn：https://blog.csdn.net/csdnnews/article/details/124880259
-    - 有点飘，有点晃
-  - 51cto：https://blog.51cto.com/harmonyos/5318953
-    - 默认不出现在可视区域，滚动到偏下位置才出现
-    - 部分文章目录点击无法正确跳转：https://blog.51cto.com/pypypy/5318533
-- 不兼容的网站
-  - iteye：https://www.iteye.com/blog/zhoumeng87-2531925
-    - 标题不使用h2、h3标签，无法兼容
-- 惊喜网站
-  - bing：https://www.bing.com/
-  - 百度：https://www.baidu.com/
+### 如何使用
+#### Edge
+直接到[Edge插件商店](https://microsoftedge.microsoft.com/addons/detail/onetoc/jkgapfniamkoblbmbhdjlnfklihlpjmc)安装即可 
+
+#### Chrome
+- 下载zip包并解压
+- 打开 chrome://extensions/ 页面 
+- 点击右上角开启开发者模式 
+- 点击左上角加载已解压的扩展程序，选择扩展程序目录即可
+
+### 配置说明
+> 选择启用与默认展开、且链接满足匹配规则的页面时，才会生成导航目录。修改配置会立即生效。
+
+#### 启用
+> 插件的启用和关闭状态，启用才能显示导航目录
+- 插件默认启用，打开页面时若链接匹配会往页面添加导航目录
+- 插件关闭时，打开页面不会对页面有任何改动
+
+#### 默认展开
+> 打开新页面时插件的展开和收起状态，展开状态才会完整显示导航目录，收起状态只显示展开按钮
+- 插件默认展开，打开新页面或刷新时自动展开
+- 关闭默认展开时，打开新页面或刷新时目录自动收起，只显示圆形的展开按钮
+
+#### 匹配规则
+> 匹配页面链接的规则，符合匹配规则的页面才会显示导航目录
+- 匹配规则使用[glob](https://en.wikipedia.org/wiki/Glob_(programming))编写
+- 匹配所使用的库是[micromatch](https://github.com/micromatch/micromatch)
+- 插件默认的匹配规则如下，可自行修改
+- 匹配所有页面可配置为 `**`
+```text
+*reactjs.org/(docs|blog)/**
+*zhihu.com/p/**
+*jianshu.com/p/**
+*oschina.net/**
+*cnblogs.com/**
+*csdn.net/**
+*github.com/*/**
+*eslint.(org|cn)/docs/**
+```
+
+
+### 默认支持的网站
+- 知乎：https://zhuanlan.zhihu.com/p/24650288
+- 简书：https://www.jianshu.com/p/a2cb1e3a79be
+- 开源中国：https://my.oschina.net/u/4843764/blog/5528481
+- React 文档：https://zh-hans.reactjs.org/
+- Eslint 文档：https://eslint.org/docs/user-guide/getting-started
+  - http://eslint.cn/docs/user-guide/getting-started
+- Github：https://github.com/facebook/react
+  - 自带目录，默认关闭，点击Readme标题时出现开启按钮
+- 博客园：https://www.cnblogs.com/teach/p/16295605.html
+  - 自带目录，默认关闭，hover段落标题时出现开启按钮
+- CSDN：https://blog.csdn.net/csdnnews/article/details/124880259
+  - 自带目录，不是fixed定位
+
+### 自带目录的网站
+- 掘金：https://juejin.cn/post/7076377297623711757
+- 思否：https://segmentfault.com/a/1190000041806654
+
+### 不兼容的网站
+- 51cto：https://blog.51cto.com/harmonyos/5318953
+  - 自带目录默认不出现在可视区域，滚动到偏下位置才出现
+  - 自带目录部分文章目录点击无法正确跳转：https://blog.51cto.com/pypypy/5318533
+  - TODO：生成目录出现较多无效锚点，选择器不够准确
+- iteye：https://www.iteye.com/blog/zhoumeng87-2531925
+  - 标题不使用Heading标签（h2、h3等），无法兼容
+- infoq：https://www.infoq.cn/article/BwXyBWmqroBpkrEdvV1l
+  - TODO：ajax加载数据，目录渲染不出数据
+  - TODO：选择器不够准确
+
+### tricks
+> 目前默认Heading选择器无法筛选出结果，可以自行修改选择器体验
+- bing：https://www.bing.com/
+- 百度：https://www.baidu.com/

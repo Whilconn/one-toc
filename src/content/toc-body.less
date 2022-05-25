@@ -1,0 +1,31 @@
+.toc-container .toc-body {
+  flex: 1;
+  padding: 15px;
+  overflow: auto;
+
+  a {
+    display: block;
+    padding: 8px 0;
+    color: #333;
+    text-decoration: none;
+    outline: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &:hover {
+      color: #007fff;
+    }
+
+    &.active {
+      color: #007fff;
+      font-weight: bold;
+    }
+  }
+
+  .no-content {
+    text-align: center;
+    color: #ccc;
+  }
+
+}

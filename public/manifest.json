@@ -1,0 +1,32 @@
+{
+  "name": "OneToc",
+  "description": "为技术文档、技术博客等网站添加导航目录的浏览器插件，提供更好的阅读体验。",
+  "version": "1.0.2",
+  "manifest_version": 3,
+  "icons": {
+    "16": "icon300.png",
+    "48": "icon300.png",
+    "128": "icon300.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "react.js",
+        "react-dom.js",
+        "content.js"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
