@@ -1,28 +1,46 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SYMBOL } from '../constants';
+import { useEventListener, useTitle } from './hooks';
+import { getAnchors, getAnchorTopList, getHeaderHeight } from '../utils';
+import './toc-body.less';
 
-export function TocBody(props) {
-  const linkNodes = props.anchorNodes.map((node, i) => {
-    const text = node.innerText;
-    const href = SYMBOL.HASH + node.id;
+export function TocBody() {
+  const [current, setCurrent] = useState(0);
 
-    // level
-    const level = +node.tagName.replace(/[a-z]/gi, '') - 2;
-    const style = { paddingLeft: `${20 * level}px` };
-    const cls = i === props.curIdx ? 'active' : '';
+  const title = useTitle();
+  const top = useMemo(getHeaderHeight, [title]);
+  const anchorNodes = useMemo(getAnchors, [title]);
+  const anchorTops = useMemo(() => getAnchorTopList(anchorNodes, top), [title]);
 
-    return (
-      <a onClick={() => props.setCurIdx(i)} href={href} className={cls} style={style} title={text}>
-        {text}
-      </a>
-    );
-  });
+  function activeLink() {
+    const scrollTop = window.scrollY;
+    let i = anchorTops.findIndex((aTop) => scrollTop < aTop);
+    if (i < 0) i = anchorTops.length - 1;
+    setCurrent(i);
+  }
 
-  const style = { maxHeight: `calc(100vh - ${props.top}px - 100px)` };
+  useEffect(activeLink, [title]);
+  const memoActiveLink = useCallback(activeLink, [title]);
+  useEventListener(window, 'scroll', memoActiveLink);
 
   return (
-    <div className="toc-body" style={style}>
-      {props.anchorNodes.length ? linkNodes : <p className="no-content">暂无数据</p>}
+    <div className="toc-body">
+      {anchorNodes.map((node, i) => {
+        const text = node.innerText;
+        const href = SYMBOL.HASH + node.id;
+
+        // level
+        const level = +node.tagName.replace(/[a-z]/gi, '') - 2;
+        const style = { paddingLeft: `${20 * level}px` };
+        const cls = i === current ? 'active' : '';
+
+        return (
+          <a onClick={() => setCurrent(i)} href={href} className={cls} style={style} title={text}>
+            {text}
+          </a>
+        );
+      })}
+      {!anchorNodes.length && <p className="no-content">暂无数据</p>}
     </div>
   );
 }

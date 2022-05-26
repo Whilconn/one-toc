@@ -8,6 +8,7 @@ function render() {
   const rootNode = document.getElementById(CID) || document.createElement('div');
   if (!rootNode.isConnected) {
     rootNode.id = CID;
+    rootNode.classList.add('toc-root');
     document.body.append(rootNode);
   }
 

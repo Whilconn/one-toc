@@ -8,7 +8,6 @@ export const config = {
     'www.jianshu.com/p',
     'my.oschina.net/u',
     'www.cnblogs.com/',
-    'www.infoq.cn/article',
     'blog.csdn.net/',
     'blog.51cto.com/',
     'github.com/',
