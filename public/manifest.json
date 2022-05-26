@@ -9,6 +9,8 @@
         "*://*/*"
       ],
       "js": [
+        "react.js",
+        "react-dom.js",
         "content.js"
       ]
     }

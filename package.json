@@ -4,8 +4,8 @@
   "description": "为网站添加文档目录的chrome插件",
   "main": "index.js",
   "scripts": {
-    "start": "vite build --watch",
-    "build": "vite build"
+    "dev": "vite build -c scripts/vite.config.dev.js",
+    "build": "vite build -c scripts/vite.config.prod.js"
   },
   "repository": {
     "type": "git",
@@ -23,11 +23,15 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "prettier": "^2.6.2",
+    "@commitlint/cli": "^17.0.1",
+    "@commitlint/config-conventional": "^17.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@vitejs/plugin-react": "^1.3.0",
-    "vite": "^2.9.9",
-    "rollup-plugin-copy": "^3.4.0"
+    "eslint": "^8.16.0",
+    "eslint-plugin-react": "^7.30.0",
+    "husky": "^8.0.1",
+    "prettier": "^2.6.2",
+    "vite": "^2.9.9"
   }
 }
