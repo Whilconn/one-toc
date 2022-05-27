@@ -2,7 +2,12 @@ import React from 'react';
 import CollapseSvg from '../assets/collapse.svg?raw';
 import './toc-head.less';
 
-export function TocHead(props) {
+interface Props {
+  title: string;
+  toggleExpanded: () => void;
+}
+
+export function TocHead(props: Props) {
   return (
     <div className="toc-head">
       <p className="toc-title" title={props.title}>

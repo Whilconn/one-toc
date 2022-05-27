@@ -2,7 +2,11 @@ import React from 'react';
 import TocSvg from '../assets/toc.svg?raw';
 import './toc-icon.less';
 
-export function TocIcon(props) {
+interface Props {
+  toggleExpanded: () => void;
+}
+
+export function TocIcon(props: Props) {
   return (
     <span
       onClick={props.toggleExpanded}

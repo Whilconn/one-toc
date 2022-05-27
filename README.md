@@ -11,7 +11,7 @@
 - 解析错误：非内容区域的h2、h3被解析为锚点
 
 ### 没有目录的网站
-- 知乎：https://zhuanlan.zhihu.com/p/502951532
+- 知乎：https://zhuanlan.zhihu.com/p/24650288
 - 简书：https://www.jianshu.com/p/a2cb1e3a79be
 - oschina：https://my.oschina.net/u/4843764/blog/5528481
 - react-doc：https://zh-hans.reactjs.org/

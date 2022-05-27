@@ -13,20 +13,20 @@ export function getHeaderHeight() {
 }
 
 export function getAnchors() {
-  let nodes = [];
+  let nodes: HTMLElement[] = [];
   const [articleSelectors, headSelectors] = ANCHOR_SELECTORS;
   for (const a of articleSelectors) {
     const selector = headSelectors.map((h) => `${a} ${h}`).join(SYMBOL.COMMA);
-    nodes = [...document.querySelectorAll(selector)];
+    nodes = [...document.querySelectorAll(selector)] as HTMLElement[];
     if (nodes.length) break;
   }
 
-  nodes.forEach((n, i) => (n.id = n.id || `toc-heading-${i}`));
+  nodes.forEach((n, i) => (n.id = n.id || `toc-anchor-${i}`));
 
   return nodes;
 }
 
-export function getAnchorTopList(anchorNodes, marginTop) {
+export function getAnchorTopList(anchorNodes: HTMLElement[], marginTop: number) {
   const scrollY = window.scrollY;
 
   return anchorNodes.map((n, i) => {

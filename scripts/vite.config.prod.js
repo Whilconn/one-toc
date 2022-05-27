@@ -11,7 +11,7 @@ fs.copyFileSync('node_modules/react-dom/umd/react-dom.production.min.js', 'publi
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/main.jsx',
+      entry: 'src/main.tsx',
       name: 'OneToc',
       formats: ['iife'],
       fileName: () => 'content.js',

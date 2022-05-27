@@ -8,14 +8,14 @@ import { getHeaderHeight } from '../utils';
 import './toc.less';
 
 export function Toc() {
-  const url = location.href.replace(/https?:\/\//, '');
-  if (config.whiteList.every((w) => !url.startsWith(w))) return;
-
   const [expanded, setExpanded] = useState(true);
   const toggleExpanded = useCallback(() => setExpanded(!expanded), [expanded]);
-
   const title = useTitle();
   const top = useMemo(getHeaderHeight, [title]);
+
+  const url = location.href.replace(/https?:\/\//, '');
+  if (config.whiteList.every((w) => !url.startsWith(w))) return null;
+
   const style = { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
   return (

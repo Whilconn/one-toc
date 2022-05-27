@@ -15,17 +15,16 @@ export function copyMdWhenClickHeader() {
   }
 
   document.body.addEventListener('dblclick', (event) => {
-    if (event.target.tagName !== 'H1') return;
+    if ((event.target as HTMLElement).tagName !== 'H1') return;
 
     const name = location.href.replace(/^.+\/|\.html.*$/g, '');
     const link = `https://raw.githubusercontent.com/reactjs/zh-hans.reactjs.org/main/content/docs/${name}.md`;
 
-    const ctrl = new AbortController(),
-      SECONDS = 5;
-    const tid = setTimeout(() => ctrl.abort(), SECONDS * 1000);
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 5000);
 
     fetch(link, { signal: ctrl.signal })
-      .then((res) => res.ok && res.text())
+      .then((res) => (res.ok ? res.text() : ''))
       .then((text) => {
         clearTimeout(tid);
         text = text.replace(/^---\n[\s\S]+?---\n+|\{#[^}]+}/g, '');
@@ -34,8 +33,8 @@ export function copyMdWhenClickHeader() {
         navigator.clipboard
           .writeText(text)
           .then(() => showMsg())
-          .catch((e) => showMsg(e.message));
+          .catch((e: Error) => showMsg(e.message));
       })
-      .catch((e) => showMsg(ctrl.signal.aborted ? '请求超时' : e.message));
+      .catch((e: Error) => showMsg(ctrl.signal.aborted ? '请求超时' : e.message));
   });
 }

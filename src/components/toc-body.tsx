@@ -10,7 +10,7 @@ export function TocBody() {
   const title = useTitle();
   const top = useMemo(getHeaderHeight, [title]);
   const anchorNodes = useMemo(getAnchors, [title]);
-  const anchorTops = useMemo(() => getAnchorTopList(anchorNodes, top), [title]);
+  const anchorTops = useMemo(() => getAnchorTopList(anchorNodes, top), [anchorNodes, top]);
 
   function activeLink() {
     const scrollTop = window.scrollY;
@@ -19,8 +19,8 @@ export function TocBody() {
     setCurrent(i);
   }
 
-  useEffect(activeLink, [title]);
-  const memoActiveLink = useCallback(activeLink, [title]);
+  useEffect(activeLink, [anchorTops]);
+  const memoActiveLink = useCallback(activeLink, [anchorTops]);
   useEventListener(window, 'scroll', memoActiveLink);
 
   return (
@@ -35,7 +35,7 @@ export function TocBody() {
         const cls = i === current ? 'active' : '';
 
         return (
-          <a onClick={() => setCurrent(i)} href={href} className={cls} style={style} title={text}>
+          <a key={node.id} onClick={() => setCurrent(i)} href={href} className={cls} style={style} title={text}>
             {text}
           </a>
         );

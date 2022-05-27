@@ -11,5 +11,6 @@ export const config = {
     'blog.csdn.net/',
     'blog.51cto.com/',
     'github.com/',
+    'eslint.cn/docs',
   ],
 };
