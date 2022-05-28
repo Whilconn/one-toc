@@ -1,21 +1,15 @@
-import fs from 'fs';
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+const { defineConfig } = require('vite');
+const react = require('@vitejs/plugin-react');
 
-// const [SRC, DEST, PUBLIC] = ['src', 'dist', 'public'];
-
-// copy react libs
-fs.copyFileSync('node_modules/react/umd/react.production.min.js', 'public/react.js');
-fs.copyFileSync('node_modules/react-dom/umd/react-dom.production.min.js', 'public/react-dom.js');
-
-export default defineConfig({
+module.exports = defineConfig({
   build: {
     lib: {
-      entry: 'src/main.tsx',
-      name: 'OneToc',
+      entry: 'src/content.tsx',
+      name: 'OneTocContent',
       formats: ['iife'],
       fileName: () => 'content.js',
     },
+    emptyOutDir: false,
     cssCodeSplit: true,
     rollupOptions: {
       external: ['react', 'react-dom'],

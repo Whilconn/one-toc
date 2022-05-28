@@ -34,5 +34,6 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "ignorePatterns": ["scripts/**"]
 }
