@@ -4,7 +4,7 @@ import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { TocIcon } from './toc-icon';
 import { useTitle } from './hooks';
-import { getHeaderHeight } from '../utils';
+import { getHeaderHeight } from './utils';
 import './toc.less';
 
 export function Toc() {

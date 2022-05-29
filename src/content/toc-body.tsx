@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SYMBOL } from '../constants';
+import { SYMBOL } from './constants';
 import { useEventListener, useTitle } from './hooks';
-import { getAnchors, getAnchorTopList, getHeaderHeight } from '../utils';
+import { getAnchors, getAnchorTopList, getHeaderHeight } from './utils';
 import './toc-body.less';
 
 export function TocBody() {

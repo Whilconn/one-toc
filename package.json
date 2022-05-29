@@ -4,8 +4,8 @@
   "description": "为网站添加文档目录的chrome插件",
   "main": "index.js",
   "scripts": {
-    "dev": "node build.js dev",
-    "build": "node build.js prod",
+    "dev": "node scripts/build.js dev",
+    "build": "node scripts/build.js prod",
     "lint": "eslint src/"
   },
   "repository": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Whilconn/one-toc#readme",
   "dependencies": {
+    "rc-switch": "^3.2.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
