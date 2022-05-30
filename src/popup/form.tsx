@@ -1,46 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Switch from 'rc-switch';
-import '../storage';
+import { SETTINGS_ACTION_NAMES, useSettings } from '../use-settings';
 import 'rc-switch/assets/index.css';
 import './form.less';
 
 export function Form() {
-  const d1 = localStorage.getItem('open') || '';
-  const d2 = localStorage.getItem('whiteList') || '';
+  const [settings, dispatch] = useSettings();
 
-  const [open, setOpen] = useState(d1 === 'true');
-  const [whitelist, setWhitelist] = useState(d2);
+  const setEnabled = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setEnabled, payload: checked });
 
-  function toggle(checked: boolean) {
-    setOpen(checked);
-    localStorage.setItem('open', checked.toString());
-  }
-
-  function changeWhitelist(evt: React.ChangeEvent) {
-    const val = (evt.target as HTMLTextAreaElement).value;
-    saveWhitelist(val);
-  }
-
-  function resetWhitelist() {
-    saveWhitelist('');
-  }
-
-  function saveWhitelist(val: string) {
-    setWhitelist(val);
-    localStorage.setItem('whiteList', val);
-  }
+  const setWhitelist = (evt: React.ChangeEvent) => {
+    dispatch({ type: SETTINGS_ACTION_NAMES.setWhitelist, payload: (evt.target as HTMLTextAreaElement).value });
+  };
+  const resetWhitelist = () => dispatch({ type: SETTINGS_ACTION_NAMES.resetWhitelist });
 
   return (
     <>
       <section className="popup-container">
         <p>
-          启用插件： <Switch checked={open} onChange={toggle} />
+          启用插件： <Switch checked={settings.enabled} onChange={setEnabled} />
         </p>
         <p>
-          网站白名单：<button onClick={resetWhitelist}>重置为默认</button>
+          网站白名单：
+          <button onClick={resetWhitelist}>重置为默认</button>
         </p>
         <p>
-          <textarea value={whitelist} onChange={changeWhitelist} cols={30} rows={10} />
+          <textarea value={settings.whitelist} onChange={setWhitelist} rows={15} />
         </p>
       </section>
     </>
