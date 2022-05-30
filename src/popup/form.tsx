@@ -1,6 +1,6 @@
 import React from 'react';
 import Switch from 'rc-switch';
-import { SETTINGS_ACTION_NAMES, useSettings } from '../use-settings';
+import { SETTINGS_ACTION_NAMES, useSettings } from './use-settings';
 import 'rc-switch/assets/index.css';
 import './form.less';
 

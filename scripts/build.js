@@ -36,7 +36,11 @@ function copyReactLibs() {
 }
 
 function build() {
-  const entries = { content: 'src/content/content.tsx', popup: 'src/popup/popup.tsx' };
+  const entries = {
+    content: 'src/content/content.tsx',
+    popup: 'src/popup/popup.tsx',
+    background: 'src/background/background.ts',
+  };
   for (const [key, entry] of Object.entries(entries)) {
     const cfg = _.cloneDeep(config.viteConfig);
     cfg.build.lib = {
