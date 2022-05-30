@@ -7,12 +7,12 @@
 .popup-container {
   padding: 15px;
   width: 500px;
-  height: 300px;
+  min-height: 300px;
   color: #333;
   font-size: 16px;
 
-  p{
-    margin-bottom: 10px;
+  p {
+    margin-bottom: 15px;
   }
 
   textarea {
@@ -20,5 +20,16 @@
     width: 100%;
     font-size: 16px;
     resize: none;
+  }
+
+  a {
+    color: #0681d0;
+    text-decoration: none;
+    outline: 0;
+    cursor: pointer;
+
+    &:hover {
+      color: #056bad;
+    }
   }
 }

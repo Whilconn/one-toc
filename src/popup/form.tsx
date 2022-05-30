@@ -22,7 +22,7 @@ export function Form() {
         </p>
         <p>
           网站白名单：
-          <button onClick={resetWhitelist}>重置为默认</button>
+          <a onClick={resetWhitelist}>重置为默认</a>
         </p>
         <p>
           <textarea value={settings.whitelist} onChange={setWhitelist} rows={15} />

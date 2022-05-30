@@ -12,19 +12,12 @@ if (!rootNode.isConnected) {
   document.body.append(rootNode);
 }
 
-const root = ReactDOM.createRoot(rootNode);
-const render = () =>
-  root.render(
-    <React.StrictMode>
-      <ErrorBoundary className="toc-container toc-expanded">
-        <Toc />
-      </ErrorBoundary>
-    </React.StrictMode>,
-  );
+ReactDOM.createRoot(rootNode).render(
+  <React.StrictMode>
+    <ErrorBoundary className="toc-container toc-expanded">
+      <Toc />
+    </ErrorBoundary>
+  </React.StrictMode>,
+);
 
-render();
 copyMdWhenClickHeader();
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') render();
-});
