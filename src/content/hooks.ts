@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export function useTitle() {
   const [title, setTitle] = useState(document.title);
-  const target = document.querySelector('title');
-  const observer = new MutationObserver(() => setTitle(document.title));
-  observer.observe(target as Node, { childList: true });
+  useEffect(() => {
+    const target = document.querySelector('title');
+    if (!target) return;
+
+    const observer = new MutationObserver(() => setTitle(document.title));
+    observer.observe(target as Node, { childList: true });
+    return () => observer.disconnect();
+  }, []);
   return title;
 }
 
