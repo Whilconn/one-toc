@@ -23,5 +23,9 @@ module.exports = defineConfig({
       },
     },
   },
+  // 解决 micromatch 不兼容浏览器，出现 process is not defined 报错
+  define: {
+    process: {},
+  },
   plugins: [react()],
 });

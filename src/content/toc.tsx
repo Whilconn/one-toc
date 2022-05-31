@@ -5,6 +5,7 @@ import { TocIcon } from './toc-icon';
 import { useTitle } from './hooks';
 import { getHeaderHeight } from './utils';
 import { useSettings } from '../popup/use-settings';
+import * as micromatch from 'micromatch';
 import './toc.less';
 
 export function Toc() {
@@ -16,8 +17,8 @@ export function Toc() {
 
   if (!settings.enabled || !settings.whitelist) return null;
 
-  const url = location.href.replace(/https?:\/\//, '');
-  if (settings.whitelist.split('\n').every((w) => !url.startsWith(w))) return null;
+  const url = location.host + location.pathname;
+  if (!micromatch.some(url, settings.whitelist.split('\n'))) return null;
 
   const style = { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
