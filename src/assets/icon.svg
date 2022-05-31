@@ -1,0 +1,10 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+ <g id="Layer_1">
+  <title>Layer 1</title>
+  <rect stroke-width="0" rx="20" id="svg_1" height="300" width="300" y="0" x="0" fill="#00bfbf"/>
+  <g id="svg_4">
+   <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="30" id="svg_2" y="98.5" x="231.78516" stroke-width="0" fill="#ffffff">One</text>
+   <text xml:space="preserve" text-anchor="start" font-family="Noto Sans JP" font-size="130" id="svg_3" y="197" x="11.77734" stroke-width="0" fill="#ffffff">Toc</text>
+  </g>
+ </g>
+</svg>

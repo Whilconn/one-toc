@@ -7,8 +7,8 @@ const viteConfigProd = require('./vite.config.prod');
 
 const env = (process.argv[2] || 'dev').toLowerCase();
 
-const PUBLIC = 'public';
-// const [SRC, DEST, PUBLIC] = ['src', 'dist', 'public'];
+const root = path.resolve(__dirname, '..');
+const [DEST, PUBLIC] = ['dist', 'public'];
 
 const CONFIG = {
   dev: {
@@ -26,11 +26,15 @@ const CONFIG = {
 
 const config = CONFIG[env];
 
+function clearDest() {
+  fs.rmdirSync(path.resolve(root, DEST), { recursive: true });
+}
+
 function copyReactLibs() {
   config.sourceFiles.forEach((src) => {
     let target = src.replace(/.+\//, '').replace(/\..+\./, '.');
-    src = path.resolve(__dirname, '..', src);
-    target = path.resolve(__dirname, '..', `${PUBLIC}/${target}`);
+    src = path.resolve(root, src);
+    target = path.resolve(root, `${PUBLIC}/${target}`);
     fs.copyFileSync(src, target);
   });
 }
@@ -53,5 +57,6 @@ function build() {
   }
 }
 
+clearDest();
 copyReactLibs();
 build();
