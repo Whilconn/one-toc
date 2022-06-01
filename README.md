@@ -1,5 +1,11 @@
 # one-toc
-为技术文档、技术博客等网站添加文档目录的chrome插件，提供更好的阅读体验
+TOC(Table Of Content) for websites.
+<br>
+![](screenshots/1.png)
+<br>
+Append TOC to the right side of websites such as technical documentation, technical blogs, etc. to provide a better reading experience.
+<br>
+在技术文档、技术博客等网站的右侧添加导航目录的chrome插件，提供更好的阅读体验。
 
 ### 默认支持的网站
 - 知乎：https://zhuanlan.zhihu.com/p/24650288
