@@ -18,7 +18,12 @@ export function Toc() {
   if (!settings.enabled || !settings.whitelist) return null;
 
   const url = location.host + location.pathname;
-  if (!micromatch.some(url, settings.whitelist.split('\n'))) return null;
+  const whitelist = settings.whitelist
+    .split('\n')
+    .map((s) => s.trim())
+    .filter((s) => s);
+
+  if (!whitelist.length || !micromatch.some(url, whitelist)) return null;
 
   const style = { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
