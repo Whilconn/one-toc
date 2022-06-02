@@ -1,6 +1,7 @@
 import React from 'react';
 import Switch from 'rc-switch';
 import { SETTINGS_ACTION_NAMES, useSettings } from './use-settings';
+import pkg from '../../package.json';
 import 'rc-switch/assets/index.css';
 import './form.less';
 
@@ -18,14 +19,25 @@ export function Form() {
     <>
       <section className="popup-container">
         <p>
-          启用插件： <Switch checked={settings.enabled} onChange={setEnabled} />
+          🚀&ensp;启用： <Switch checked={settings.enabled} onChange={setEnabled} />
         </p>
         <p>
-          网站白名单：
+          🌐&ensp;匹配规则：
           <a onClick={resetWhitelist}>重置为默认</a>
         </p>
         <p>
-          <textarea value={settings.whitelist} onChange={setWhitelist} rows={15} />
+          <textarea value={settings.whitelist} onChange={setWhitelist} rows={10} />
+        </p>
+        <p>
+          <span>❗&ensp;</span>
+          <a href={pkg.homepage + '#配置说明'} target="_blank" rel="noreferrer">
+            配置说明
+          </a>
+          <span>&emsp;&emsp;</span>
+          <span>🐞&ensp;</span>
+          <a href={pkg.bugs.url} target="_blank" rel="noreferrer">
+            反馈问题
+          </a>
         </p>
       </section>
     </>

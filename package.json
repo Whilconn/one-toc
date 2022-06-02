@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/Whilconn/one-toc/issues"
   },
-  "homepage": "https://github.com/Whilconn/one-toc#readme",
+  "homepage": "https://github.com/Whilconn/one-toc",
   "dependencies": {
     "micromatch": "^4.0.5",
     "rc-switch": "^3.2.2",

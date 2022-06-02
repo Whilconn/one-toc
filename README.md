@@ -7,6 +7,34 @@ Append TOC to the right side of websites such as technical documentation, techni
 <br><br>
 ![](screenshots/1.png)
 
+### 如何使用
+#### Edge
+直接到[Edge插件商店](https://microsoftedge.microsoft.com/addons/detail/onetoc/jkgapfniamkoblbmbhdjlnfklihlpjmc)安装即可 
+
+#### Chrome
+- 下载zip包并解压
+- 打开 chrome://extensions/ 页面 
+- 点击右上角开启开发者模式 
+- 点击左上角加载已解压的扩展程序，选择扩展程序目录即可
+
+### 配置说明
+- 1、选择启用且链接满足匹配规则的页面才会生成导航目录
+- 2、插件默认启用，默认支持的匹配规则如下
+```text
+*reactjs.org/(docs|blog)/**
+*zhihu.com/p/**
+*jianshu.com/p/**
+*oschina.net/**
+*cnblogs.com/**
+*csdn.net/**
+*github.com/*/**
+*eslint.org/docs/**
+*eslint.cn/docs/**
+```
+- 3、匹配规则使用[glob](https://en.wikipedia.org/wiki/Glob_(programming))编写，
+- 4、匹配所使用的库是[micromatch](https://github.com/micromatch/micromatch)
+- 5、修改配置会立即生效
+
 ### 默认支持的网站
 - 知乎：https://zhuanlan.zhihu.com/p/24650288
 - 简书：https://www.jianshu.com/p/a2cb1e3a79be
