@@ -1,9 +1,9 @@
 # one-toc
 TOC(Table Of Content) for websites.
 <br><br>
-Append TOC to the right side of websites such as technical documentation, technical blogs, etc. to provide a better reading experience.
+Append TOC to the websites such as technical documentation, technical blogs, etc. to provide a better reading experience.
 <br><br>
-在技术文档、技术博客等网站的右侧添加导航目录的chrome插件，提供更好的阅读体验。
+为技术文档、技术博客等网站添加导航目录的浏览器插件，提供更好的阅读体验。
 <br><br>
 ![](screenshots/1.png)
 
