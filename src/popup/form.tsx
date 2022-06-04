@@ -9,6 +9,7 @@ export function Form() {
   const [settings, dispatch] = useSettings();
 
   const setEnabled = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setEnabled, payload: checked });
+  const setExpanded = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setExpanded, payload: checked });
 
   const setWhitelist = (evt: React.ChangeEvent) => {
     dispatch({ type: SETTINGS_ACTION_NAMES.setWhitelist, payload: (evt.target as HTMLTextAreaElement).value });
@@ -23,6 +24,9 @@ export function Form() {
         </p>
         <p>
           🚀&ensp;启用： <Switch checked={settings.enabled} onChange={setEnabled} />
+        </p>
+        <p>
+          ☀️&ensp;默认展开： <Switch checked={settings.expanded} onChange={setExpanded} />
         </p>
         <p>
           🌐&ensp;匹配规则：

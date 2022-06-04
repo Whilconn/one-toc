@@ -5,7 +5,7 @@ export function get(key: string | string[]): Promise<Settings> {
   return chrome.storage.local.get(key);
 }
 
-export function set(settings: Settings): Promise<void> {
+export function set(settings: Partial<Settings>): Promise<void> {
   return chrome.storage.local.set(settings);
 }
 
@@ -19,7 +19,7 @@ export function removeListener(callback: (changes: StorageChanges, areaName: str
 
 export interface StorageChanges {
   [key: string]: {
-    newValue: any;
-    oldValue: any;
+    newValue: boolean | string | undefined;
+    oldValue: boolean | string | undefined;
   };
 }

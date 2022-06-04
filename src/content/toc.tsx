@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { TocIcon } from './toc-icon';
@@ -9,11 +9,13 @@ import * as micromatch from 'micromatch';
 import './toc.less';
 
 export function Toc() {
-  const [settings] = useSettings();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState<boolean>();
   const toggleExpanded = useCallback(() => setExpanded(!expanded), [expanded]);
+
   const title = useTitle();
+  const [settings] = useSettings();
   const top = useMemo(getHeaderHeight, [title]);
+  useEffect(() => setExpanded(settings.expanded), [settings]);
 
   if (!settings.enabled || !settings.whitelist) return null;
 

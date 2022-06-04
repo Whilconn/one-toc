@@ -1,15 +1,12 @@
-export const SETTINGS_KEYS = {
-  ENABLED: 'enabled',
-  WHITELIST: 'whitelist',
-};
-
 export interface Settings {
-  enabled?: boolean;
-  whitelist?: string;
+  enabled: boolean;
+  expanded: boolean;
+  whitelist: string;
 }
 
-export const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
+  expanded: true,
   whitelist: [
     '*reactjs.org/(docs|blog)/**',
     '*zhihu.com/p/**',

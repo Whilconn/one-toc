@@ -18,8 +18,24 @@ Append TOC to the right side of websites such as technical documentation, techni
 - 点击左上角加载已解压的扩展程序，选择扩展程序目录即可
 
 ### 配置说明
-- 1、选择启用且链接满足匹配规则的页面才会生成导航目录
-- 2、插件默认启用，默认支持的匹配规则如下
+> 选择启用与默认展开、且链接满足匹配规则的页面时，才会生成导航目录。修改配置会立即生效。
+
+#### 启用
+> 插件的启用和关闭状态，启用才能显示导航目录
+- 插件默认启用，打开页面时若链接匹配会往页面添加导航目录
+- 插件关闭时，打开页面不会对页面有任何改动
+
+#### 默认展开
+> 打开新页面时插件的展开和收起状态，展开状态才会完整显示导航目录，收起状态只显示展开按钮
+- 插件默认展开，打开新页面或刷新时自动展开
+- 关闭默认展开时，打开新页面或刷新时目录自动收起，只显示圆形的展开按钮
+
+#### 匹配规则
+> 匹配页面链接的规则，符合匹配规则的页面才会显示导航目录
+- 匹配规则使用[glob](https://en.wikipedia.org/wiki/Glob_(programming))编写
+- 匹配所使用的库是[micromatch](https://github.com/micromatch/micromatch)
+- 插件默认的匹配规则如下，可自行修改
+- 匹配所有页面可配置为 `**`
 ```text
 *reactjs.org/(docs|blog)/**
 *zhihu.com/p/**
@@ -28,12 +44,9 @@ Append TOC to the right side of websites such as technical documentation, techni
 *cnblogs.com/**
 *csdn.net/**
 *github.com/*/**
-*eslint.org/docs/**
-*eslint.cn/docs/**
+*eslint.(org|cn)/docs/**
 ```
-- 3、匹配规则使用[glob](https://en.wikipedia.org/wiki/Glob_(programming))编写，
-- 4、匹配所使用的库是[micromatch](https://github.com/micromatch/micromatch)
-- 5、修改配置会立即生效
+
 
 ### 默认支持的网站
 - 知乎：https://zhuanlan.zhihu.com/p/24650288
@@ -68,11 +81,3 @@ Append TOC to the right side of websites such as technical documentation, techni
 > 目前默认Heading选择器无法筛选出结果，可以自行修改选择器体验
 - bing：https://www.bing.com/
 - 百度：https://www.baidu.com/
-
-### 一些问题
-- 锚点跳转后被遮挡
-  - 目前依靠 URL 的 Hash 改变进行跳转（网页有fixed header时，易出现锚点被遮挡的问题）
-  - 可以考虑使用 Scroll Api 控制页面滚动达到跳转效果
-- 锚点提取错误：非内容区域的Heading标签（h2、h3等）被提取为锚点
-  - 目前默认支持网站的锚点提取比较准确
-  - 其他网站由于规范性问题，提取准确性不高，后续待优化
