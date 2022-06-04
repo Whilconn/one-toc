@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client';
 import { CID } from './constants';
 import { Toc } from './toc';
 import { ErrorBoundary } from '../shared/error-boundary';
-import { copyMdWhenClickHeader } from '../copy-react-docs';
 
 const rootNode = document.getElementById(CID) || document.createElement('div');
 if (!rootNode.isConnected) {
@@ -19,5 +18,3 @@ ReactDOM.createRoot(rootNode).render(
     </ErrorBoundary>
   </React.StrictMode>,
 );
-
-copyMdWhenClickHeader();

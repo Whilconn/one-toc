@@ -18,6 +18,9 @@ export function Form() {
   return (
     <>
       <section className="popup-container">
+        <p className="popup-title">
+          <b>OneToc</b>&ensp;V{pkg.version}
+        </p>
         <p>
           🚀&ensp;启用： <Switch checked={settings.enabled} onChange={setEnabled} />
         </p>

@@ -18,7 +18,6 @@ export const DEFAULT_SETTINGS = {
     '*cnblogs.com/**',
     '*csdn.net/**',
     '*github.com/*/**',
-    '*eslint.org/docs/**',
-    '*eslint.cn/docs/**',
+    '*eslint.(org|cn)/docs/**',
   ].join('\n'),
 };
