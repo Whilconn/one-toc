@@ -27,7 +27,8 @@ const CONFIG = {
 const config = CONFIG[env];
 
 function clearDest() {
-  fs.rmdirSync(path.resolve(root, DEST), { recursive: true });
+  const destDir = path.resolve(root, DEST);
+  if (fs.existsSync(destDir)) fs.rmdirSync(destDir, { recursive: true });
 }
 
 function copyReactLibs() {

@@ -54,7 +54,7 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
 ```
 
 ## 适配情况
-### 默认支持的网站
+### 支持的网站
 - 知乎：https://zhuanlan.zhihu.com/p/24650288
 - 简书：https://www.jianshu.com/p/a2cb1e3a79be
 - 开源中国：https://my.oschina.net/u/4843764/blog/5528481
@@ -67,21 +67,17 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
   - 自带目录，默认关闭，hover段落标题时出现开启按钮
 - CSDN：https://blog.csdn.net/csdnnews/article/details/124880259
   - 自带目录，不是fixed定位
-
-### 自带目录的网站
+- 51cto：https://blog.51cto.com/harmonyos/5318953
+  - 自带目录默认不出现在可视区域，滚动到偏下位置才出现
+  - 自带目录部分文章目录点击无法正确跳转：https://blog.51cto.com/pypypy/5318533
 - 掘金：https://juejin.cn/post/7076377297623711757
 - 思否：https://segmentfault.com/a/1190000041806654
 
 ### 不兼容的网站
-- 51cto：https://blog.51cto.com/harmonyos/5318953
-  - 自带目录默认不出现在可视区域，滚动到偏下位置才出现
-  - 自带目录部分文章目录点击无法正确跳转：https://blog.51cto.com/pypypy/5318533
-  - TODO：生成目录出现较多无效锚点，选择器不够准确
 - iteye：https://www.iteye.com/blog/zhoumeng87-2531925
   - 标题不使用Heading标签（h2、h3等），无法兼容
 - infoq：https://www.infoq.cn/article/BwXyBWmqroBpkrEdvV1l
   - TODO：ajax加载数据，目录渲染不出数据
-  - TODO：选择器不够准确
 
 ### tricks
 > 目前默认Heading选择器无法筛选出结果，可以自行修改选择器体验

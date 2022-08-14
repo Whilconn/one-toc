@@ -23,6 +23,11 @@ export function TocBody() {
   const memoActiveLink = useCallback(activeLink, [anchorTops]);
   useEventListener(window, 'scroll', memoActiveLink);
 
+  const minLevel = anchorNodes.reduce((min, node) => {
+    const level = +node.tagName.replace(/[a-z]/gi, '');
+    return Math.min(min, level);
+  }, Infinity);
+
   return (
     <div className="toc-body">
       {anchorNodes.map((node, i) => {
@@ -30,7 +35,7 @@ export function TocBody() {
         const href = SYMBOL.HASH + node.id;
 
         // level
-        const level = +node.tagName.replace(/[a-z]/gi, '') - 2;
+        const level = +node.tagName.replace(/[a-z]/gi, '') - minLevel;
         const style = { paddingLeft: `${20 * level}px` };
         const cls = i === current ? 'active' : '';
 
