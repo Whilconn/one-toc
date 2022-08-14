@@ -108,9 +108,12 @@ function getAnchorsByWeight(groups: HTMLElement[][]) {
   return groups[ws[0][0]];
 }
 
-function removeTitleFromAnchors(nodes: HTMLElement[]) {
+function shiftTitleFromAnchors(nodes: HTMLElement[]) {
   const H1 = 'H1';
-  if (nodes.length && nodes[0].tagName === H1 && !nodes.some((n, i) => i && n.tagName === H1)) {
+  if (!nodes.length || nodes[0].tagName !== H1) return nodes;
+
+  const t2 = nodes.find((n, i) => i && n.tagName === H1);
+  if (!t2 || genSelector(t2) !== genSelector(nodes[0])) {
     nodes.shift();
   }
   return nodes;
@@ -122,7 +125,7 @@ export function getAnchors() {
   nodes = filterAnchors(nodes);
   const groups = groupAnchors(nodes);
   nodes = getAnchorsByWeight(groups);
-  nodes = removeTitleFromAnchors(nodes);
+  nodes = shiftTitleFromAnchors(nodes);
   markAnchors(nodes);
 
   return nodes;
