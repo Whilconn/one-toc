@@ -4,6 +4,7 @@ const react = require('@vitejs/plugin-react');
 
 module.exports = defineConfig({
   root: path.resolve(__dirname, '..'),
+  mode: 'production',
   build: {
     lib: {
       entry: 'src/content/content.tsx',

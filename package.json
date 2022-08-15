@@ -9,6 +9,7 @@
     "build": "pnpm node:build prod",
     "pack": "pnpm build && node scripts/pack.js",
     "new-version": "node scripts/version.js",
+    "test": "cypress open",
     "lint": "eslint src/"
   },
   "repository": {
@@ -32,6 +33,7 @@
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@types/micromatch": "^4.0.2",
+    "@types/node": "^18.7.4",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.26.0",

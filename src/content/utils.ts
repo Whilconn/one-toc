@@ -75,7 +75,7 @@ function groupAnchors(nodes: HTMLElement[]) {
 function getAnchorsByWeight(groups: HTMLElement[][]) {
   if (!groups.length) return [];
 
-  const groupWeights = groups.map((g) => 0);
+  const groupWeights = groups.map(() => 0);
 
   function accWeights(weights: number[], scores: number[][], results: number[]) {
     const sortedGroupIdxList = scores.sort((a, b) => b[1] - a[1]).map((s) => s[0]);
