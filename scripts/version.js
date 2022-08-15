@@ -2,6 +2,14 @@ const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * @description 版本变更时运行，同时修改package.json与manifest.json中的版本号
+ * @example node scripts/version.js [options]
+ * 参考：npm version --help
+ * options：<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git
+ * 常用options：major | minor | patch | 空
+ */
+
 const PUBLIC = 'public';
 const UTF8 = 'utf-8';
 const root = path.resolve(__dirname, '..');

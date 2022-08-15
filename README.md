@@ -51,6 +51,8 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
 *csdn.net/**
 *github.com/*/**
 *eslint.(org|cn)/docs/**
+*blog.51cto.com/**
+*www.ncbi.nlm.nih.gov/**
 ```
 
 ## 适配情况
@@ -72,14 +74,10 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
   - 自带目录部分文章目录点击无法正确跳转：https://blog.51cto.com/pypypy/5318533
 - 掘金：https://juejin.cn/post/7076377297623711757
 - 思否：https://segmentfault.com/a/1190000041806654
+- NCBI：https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6742634/
 
 ### 不兼容的网站
 - iteye：https://www.iteye.com/blog/zhoumeng87-2531925
   - 标题不使用Heading标签（h2、h3等），无法兼容
 - infoq：https://www.infoq.cn/article/BwXyBWmqroBpkrEdvV1l
   - TODO：ajax加载数据，目录渲染不出数据
-
-### tricks
-> 目前默认Heading选择器无法筛选出结果，可以自行修改选择器体验
-- bing：https://www.bing.com/
-- 百度：https://www.baidu.com/

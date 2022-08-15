@@ -1,7 +1,7 @@
 {
   "name": "OneToc",
   "description": "为技术文档、技术博客等网站添加导航目录的浏览器插件，提供更好的阅读体验。",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "manifest_version": 3,
   "icons": {
     "16": "icon300.png",

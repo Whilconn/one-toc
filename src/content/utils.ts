@@ -13,7 +13,9 @@ export function getHeaderHeight() {
 }
 
 function filterAnchors(nodes: HTMLElement[]) {
-  const invalidSelector = ['header', 'aside,.aside,.side', '.left,.right', 'footer,.foot,.footer', '.comment'];
+  const invalidSelector = ['header', 'aside,.aside,.side', '.left,.right', 'footer,.foot,.footer', '.comment'].join(
+    SYMBOL.COMMA,
+  );
   const invalidDisplays = ['inline', 'none'];
   const invalidPositions = ['sticky', 'fixed', 'absolute'];
 

@@ -16,5 +16,7 @@ export const DEFAULT_SETTINGS: Settings = {
     '*csdn.net/**',
     '*github.com/*/**',
     '*eslint.(org|cn)/docs/**',
+    '*blog.51cto.com/**',
+    '*www.ncbi.nlm.nih.gov/**',
   ].join('\n'),
 };
