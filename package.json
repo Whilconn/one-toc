@@ -4,8 +4,10 @@
   "description": "为技术文档、技术博客等网站添加导航目录的浏览器插件，提供更好的阅读体验。",
   "main": "index.js",
   "scripts": {
-    "dev": "node scripts/build.js dev",
-    "build": "node scripts/build.js prod && zip -qr OneToc.zip ./dist",
+    "node:build": "node scripts/build.js",
+    "dev": "pnpm node:build dev",
+    "build": "pnpm node:build prod",
+    "pack": "pnpm build && node scripts/pack.js",
     "new-version": "node scripts/version.js",
     "lint": "eslint src/"
   },
@@ -39,7 +41,9 @@
     "eslint": "^8.16.0",
     "eslint-plugin-react": "^7.30.0",
     "eslint-plugin-react-hooks": "^4.5.0",
+    "glob": "^8.0.3",
     "husky": "^8.0.1",
+    "jszip": "^3.10.1",
     "less": "^4.1.2",
     "lodash": "^4.17.21",
     "prettier": "^2.6.2",
