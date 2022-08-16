@@ -1,42 +1,50 @@
-import { HEADING_SELECTORS, HEADER_HEIGHT, SYMBOL } from './constants';
+import { FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../content/constants';
 
-export function getHeaderHeight() {
-  const tag = 'header';
-  const reg = new RegExp(tag, 'i');
-  const nodes = document.elementsFromPoint(0, 30);
+const INVALID_DISPLAYS = ['inline', 'none'];
+const INVALID_SELECTORS = [
+  'header',
+  'aside',
+  '.aside',
+  '.side',
+  '.left',
+  '.right',
+  'footer',
+  '.foot',
+  '.footer',
+  '.comment',
+];
 
-  const header = nodes.find((node) => {
-    return node.tagName.toLowerCase() === tag || reg.test(node.className || '');
+export function getAnchors() {
+  const selector = HEADING_SELECTORS.join(SYMBOL.COMMA);
+  let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
+  nodes = filterAnchors(nodes);
+  const groups = groupAnchors(nodes);
+  nodes = getAnchorsByWeight(groups);
+  nodes = shiftTitleFromAnchors(nodes);
+  markAnchors(nodes);
+
+  return nodes;
+}
+
+export function getAnchorTopList(anchorNodes: HTMLElement[], marginTop: number) {
+  const scrollY = window.scrollY;
+
+  return anchorNodes.map((n, i) => {
+    if (i >= anchorNodes.length - 1) return Infinity;
+    return scrollY + anchorNodes[i + 1].getBoundingClientRect().top - marginTop;
   });
-
-  return 20 + Math.min(header ? header.scrollHeight : HEADER_HEIGHT, 2 * HEADER_HEIGHT);
 }
 
 function filterAnchors(nodes: HTMLElement[]) {
-  const invalidSelectors = [
-    'header',
-    'aside',
-    '.aside',
-    '.side',
-    '.left',
-    '.right',
-    'footer',
-    '.foot',
-    '.footer',
-    '.comment',
-  ];
-  const invalidDisplays = ['inline', 'none'];
-  const invalidPositions = ['sticky', 'fixed', 'absolute'];
-
   return nodes.filter((node) => {
-    const selector = invalidSelectors.map((s) => `${s} ${node.tagName}`).join(SYMBOL.COMMA);
+    const selector = INVALID_SELECTORS.map((s) => `${s} ${node.tagName}`).join(SYMBOL.COMMA);
     if (node.matches(selector)) return false;
 
     const MIN = 8;
     if (node.scrollWidth < MIN && node.scrollHeight < MIN) return false;
 
     const style = getComputedStyle(node);
-    return !invalidDisplays.includes(style.display) && !invalidPositions.includes(style.position);
+    return !INVALID_DISPLAYS.includes(style.display) && !FIXED_POSITIONS.includes(style.position);
   });
 }
 
@@ -55,6 +63,8 @@ function genSelector(node: HTMLElement) {
 
   return selectors.reverse().join('>');
 }
+
+// TODO：添加分组策略，按左右边界是否对齐过滤
 
 function groupAnchors(nodes: HTMLElement[]) {
   const groups: HTMLElement[][] = [];
@@ -129,25 +139,4 @@ function shiftTitleFromAnchors(nodes: HTMLElement[]) {
     nodes.shift();
   }
   return nodes;
-}
-
-export function getAnchors() {
-  const selector = HEADING_SELECTORS.join(SYMBOL.COMMA);
-  let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
-  nodes = filterAnchors(nodes);
-  const groups = groupAnchors(nodes);
-  nodes = getAnchorsByWeight(groups);
-  nodes = shiftTitleFromAnchors(nodes);
-  markAnchors(nodes);
-
-  return nodes;
-}
-
-export function getAnchorTopList(anchorNodes: HTMLElement[], marginTop: number) {
-  const scrollY = window.scrollY;
-
-  return anchorNodes.map((n, i) => {
-    if (i >= anchorNodes.length - 1) return Infinity;
-    return scrollY + anchorNodes[i + 1].getBoundingClientRect().top - marginTop;
-  });
 }

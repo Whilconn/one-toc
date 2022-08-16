@@ -1,15 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEventListener, useTitle } from './hooks';
-import { getAnchors, getAnchorTopList, getHeaderHeight } from './utils';
+import { getAnchors, getAnchorTopList } from '../utils/anchor-util';
+import { getFixedHeaderHeight } from '../utils/header-util';
 import './toc-body.less';
 
 export function TocBody() {
   const [current, setCurrent] = useState(0);
+  const [top, setTop] = useState(0);
 
   const title = useTitle();
-  const top = useMemo(getHeaderHeight, [title]);
   const anchorNodes = useMemo(getAnchors, [title]);
   const anchorTops = useMemo(() => getAnchorTopList(anchorNodes, top), [anchorNodes, top]);
+  useEffect(() => {
+    setTop(getFixedHeaderHeight());
+  }, [title]);
 
   function activeLink() {
     const scrollTop = window.scrollY;
@@ -24,10 +28,12 @@ export function TocBody() {
 
   // 解决 fixed header 遮挡锚点的问题，配合 scrollByHash 使用
   useEffect(() => {
-    const styleHtml = `<style>:target{scroll-margin-top:${top}px;scroll-padding-top:${top}px;}</style>`;
-    const styleNode = document.querySelector('style');
-    if (styleNode?.outerHTML === styleHtml) return;
-    styleNode?.insertAdjacentHTML('beforebegin', styleHtml);
+    const id = 'scroll-margin-top' + new Date().toJSON().replace(/T.+/, '');
+    const styleHtml = `<style id=${id}>:target{scroll-margin-top:${top}px;scroll-padding-top:${top}px;}</style>`;
+    const styleNode = document.querySelector(`#${id},style`) || document.body;
+    styleNode.insertAdjacentHTML('beforebegin', styleHtml);
+
+    if (styleNode?.id === id) styleNode.remove();
   }, [top]);
 
   function scrollByHash(node: HTMLElement) {
@@ -38,7 +44,7 @@ export function TocBody() {
     window.location.hash = `:~:text=${encodeURIComponent(node.innerText)}`;
   }
 
-  function scrollByForce(node: HTMLElement) {
+  function scrollByApi(node: HTMLElement) {
     const scrollingNode = document.scrollingElement as HTMLElement;
     scrollingNode.style.scrollBehavior = 'auto';
     node.scrollIntoView({ block: 'start' });
@@ -47,8 +53,9 @@ export function TocBody() {
 
   function clickAnchor(i: number, node: HTMLElement) {
     setCurrent(i);
-    scrollByHash(node);
-    // scrollByForce(node);
+    setTop(getFixedHeaderHeight());
+    // scrollByHash(node);
+    scrollByApi(node);
     // scrollByTextFragment(node);
   }
 

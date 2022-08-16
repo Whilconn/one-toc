@@ -3,7 +3,7 @@ import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { TocIcon } from './toc-icon';
 import { useTitle } from './hooks';
-import { getHeaderHeight } from './utils';
+import { getFixedHeaderHeight } from '../utils/header-util';
 import { useSettings } from '../popup/use-settings';
 import * as micromatch from 'micromatch';
 import './toc.less';
@@ -14,7 +14,7 @@ export function Toc() {
 
   const title = useTitle();
   const [settings] = useSettings();
-  const top = useMemo(getHeaderHeight, [title]);
+  const top = useMemo(getFixedHeaderHeight, [title]);
   useEffect(() => setExpanded(settings.expanded), [settings]);
 
   if (!settings.enabled || !settings.whitelist) return null;
