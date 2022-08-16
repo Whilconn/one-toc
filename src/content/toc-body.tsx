@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SYMBOL } from './constants';
 import { useEventListener, useTitle } from './hooks';
 import { getAnchors, getAnchorTopList, getHeaderHeight } from './utils';
 import './toc-body.less';
@@ -23,15 +22,40 @@ export function TocBody() {
   const memoActiveLink = useCallback(activeLink, [anchorTops]);
   useEventListener(window, 'scroll', memoActiveLink);
 
+  // 解决 fixed header 遮挡锚点的问题，配合 scrollByHash 使用
+  useEffect(() => {
+    const styleHtml = `<style>:target{scroll-margin-top:${top}px;scroll-padding-top:${top}px;}</style>`;
+    const styleNode = document.querySelector('style');
+    if (styleNode?.outerHTML === styleHtml) return;
+    styleNode?.insertAdjacentHTML('beforebegin', styleHtml);
+  }, [top]);
+
+  function scrollByHash(node: HTMLElement) {
+    window.location.hash = node.id;
+  }
+
+  function scrollByTextFragment(node: HTMLElement) {
+    window.location.hash = `:~:text=${encodeURIComponent(node.innerText)}`;
+  }
+
+  function scrollByForce(node: HTMLElement) {
+    const scrollingNode = document.scrollingElement as HTMLElement;
+    scrollingNode.style.scrollBehavior = 'auto';
+    node.scrollIntoView({ block: 'start' });
+    scrollingNode.scrollTop -= top;
+  }
+
+  function clickAnchor(i: number, node: HTMLElement) {
+    setCurrent(i);
+    scrollByHash(node);
+    // scrollByForce(node);
+    // scrollByTextFragment(node);
+  }
+
   const minLevel = anchorNodes.reduce((min, node) => {
     const level = +node.tagName.replace(/[a-z]/gi, '');
     return Math.min(min, level);
   }, Infinity);
-
-  function clickAnchor(i: number, id: string) {
-    setCurrent(i);
-    window.location.hash = id;
-  }
 
   return (
     <div className="toc-body">
@@ -44,7 +68,7 @@ export function TocBody() {
         const cls = i === current ? 'active' : '';
 
         return (
-          <a key={node.id} onClick={() => clickAnchor(i, node.id)} className={cls} style={style} title={text}>
+          <a key={node.id} onClick={() => clickAnchor(i, node)} className={cls} style={style} title={text}>
             {text}
           </a>
         );
