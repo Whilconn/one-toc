@@ -28,11 +28,15 @@ export function TocBody() {
     return Math.min(min, level);
   }, Infinity);
 
+  function clickAnchor(i: number, id: string) {
+    setCurrent(i);
+    window.location.hash = id;
+  }
+
   return (
     <div className="toc-body">
       {anchorNodes.map((node, i) => {
         const text = node.innerText;
-        const href = SYMBOL.HASH + node.id;
 
         // level
         const level = +node.tagName.replace(/[a-z]/gi, '') - minLevel;
@@ -40,7 +44,7 @@ export function TocBody() {
         const cls = i === current ? 'active' : '';
 
         return (
-          <a key={node.id} onClick={() => setCurrent(i)} href={href} className={cls} style={style} title={text}>
+          <a key={node.id} onClick={() => clickAnchor(i, node.id)} className={cls} style={style} title={text}>
             {text}
           </a>
         );

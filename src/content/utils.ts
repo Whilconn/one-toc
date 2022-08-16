@@ -13,14 +13,24 @@ export function getHeaderHeight() {
 }
 
 function filterAnchors(nodes: HTMLElement[]) {
-  const invalidSelector = ['header', 'aside,.aside,.side', '.left,.right', 'footer,.foot,.footer', '.comment'].join(
-    SYMBOL.COMMA,
-  );
+  const invalidSelectors = [
+    'header',
+    'aside',
+    '.aside',
+    '.side',
+    '.left',
+    '.right',
+    'footer',
+    '.foot',
+    '.footer',
+    '.comment',
+  ];
   const invalidDisplays = ['inline', 'none'];
   const invalidPositions = ['sticky', 'fixed', 'absolute'];
 
   return nodes.filter((node) => {
-    if (node.matches(`${invalidSelector} ${node.tagName}`)) return false;
+    const selector = invalidSelectors.map((s) => `${s} ${node.tagName}`).join(SYMBOL.COMMA);
+    if (node.matches(selector)) return false;
 
     const MIN = 8;
     if (node.scrollWidth < MIN && node.scrollHeight < MIN) return false;
