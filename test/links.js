@@ -1,4 +1,4 @@
-export const links = [
+module.exports.links = [
   ['知乎', 'https://zhuanlan.zhihu.com/p/24650288', '62'],
   ['开源中国', 'https://my.oschina.net/u/4843764/blog/5528481', '18'],
   ['博客园', 'https://www.cnblogs.com/teach/p/16295605.html', '11'],
@@ -8,7 +8,7 @@ export const links = [
   ['思否', 'https://segmentfault.com/a/1190000041806654', '5'],
   ['React Doc(CN)', 'https://react.docschina.org/docs/getting-started.html', '19'],
   ['MDN', 'https://developer.mozilla.org/zh-CN/docs/Web/API/Window/location', '15'],
-  ['简书', 'https://www.jianshu.com/p/a2cb1e3a79be', '18'],
+  ['简书', 'https://www.jianshu.com/p/a2cb1e3a79be', '19'],
   ['React Doc(EN)', 'https://reactjs.org/docs/getting-started.html', '19'],
   ['tsconfig', 'https://www.typescriptlang.org/tsconfig', '154'],
   // ['Github(EN)', 'https://github.com/facebook/react', '8'],
