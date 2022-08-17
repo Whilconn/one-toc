@@ -9,7 +9,7 @@
     "build": "pnpm node:build prod",
     "pack": "pnpm build && node scripts/pack.js",
     "new-version": "node scripts/version.js",
-    "test": "cypress open",
+    "test": "cypress run --headed --browser=chrome",
     "lint": "eslint src/"
   },
   "repository": {

@@ -40,8 +40,8 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
 > 匹配页面链接的规则，符合匹配规则的页面才会显示导航目录
 - 匹配规则使用[glob](https://en.wikipedia.org/wiki/Glob_(programming))编写
 - 匹配所使用的库是[micromatch](https://github.com/micromatch/micromatch)
-- 插件默认的匹配规则如下，可自行修改
 - 匹配所有页面可配置为 `**`
+- 插件默认的匹配规则如下，可自行修改
 ```text
 *reactjs.org/(docs|blog)/**
 *zhihu.com/p/**
@@ -57,27 +57,21 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
 
 ## 适配情况
 ### 支持的网站
-- 知乎：https://zhuanlan.zhihu.com/p/24650288
-- 简书：https://www.jianshu.com/p/a2cb1e3a79be
-- 开源中国：https://my.oschina.net/u/4843764/blog/5528481
-- React 文档：https://zh-hans.reactjs.org/
-- Eslint 文档：https://eslint.org/docs/user-guide/getting-started
-  - http://eslint.cn/docs/user-guide/getting-started
-- Github：https://github.com/facebook/react
-  - 自带目录，默认关闭，点击Readme标题时出现开启按钮
-- 博客园：https://www.cnblogs.com/teach/p/16295605.html
-  - 自带目录，默认关闭，hover段落标题时出现开启按钮
-- CSDN：https://blog.csdn.net/csdnnews/article/details/124880259
-  - 自带目录，不是fixed定位
-- 51cto：https://blog.51cto.com/harmonyos/5318953
-  - 自带目录默认不出现在可视区域，滚动到偏下位置才出现
-  - 自带目录部分文章目录点击无法正确跳转：https://blog.51cto.com/pypypy/5318533
-- 掘金：https://juejin.cn/post/7076377297623711757
-- 思否：https://segmentfault.com/a/1190000041806654
-- NCBI：https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6742634/
+- 知乎：https://zhuanlan.zhihu.com
+- 简书：https://www.jianshu.com
+- 开源中国：https://my.oschina.net
+- React 文档：https://zh-hans.reactjs.org
+- Eslint 文档：https://eslint.org
+- Github：https://github.com
+- 博客园：https://www.cnblogs.com
+- CSDN：https://blog.csdn.net
+- 51cto：https://blog.51cto.com
+- 掘金：https://juejin.cn
+- 思否：https://segmentfault.com
+- NCBI：https://www.ncbi.nlm.nih.gov
 
 ### 不兼容的网站
 - iteye：https://www.iteye.com/blog/zhoumeng87-2531925
-  - 标题不使用Heading标签（h2、h3等），无法兼容
+  - 标题不使用Heading标签（h2、h3等），暂未兼容
 - infoq：https://www.infoq.cn/article/BwXyBWmqroBpkrEdvV1l
   - TODO：ajax加载数据，目录渲染不出数据

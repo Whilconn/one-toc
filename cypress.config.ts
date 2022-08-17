@@ -20,8 +20,12 @@ function modifyManifest() {
 }
 
 export default defineConfig({
+  video: false,
+  screenshotOnRunFailure: false,
   viewportWidth: 1920,
   viewportHeight: 1080,
+  pageLoadTimeout: 20e3,
+  watchForFileChanges: false,
   e2e: {
     setupNodeEvents(on, config) {
       on('before:browser:launch', (browser, launchOptions) => {

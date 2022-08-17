@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEventListener, useTitle } from './hooks';
 import { getAnchors, getAnchorTopList } from '../utils/anchor-util';
 import { getFixedHeaderHeight } from '../utils/header-util';
+import { scrollByApi } from '../utils/scroll-util';
 import './toc-body.less';
 
 export function TocBody() {
@@ -26,37 +27,12 @@ export function TocBody() {
   const memoActiveLink = useCallback(activeLink, [anchorTops]);
   useEventListener(window, 'scroll', memoActiveLink);
 
-  // 解决 fixed header 遮挡锚点的问题，配合 scrollByHash 使用
-  useEffect(() => {
-    const id = 'scroll-margin-top' + new Date().toJSON().replace(/T.+/, '');
-    const styleHtml = `<style id=${id}>:target{scroll-margin-top:${top}px;scroll-padding-top:${top}px;}</style>`;
-    const styleNode = document.querySelector(`#${id},style`) || document.body;
-    styleNode.insertAdjacentHTML('beforebegin', styleHtml);
-
-    if (styleNode?.id === id) styleNode.remove();
-  }, [top]);
-
-  function scrollByHash(node: HTMLElement) {
-    window.location.hash = node.id;
-  }
-
-  function scrollByTextFragment(node: HTMLElement) {
-    window.location.hash = `:~:text=${encodeURIComponent(node.innerText)}`;
-  }
-
-  function scrollByApi(node: HTMLElement) {
-    const scrollingNode = document.scrollingElement as HTMLElement;
-    scrollingNode.style.scrollBehavior = 'auto';
-    node.scrollIntoView({ block: 'start' });
-    scrollingNode.scrollTop -= top;
-  }
-
-  function clickAnchor(i: number, node: HTMLElement) {
+  function clickAnchor(i: number, anchorNode: HTMLElement) {
     setCurrent(i);
-    setTop(getFixedHeaderHeight());
-    // scrollByHash(node);
-    scrollByApi(node);
-    // scrollByTextFragment(node);
+    const newTop = getFixedHeaderHeight();
+    setTop(newTop);
+    // scrollByHash(anchorNode, newTop);
+    scrollByApi(anchorNode, Math.max(top, newTop));
   }
 
   const minLevel = anchorNodes.reduce((min, node) => {
