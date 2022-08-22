@@ -27,15 +27,6 @@ export function getAnchors() {
   return nodes;
 }
 
-export function getAnchorTopList(anchorNodes: HTMLElement[], marginTop: number) {
-  const scrollY = window.scrollY;
-
-  return anchorNodes.map((n, i) => {
-    if (i >= anchorNodes.length - 1) return Infinity;
-    return scrollY + anchorNodes[i + 1].getBoundingClientRect().top - marginTop;
-  });
-}
-
 function filterAnchors(nodes: HTMLElement[]) {
   return nodes.filter((node) => {
     if (!getText(node)) return false;

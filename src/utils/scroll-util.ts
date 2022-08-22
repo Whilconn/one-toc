@@ -58,13 +58,9 @@ export function scrollByHash(headingNode: HTMLElement, fixedHeaderHeight: number
 }
 
 function markCurrentHeading(headingNode: HTMLElement) {
-  const newStyle = '0 2px 0 #007fff';
-  if (headingNode.style.boxShadow === newStyle) return;
+  const styleName = 'toc-current-heading';
+  if (headingNode.classList.contains(styleName)) return;
 
-  const oldStyle = headingNode.style.boxShadow;
-  headingNode.style.boxShadow = newStyle;
-
-  setTimeout(() => {
-    headingNode.style.boxShadow = oldStyle;
-  }, 2e3);
+  headingNode.classList.add(styleName);
+  setTimeout(() => headingNode.classList.remove(styleName), 500);
 }

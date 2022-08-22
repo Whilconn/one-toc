@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEventListener, useTitle } from './hooks';
-import { getAnchors, getAnchorTopList } from '../utils/anchor-util';
+import { getAnchors } from '../utils/anchor-util';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { scrollByApi } from '../utils/scroll-util';
 import { getText } from '../utils/dom-util';
@@ -8,32 +8,50 @@ import './toc-body.less';
 
 export function TocBody() {
   const [current, setCurrent] = useState(0);
-  const [top, setTop] = useState(0);
+  const [activeTime, setActiveTime] = useState(0);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   const title = useTitle();
   const anchorNodes = useMemo(getAnchors, [title]);
-  const anchorTops = useMemo(() => getAnchorTopList(anchorNodes, top), [anchorNodes, top]);
-  useEffect(() => {
-    setTop(getFixedHeaderHeight());
-  }, [title]);
 
   function activeLink() {
-    const scrollTop = window.scrollY;
-    let i = anchorTops.findIndex((aTop) => scrollTop < aTop);
-    if (i < 0) i = anchorTops.length - 1;
-    setCurrent(i);
+    const now = Date.now();
+    if (now - activeTime < 100) return;
+
+    setActiveTime(now);
+
+    let height = getFixedHeaderHeight();
+    height = Math.max(height, headerHeight);
+    if (height > headerHeight) setHeaderHeight(height);
+
+    const offset = 5;
+    const idx = anchorNodes.findIndex((n, i) => {
+      if (i === anchorNodes.length - 1) return i;
+
+      const top = anchorNodes[i + 1].getBoundingClientRect().top;
+      return top > height + offset;
+    });
+
+    setCurrent(idx);
   }
 
-  useEffect(activeLink, [anchorTops]);
-  const memoActiveLink = useCallback(activeLink, [anchorTops]);
+  // 高亮链接：首次进入页面
+  useEffect(activeLink, [anchorNodes]);
+
+  // 高亮链接：滚动页面
+  const memoActiveLink = useCallback(activeLink, [anchorNodes, activeTime, headerHeight]);
   useEventListener(window, 'scroll', memoActiveLink);
 
   function clickAnchor(i: number, anchorNode: HTMLElement) {
+    setActiveTime(Date.now());
     setCurrent(i);
-    const newTop = getFixedHeaderHeight();
-    setTop(newTop);
-    // scrollByHash(anchorNode, newTop);
-    scrollByApi(anchorNode, Math.max(top, newTop));
+
+    let height = getFixedHeaderHeight();
+    height = Math.max(height, headerHeight);
+    if (height > headerHeight) setHeaderHeight(height);
+
+    // scrollByHash(anchorNode, height);
+    scrollByApi(anchorNode, height);
   }
 
   const minLevel = anchorNodes.reduce((min, node) => {

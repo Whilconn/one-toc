@@ -5,6 +5,7 @@ const { openDevPage, reloadDevPage } = require('./dev-page');
 nodemon({
   exec: 'echo',
   ext: '*',
+  delay: 2000,
   watch: ['src', 'scripts', 'public', 'test'],
   ignore: ['.git/', '**/node_modules/', 'dist/', 'public/react*.js'],
 });
