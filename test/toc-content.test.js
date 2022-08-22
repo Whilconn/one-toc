@@ -8,7 +8,7 @@ jest.setTimeout(2 * TIMEOUT);
 describe('toc content should render', () => {
   for (const link of links) {
     test('render test: ' + link[0], async () => {
-      const page = await openPage(global.browser, TIMEOUT, link[1]);
+      const page = await openPage(global.browser, link[1], TIMEOUT);
       const selector = '.toc-root a';
       const nodes = await getNodes(page, selector);
 

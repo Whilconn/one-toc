@@ -6,7 +6,8 @@ const { ROOT_ABS, DEST_ABS, PUBLIC_ABS } = require('./config');
 const viteConfigDev = require('./vite.config.dev');
 const viteConfigProd = require('./vite.config.prod');
 
-const env = (process.argv[2] || 'dev').toLowerCase();
+const ENV_DEV = 'dev';
+const env = (process.argv[2] || ENV_DEV).toLowerCase();
 
 const CONFIG = {
   dev: {
@@ -25,7 +26,7 @@ const CONFIG = {
 const config = CONFIG[env];
 
 function clearDest() {
-  if (fs.existsSync(DEST_ABS)) fs.rmdirSync(DEST_ABS, { recursive: true });
+  if (fs.existsSync(DEST_ABS)) fs.rmSync(DEST_ABS, { recursive: true });
 }
 
 function copyReactLibs() {
@@ -43,6 +44,8 @@ function build() {
     popup: 'src/popup/popup.tsx',
     background: 'src/background/background.ts',
   };
+
+  const buildTasks = [];
   for (const [key, entry] of Object.entries(entries)) {
     const cfg = _.cloneDeep(config.viteConfig);
     cfg.build.lib = {
@@ -51,10 +54,14 @@ function build() {
       name: 'OneToc' + key[0].toUpperCase() + key.slice(1),
       fileName: () => key + '.js',
     };
-    vite.build(cfg).then();
+    buildTasks.push(vite.build(cfg));
   }
+
+  return Promise.all(buildTasks);
 }
 
 clearDest();
 copyReactLibs();
-build();
+if (env !== ENV_DEV) build().then();
+
+module.exports.build = build;

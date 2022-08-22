@@ -16,6 +16,7 @@ async function openBrowser() {
     handleSIGINT: true,
     handleSIGHUP: true,
     waitForInitialPage: false,
+    defaultViewport: null,
     args: [
       '--no-startup-window',
       '--start-maximized',
@@ -26,10 +27,9 @@ async function openBrowser() {
   });
 }
 
-async function openPage(browser, timeout = TIMEOUT, url) {
+async function openPage(browser, url, timeout = TIMEOUT) {
   const page = await browser.newPage();
   page.setDefaultTimeout(timeout);
-  await page.setViewport({ width: SW, height: SH, deviceScaleFactor: 1 });
   await page.goto(url);
 
   return page;
