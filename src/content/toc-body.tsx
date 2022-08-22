@@ -3,6 +3,7 @@ import { useEventListener, useTitle } from './hooks';
 import { getAnchors, getAnchorTopList } from '../utils/anchor-util';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { scrollByApi } from '../utils/scroll-util';
+import { getText } from '../utils/dom-util';
 import './toc-body.less';
 
 export function TocBody() {
@@ -43,7 +44,7 @@ export function TocBody() {
   return (
     <div className="toc-body">
       {anchorNodes.map((node, i) => {
-        const text = node.innerText;
+        const text = getText(node);
 
         // level
         const level = +node.tagName.replace(/[a-z]/gi, '') - minLevel;

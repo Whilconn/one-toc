@@ -1,4 +1,5 @@
 import { FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../content/constants';
+import { getText } from './dom-util';
 
 const INVALID_DISPLAYS = ['inline', 'none'];
 const INVALID_SELECTORS = [
@@ -37,6 +38,8 @@ export function getAnchorTopList(anchorNodes: HTMLElement[], marginTop: number) 
 
 function filterAnchors(nodes: HTMLElement[]) {
   return nodes.filter((node) => {
+    if (!getText(node)) return false;
+
     const selector = INVALID_SELECTORS.map((s) => `${s} ${node.tagName}`).join(SYMBOL.COMMA);
     if (node.matches(selector)) return false;
 
