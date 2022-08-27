@@ -10,14 +10,14 @@ nodemon({
   ignore: ['.git/', '**/node_modules/', 'dist/', 'public/react*.js'],
 });
 
-let browser, appPage, extPage;
+let browser, pages;
 
 nodemon
   .on('start', async () => {
     await build();
 
-    if (browser) return await reloadDevPage(appPage, extPage);
-    [browser, appPage, extPage] = await openDevPage(browser);
+    if (browser) return await reloadDevPage(pages);
+    [browser, pages] = await openDevPage(browser);
   })
   .on('quit', () => {
     console.log('🔔 nodemon has quit');
