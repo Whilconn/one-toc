@@ -1,5 +1,5 @@
 const { links } = require('./links');
-const { openPage, getNodes } = require('./browser');
+const { openPage, getNodes } = require('../scripts/browser');
 
 const TIMEOUT = 20e3;
 

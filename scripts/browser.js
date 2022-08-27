@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer-core');
 const chromePath = require('chrome-location');
-const { DEST_ABS: extensionPath } = require('../scripts/config');
+const { DEST_ABS: extensionPath } = require('./config');
 
 const TIMEOUT = 20e3;
 const SW = 1920;
@@ -41,20 +41,3 @@ async function getNodes(page, selector) {
 }
 
 module.exports = { openBrowser, openPage, getNodes };
-
-// TODO：可删除，仅用于cypress测试前准备
-function modifyManifest() {
-  const mfPath = path.resolve(extensionPath, 'manifest.json');
-  const utf8 = 'utf8';
-
-  const content = fs.readFileSync(mfPath, utf8);
-  const json = JSON.parse(content);
-  const contentScripts = json.content_scripts;
-  for (const s of contentScripts) {
-    s.all_frames = true;
-    if (!s.exclude_matches?.length) s.exclude_matches = [];
-    const ex = '*://*/__/*';
-    if (!s.exclude_matches.includes(ex)) s.exclude_matches.push(ex);
-  }
-  fs.writeFileSync(mfPath, JSON.stringify(json, null, 4), utf8);
-}
