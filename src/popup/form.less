@@ -10,20 +10,20 @@
 .popup-container {
   padding: 15px;
   width: 360px;
-  min-height: 300px;
   color: #333;
 
-  p {
-    margin-bottom: 10px;
+  & > div {
+    margin-bottom: 15px;
 
     &.space-between {
       display: flex;
+      align-items: center;
       justify-content: space-between;
     }
   }
 
   .popup-title {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #eee;
     padding-bottom: 10px;
     text-align: left;
   }
@@ -34,21 +34,25 @@
     line-height: 1.6;
     resize: none;
     outline: 0;
-    border-color: #ccc;
+    border-color: #eee;
   }
 
-  a {
-    color: #1890FF;
-    text-decoration: none;
-    outline: 0;
-    cursor: pointer;
+  .popup-footer {
+    padding-top: 10px;
 
-    &:hover {
-      color: #40A9FF;
-    }
+    a {
+      color: #1890FF;
+      text-decoration: none;
+      outline: 0;
+      cursor: pointer;
 
-    &:active {
-      color: #096dd9;
+      &:hover {
+        color: #40A9FF;
+      }
+
+      &:active {
+        color: #096dd9;
+      }
     }
   }
 }

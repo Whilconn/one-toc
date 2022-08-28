@@ -17,7 +17,7 @@ export function Toc() {
   const top = useMemo(getFixedHeaderHeight, [title]);
   useEffect(() => setExpanded(settings.expanded), [settings]);
 
-  if (!settings.enabled || !settings.whitelist) return null;
+  if (!settings.enabled || (settings.enableGlob && !settings.whitelist)) return null;
 
   const url = location.host + location.pathname;
   const whitelist = settings.whitelist
@@ -25,12 +25,12 @@ export function Toc() {
     .map((s) => s.trim())
     .filter((s) => s);
 
-  if (!whitelist.length || !micromatch.some(url, whitelist)) return null;
+  if (settings.enableGlob && (!whitelist.length || !micromatch.some(url, whitelist))) return null;
 
   const style = { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
   return (
-    <nav className={'toc-container ' + (expanded ? 'toc-expanded' : '')} style={style}>
+    <nav className={'toc-container ' + (expanded ? 'toc-expanded' : '')} style={style} data-theme={settings.theme}>
       {expanded ? (
         <>
           <TocHead title={title} toggleExpanded={toggleExpanded} />

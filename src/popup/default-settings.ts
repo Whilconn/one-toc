@@ -1,12 +1,22 @@
 export interface Settings {
   enabled: boolean;
   expanded: boolean;
+  theme: string;
+  enableGlob: boolean;
   whitelist: string;
 }
+
+export const THEME_OPTIONS = [
+  { label: '默认', value: 'aero' },
+  { label: '浅色', value: 'light' },
+  { label: '深色', value: 'dark' },
+];
 
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   expanded: true,
+  theme: THEME_OPTIONS[0].value,
+  enableGlob: true,
   whitelist: import.meta.env.DEV
     ? '**'
     : [

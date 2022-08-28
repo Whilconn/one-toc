@@ -1,9 +1,23 @@
+@import "../assets/variables";
+
 .toc-root {
   position: fixed;
   z-index: 999999;
 }
 
 .toc-container {
+  &[data-theme='aero'] {
+    .var-aero();
+  }
+
+  &[data-theme='light'] {
+    .var-light();
+  }
+
+  &[data-theme='dark'] {
+    .var-dark();
+  }
+
   &, * {
     margin: 0;
     padding: 0;
@@ -19,7 +33,7 @@
   position: fixed;
   top: 100px;
   right: 20px;
-  color: #333;
+  color: var(--onetoc-color);
   font-size: 14px;
   z-index: 999999;
 
@@ -29,8 +43,8 @@
     width: 260px;
     text-align: left;
     border-radius: 5px;
-    background: #ffffff80;
-    backdrop-filter: blur(50px);
+    background: var(--onetoc-bg-color);
+    backdrop-filter: var(--onetoc-bg-filter);
     box-shadow: 0 0 2px 0 #ccc;
   }
 }

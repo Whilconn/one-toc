@@ -10,9 +10,10 @@ const keyToSetterName = (key: string) => 'set' + key[0].toUpperCase() + key.slic
  */
 const setEnabled = 'setEnabled';
 const setExpanded = 'setExpanded';
+const setTheme = 'setTheme';
+const setEnableGlob = 'setEnableGlob';
 const setWhitelist = 'setWhitelist';
-const resetWhitelist = 'resetWhitelist';
-export const SETTINGS_ACTION_NAMES = { setEnabled, setExpanded, setWhitelist, resetWhitelist };
+export const SETTINGS_ACTION_NAMES = { setEnabled, setExpanded, setTheme, setEnableGlob, setWhitelist };
 
 /**
  * reducer
@@ -37,16 +38,24 @@ function reducer(settings: Settings, action: SettingsAction) {
       return { ...settings, expanded };
     }
 
-    case setWhitelist: {
-      const whitelist = action.payload as string;
-      if (settings.whitelist === whitelist) return settings;
+    case setTheme: {
+      const theme = action.payload as string;
+      if (settings.theme === theme) return settings;
 
-      void StorageUtil.set({ whitelist }).then();
-      return { ...settings, whitelist };
+      void StorageUtil.set({ theme }).then();
+      return { ...settings, theme };
     }
 
-    case resetWhitelist: {
-      const whitelist = DEFAULT_SETTINGS.whitelist;
+    case setEnableGlob: {
+      const enableGlob = action.payload as boolean;
+      if (settings.enableGlob === enableGlob) return settings;
+
+      void StorageUtil.set({ enableGlob }).then();
+      return { ...settings, enableGlob };
+    }
+
+    case setWhitelist: {
+      const whitelist = action.payload as string;
       if (settings.whitelist === whitelist) return settings;
 
       void StorageUtil.set({ whitelist }).then();
@@ -62,7 +71,13 @@ function reducer(settings: Settings, action: SettingsAction) {
  * settings hook，读取、更新、自动保存settings状态
  */
 export function useSettings(): [Settings, Dispatch<SettingsAction>] {
-  const [settings, dispatch] = useReducer(reducer, { enabled: false, expanded: false, whitelist: '' });
+  const [settings, dispatch] = useReducer(reducer, {
+    enabled: false,
+    expanded: false,
+    theme: '',
+    enableGlob: false,
+    whitelist: '',
+  });
 
   // 读取本地插件配置
   useEffect(() => {
