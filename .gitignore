@@ -49,3 +49,5 @@ Thumbs.db
 # react-libs
 /public/react.js
 /public/react-dom.js
+/public/antd.js
+/public/antd.css

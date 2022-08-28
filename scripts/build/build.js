@@ -12,13 +12,20 @@ const MODE = { DEV: 'development', PROD: 'production' };
 const CONFIG = {
   development: {
     viteConfig: viteConfigDev,
-    sourceFiles: ['node_modules/react/umd/react.development.js', 'node_modules/react-dom/umd/react-dom.development.js'],
+    sourceFiles: [
+      'node_modules/react/umd/react.development.js',
+      'node_modules/react-dom/umd/react-dom.development.js',
+      'node_modules/antd/dist/antd.min.js',
+      'node_modules/antd/dist/antd.min.css',
+    ],
   },
   production: {
     viteConfig: viteConfigProd,
     sourceFiles: [
       'node_modules/react/umd/react.production.min.js',
       'node_modules/react-dom/umd/react-dom.production.min.js',
+      'node_modules/antd/dist/antd.min.js',
+      'node_modules/antd/dist/antd.min.css',
     ],
   },
 };

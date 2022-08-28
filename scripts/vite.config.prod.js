@@ -15,9 +15,10 @@ module.exports = defineConfig({
     emptyOutDir: false,
     cssCodeSplit: true,
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['antd', 'react', 'react-dom'],
       output: {
         globals: {
+          antd: 'antd',
           react: 'React',
           'react-dom': 'ReactDOM',
         },

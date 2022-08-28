@@ -10,7 +10,7 @@ function startNodemon(startHandler, reloadHandler, reloadExtPage) {
     ext: '*',
     delay: 2000,
     watch: ['src', 'scripts', 'public', 'test'],
-    ignore: ['.git/', '**/node_modules/', 'dist/', 'public/react*.js'],
+    ignore: ['.git/', '**/node_modules/', 'dist/', 'public/*.js', 'public/*.css'],
   });
 
   nodemon
