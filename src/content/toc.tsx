@@ -1,14 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import * as micromatch from 'micromatch';
+import Draggable from 'react-draggable';
 import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { TocIcon } from './toc-icon';
 import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { useSettings } from '../popup/use-settings';
-import * as micromatch from 'micromatch';
 import './toc.less';
 
 export function Toc() {
+  const dragRef = useRef(null);
   const [expanded, setExpanded] = useState<boolean>();
   const toggleExpanded = useCallback(() => setExpanded(!expanded), [expanded]);
 
@@ -30,15 +32,22 @@ export function Toc() {
   const style = { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
   return (
-    <nav className={'toc-container ' + (expanded ? 'toc-expanded' : '')} style={style} data-theme={settings.theme}>
-      {expanded ? (
-        <>
-          <TocHead title={title} toggleExpanded={toggleExpanded} />
-          <TocBody />
-        </>
-      ) : (
-        <TocIcon toggleExpanded={toggleExpanded} />
-      )}
-    </nav>
+    <Draggable nodeRef={dragRef} bounds="html" cancel=".toc-body">
+      <nav
+        ref={dragRef}
+        className={'toc-container ' + (expanded ? 'toc-expanded' : '')}
+        style={style}
+        data-theme={settings.theme}
+      >
+        {expanded ? (
+          <>
+            <TocHead title={title} toggleExpanded={toggleExpanded} />
+            <TocBody />
+          </>
+        ) : (
+          <TocIcon toggleExpanded={toggleExpanded} />
+        )}
+      </nav>
+    </Draggable>
   );
 }
