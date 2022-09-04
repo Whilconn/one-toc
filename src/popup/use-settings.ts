@@ -11,9 +11,9 @@ const keyToSetterName = (key: string) => 'set' + key[0].toUpperCase() + key.slic
 const setEnabled = 'setEnabled';
 const setExpanded = 'setExpanded';
 const setTheme = 'setTheme';
-const setEnableGlob = 'setEnableGlob';
+const setAllMatched = 'setAllMatched';
 const setWhitelist = 'setWhitelist';
-export const SETTINGS_ACTION_NAMES = { setEnabled, setExpanded, setTheme, setEnableGlob, setWhitelist };
+export const SETTINGS_ACTION_NAMES = { setEnabled, setExpanded, setTheme, setAllMatched, setWhitelist };
 
 /**
  * reducer
@@ -46,12 +46,12 @@ function reducer(settings: Settings, action: SettingsAction) {
       return { ...settings, theme };
     }
 
-    case setEnableGlob: {
-      const enableGlob = action.payload as boolean;
-      if (settings.enableGlob === enableGlob) return settings;
+    case setAllMatched: {
+      const allMatched = action.payload as boolean;
+      if (settings.allMatched === allMatched) return settings;
 
-      void StorageUtil.set({ enableGlob }).then();
-      return { ...settings, enableGlob };
+      void StorageUtil.set({ allMatched }).then();
+      return { ...settings, allMatched };
     }
 
     case setWhitelist: {
@@ -75,7 +75,7 @@ export function useSettings(): [Settings, Dispatch<SettingsAction>] {
     enabled: false,
     expanded: false,
     theme: '',
-    enableGlob: false,
+    allMatched: false,
     whitelist: '',
   });
 

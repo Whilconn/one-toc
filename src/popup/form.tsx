@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input, Radio, RadioChangeEvent, Switch } from 'antd';
-import { EXPAND_OPTIONS, GLOB_OPTIONS, THEME_OPTIONS } from './default-settings';
+import { EXPAND_OPTIONS, ALL_MATCHED_OPTIONS, THEME_OPTIONS } from './default-settings';
 import { SETTINGS_ACTION_NAMES, useSettings } from './use-settings';
 import pkg from '../../package.json';
 import manifest from '../../public/manifest.json';
@@ -12,7 +12,7 @@ export function Form() {
   const setEnabled = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setEnabled, payload: checked });
   const setExpanded = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setExpanded, payload: checked });
   const setTheme = (theme: string) => dispatch({ type: SETTINGS_ACTION_NAMES.setTheme, payload: theme });
-  const setEnableGlob = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setEnableGlob, payload: checked });
+  const setAllMatched = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setAllMatched, payload: checked });
 
   const setWhitelist = (evt: React.ChangeEvent) => {
     dispatch({ type: SETTINGS_ACTION_NAMES.setWhitelist, payload: (evt.target as HTMLTextAreaElement).value });
@@ -53,9 +53,9 @@ export function Form() {
         <div className="space-between">
           <span>🌐&ensp;匹配网站</span>
           <Radio.Group
-            options={GLOB_OPTIONS}
-            onChange={(e: RadioChangeEvent) => setEnableGlob(e.target.value as boolean)}
-            value={settings.enableGlob}
+            options={ALL_MATCHED_OPTIONS}
+            onChange={(e: RadioChangeEvent) => setAllMatched(e.target.value as boolean)}
+            value={settings.allMatched}
             optionType="button"
             buttonStyle="solid"
           />
@@ -64,7 +64,7 @@ export function Form() {
           value={settings.whitelist}
           onChange={setWhitelist}
           autoSize={{ minRows: 5, maxRows: 15 }}
-          disabled={!settings.enableGlob}
+          disabled={settings.allMatched}
           maxLength={1000}
           placeholder="请输入网站匹配规则，规则使用glob编写，多个规则用换行符分隔"
           showCount={true}
