@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input, Radio, RadioChangeEvent, Switch } from 'antd';
-import { THEME_OPTIONS } from './default-settings';
+import { EXPAND_OPTIONS, GLOB_OPTIONS, THEME_OPTIONS } from './default-settings';
 import { SETTINGS_ACTION_NAMES, useSettings } from './use-settings';
 import pkg from '../../package.json';
 import manifest from '../../public/manifest.json';
@@ -27,6 +27,7 @@ export function Form() {
           </span>
           <Switch checked={settings.enabled} onChange={setEnabled} checkedChildren="开启" unCheckedChildren="关闭" />
         </div>
+
         <div className="space-between">
           <span>🌈️&ensp;主题</span>
           <Radio.Group
@@ -37,13 +38,27 @@ export function Form() {
             buttonStyle="solid"
           />
         </div>
+
         <div className="space-between">
-          <span>🔆 &ensp;默认展开</span>
-          <Switch checked={settings.expanded} onChange={setExpanded} checkedChildren="开" unCheckedChildren="关" />
+          <span>🔆&ensp;默认展开</span>
+          <Radio.Group
+            options={EXPAND_OPTIONS}
+            onChange={(e: RadioChangeEvent) => setExpanded(e.target.value as boolean)}
+            value={settings.expanded}
+            optionType="button"
+            buttonStyle="solid"
+          />
         </div>
+
         <div className="space-between">
-          <span>🌐&ensp;定制匹配规则</span>
-          <Switch checked={settings.enableGlob} onChange={setEnableGlob} checkedChildren="开" unCheckedChildren="关" />
+          <span>🌐&ensp;匹配网站</span>
+          <Radio.Group
+            options={GLOB_OPTIONS}
+            onChange={(e: RadioChangeEvent) => setEnableGlob(e.target.value as boolean)}
+            value={settings.enableGlob}
+            optionType="button"
+            buttonStyle="solid"
+          />
         </div>
         <Input.TextArea
           value={settings.whitelist}
@@ -54,6 +69,7 @@ export function Form() {
           placeholder="请输入网站匹配规则，规则使用glob编写，多个规则用换行符分隔"
           showCount={true}
         />
+
         <div className="popup-footer">
           <span>❗&ensp;</span>
           <a href={pkg.homepage + '#配置说明'} target="_blank" rel="noreferrer">

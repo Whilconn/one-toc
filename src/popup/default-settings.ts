@@ -12,6 +12,16 @@ export const THEME_OPTIONS = [
   { label: '深色', value: 'dark' },
 ];
 
+export const GLOB_OPTIONS = [
+  { label: '所有', value: false },
+  { label: '定制', value: true },
+];
+
+export const EXPAND_OPTIONS = [
+  { label: '展开', value: true },
+  { label: '收起', value: false },
+];
+
 export const DEFAULT_SETTINGS: Settings = {
   enabled: true,
   expanded: true,

@@ -24,24 +24,29 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
 - 点击左上角加载已解压的扩展程序，选择扩展程序目录即可
 
 ## 配置说明
-> 选择启用与默认展开、且链接满足匹配规则的页面时，才会生成导航目录。修改配置会立即生效。
+> 选择开启与默认展开、且页面链接满足匹配规则时，页面才会显示导航目录。修改配置会立即生效。
 
-### 启用
-> 插件的启用和关闭状态，启用才能显示导航目录
-- 插件默认启用，打开页面时若链接匹配会往页面添加导航目录
-- 插件关闭时，打开页面不会对页面有任何改动
+![](screenshots/popup.png)
+
+### 开启和关闭
+> 插件可选择开启或关闭两种状态
+- 插件默认开启，打开页面显示导航目录
+- 插件关闭时，打开页面不显示导航目录
+
+### 主题
+> 插件提供默认、浅色、深色等3种主题
 
 ### 默认展开
-> 打开新页面时插件的展开和收起状态，展开状态才会完整显示导航目录，收起状态只显示展开按钮
+> 打开新页面时插件的显示状态，收起状态只显示展开按钮，展开状态才会完整显示导航目录
 - 插件默认展开，打开新页面或刷新时自动展开
-- 关闭默认展开时，打开新页面或刷新时目录自动收起，只显示圆形的展开按钮
+- 选中收起时，打开新页面或刷新时目录自动收起，只显示圆形的展开按钮
 
-### 匹配规则
-> 匹配页面链接的规则，符合匹配规则的页面才会显示导航目录
+### 匹配网站
+> 插件在哪些网站启用，默认为 `所有` 网站，也可以 `定制`；`定制` 模式下可自行编写匹配规则，符合匹配规则的页面才会显示导航目录
 - 匹配规则使用[glob](https://en.wikipedia.org/wiki/Glob_(programming))编写
 - 匹配所使用的库是[micromatch](https://github.com/micromatch/micromatch)
-- 匹配所有页面可配置为 `**`
-- 插件默认的匹配规则如下，可自行修改
+- 示例1：匹配所有页面的规则为 `**`
+- 示例2：常用的技术网站匹配规则如下
 ```text
 *reactjs.org/(docs|blog)/**
 *zhihu.com/p/**
@@ -69,9 +74,3 @@ Append TOC to the websites such as technical documentation, technical blogs, etc
 - 掘金：https://juejin.cn
 - 思否：https://segmentfault.com
 - NCBI：https://www.ncbi.nlm.nih.gov
-
-### 不兼容的网站
-- iteye：https://www.iteye.com/blog/zhoumeng87-2531925
-  - 标题不使用Heading标签（h2、h3等），暂未兼容
-- infoq：https://www.infoq.cn/article/BwXyBWmqroBpkrEdvV1l
-  - TODO：ajax加载数据，目录渲染不出数据
