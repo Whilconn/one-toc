@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { Settings } from './default-settings';
+import { Settings } from '../shared/default-settings';
 
 export function get(key: string | string[]): Promise<Settings> {
   return chrome.storage.local.get(key);

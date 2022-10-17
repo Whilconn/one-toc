@@ -1,24 +1,33 @@
 <div align="center">
 <h1>OneToc</h1>
-<p>Table of content for websites.</p>
+<p>Table of contents for websites.</p>
 
-![](https://badges.aleen42.com/src/react.svg)
-![](https://badges.aleen42.com/src/typescript.svg)
-![](https://badges.aleen42.com/src/vitejs.svg)
+![react](https://badges.aleen42.com/src/react.svg)
+![typescript](https://badges.aleen42.com/src/typescript.svg)
+![vite](https://badges.aleen42.com/src/vitejs.svg)
+![jest](https://badges.aleen42.com/src/jest_1.svg)
+![eslint](https://badges.aleen42.com/src/eslint.svg)
+
 </div>
 
 为技术文档、技术博客等网站添加导航目录的浏览器插件，以提供更好的阅读体验。
 <br>
-Append TOC to the websites such as technical documentation, technical blogs, etc. to provide a better reading experience.
+It's a browser extension which can append table of contents to the websites such as technical docs and technical blogs, to provide a better reading experience.
 
 ![](screenshots/1.png)
+
+## 感谢
+感谢 JetBrains 提供的开源开发许可证支持！<br>
+
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="100px" alt="JetBrains Logo (Main) logo.">
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="100px" alt="WebStorm logo.">
 
 ## 如何使用
 ### Edge
 直接到[Edge插件商店](https://microsoftedge.microsoft.com/addons/detail/onetoc/jkgapfniamkoblbmbhdjlnfklihlpjmc)安装即可 
 
 ### Chrome
-- 下载zip包并解压
+- 下载[zip包](https://github.com/Whilconn/one-toc/releases)并解压
 - 打开 chrome://extensions/ 页面 
 - 点击右上角开启开发者模式 
 - 点击左上角加载已解压的扩展程序，选择扩展程序目录即可

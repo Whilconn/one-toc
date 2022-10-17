@@ -1,6 +1,6 @@
 import { Dispatch, useEffect, useReducer } from 'react';
 import { DEFAULT_SETTINGS, Settings } from './default-settings';
-import * as StorageUtil from './storage-util';
+import * as BrowserStorage from '../utils/browser-storage';
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);
 const keyToSetterName = (key: string) => 'set' + key[0].toUpperCase() + key.slice(1);
@@ -9,11 +9,11 @@ const keyToSetterName = (key: string) => 'set' + key[0].toUpperCase() + key.slic
  * action names
  */
 const setEnabled = 'setEnabled';
-const setExpanded = 'setExpanded';
+const setPosition = 'setPosition';
 const setTheme = 'setTheme';
 const setAllMatched = 'setAllMatched';
 const setWhitelist = 'setWhitelist';
-export const SETTINGS_ACTION_NAMES = { setEnabled, setExpanded, setTheme, setAllMatched, setWhitelist };
+export const SETTINGS_ACTION_NAMES = { setEnabled, setPosition, setTheme, setAllMatched, setWhitelist };
 
 /**
  * reducer
@@ -26,23 +26,23 @@ function reducer(settings: Settings, action: SettingsAction) {
       const enabled = action.payload as boolean;
       if (settings.enabled === enabled) return settings;
 
-      void StorageUtil.set({ enabled }).then();
+      void BrowserStorage.set({ enabled }).then();
       return { ...settings, enabled };
     }
 
-    case setExpanded: {
-      const expanded = action.payload as boolean;
-      if (settings.expanded === expanded) return settings;
+    case setPosition: {
+      const position = action.payload as string;
+      if (settings.position === position) return settings;
 
-      void StorageUtil.set({ expanded }).then();
-      return { ...settings, expanded };
+      void BrowserStorage.set({ position }).then();
+      return { ...settings, position };
     }
 
     case setTheme: {
       const theme = action.payload as string;
       if (settings.theme === theme) return settings;
 
-      void StorageUtil.set({ theme }).then();
+      void BrowserStorage.set({ theme }).then();
       return { ...settings, theme };
     }
 
@@ -50,7 +50,7 @@ function reducer(settings: Settings, action: SettingsAction) {
       const allMatched = action.payload as boolean;
       if (settings.allMatched === allMatched) return settings;
 
-      void StorageUtil.set({ allMatched }).then();
+      void BrowserStorage.set({ allMatched }).then();
       return { ...settings, allMatched };
     }
 
@@ -58,7 +58,7 @@ function reducer(settings: Settings, action: SettingsAction) {
       const whitelist = action.payload as string;
       if (settings.whitelist === whitelist) return settings;
 
-      void StorageUtil.set({ whitelist }).then();
+      void BrowserStorage.set({ whitelist }).then();
       return { ...settings, whitelist };
     }
 
@@ -73,7 +73,7 @@ function reducer(settings: Settings, action: SettingsAction) {
 export function useSettings(): [Settings, Dispatch<SettingsAction>] {
   const [settings, dispatch] = useReducer(reducer, {
     enabled: false,
-    expanded: false,
+    position: '',
     theme: '',
     allMatched: false,
     whitelist: '',
@@ -81,7 +81,7 @@ export function useSettings(): [Settings, Dispatch<SettingsAction>] {
 
   // 读取本地插件配置
   useEffect(() => {
-    void StorageUtil.get(SETTINGS_KEYS).then((settings) => {
+    void BrowserStorage.get(SETTINGS_KEYS).then((settings) => {
       SETTINGS_KEYS.forEach((key) => {
         dispatch({ type: keyToSetterName(key), payload: settings[key as keyof Settings] });
       });
@@ -90,7 +90,7 @@ export function useSettings(): [Settings, Dispatch<SettingsAction>] {
 
   // 插件配置变化时，更新配置状态
   useEffect(() => {
-    function callback(changes: StorageUtil.StorageChanges, areaName: string) {
+    function callback(changes: BrowserStorage.StorageChanges, areaName: string) {
       if (areaName !== 'local') return;
 
       SETTINGS_KEYS.forEach((key) => {
@@ -99,8 +99,8 @@ export function useSettings(): [Settings, Dispatch<SettingsAction>] {
       });
     }
 
-    StorageUtil.addListener(callback);
-    return () => StorageUtil.removeListener(callback);
+    BrowserStorage.addListener(callback);
+    return () => BrowserStorage.removeListener(callback);
   }, [settings, dispatch]);
 
   return [settings, dispatch];

@@ -1,4 +1,4 @@
-import { FIXED_POSITIONS, HEADER_HEIGHT } from '../content/constants';
+import { FIXED_POSITIONS, HEADER_HEIGHT } from '../shared/constants';
 
 export function getFixedHeaderHeight() {
   const bottom = locateHeaderBottom();

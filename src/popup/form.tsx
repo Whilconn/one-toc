@@ -1,7 +1,7 @@
 import React from 'react';
 import { Input, Radio, RadioChangeEvent, Switch } from 'antd';
-import { EXPAND_OPTIONS, ALL_MATCHED_OPTIONS, THEME_OPTIONS } from './default-settings';
-import { SETTINGS_ACTION_NAMES, useSettings } from './use-settings';
+import { ALL_MATCHED_OPTIONS, THEME_OPTIONS, POSITION_OPTIONS } from '../shared/default-settings';
+import { SETTINGS_ACTION_NAMES, useSettings } from '../shared/use-settings';
 import pkg from '../../package.json';
 import manifest from '../../public/manifest.json';
 import './form.less';
@@ -10,7 +10,7 @@ export function Form() {
   const [settings, dispatch] = useSettings();
 
   const setEnabled = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setEnabled, payload: checked });
-  const setExpanded = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setExpanded, payload: checked });
+  const setPosition = (position: string) => dispatch({ type: SETTINGS_ACTION_NAMES.setPosition, payload: position });
   const setTheme = (theme: string) => dispatch({ type: SETTINGS_ACTION_NAMES.setTheme, payload: theme });
   const setAllMatched = (checked: boolean) => dispatch({ type: SETTINGS_ACTION_NAMES.setAllMatched, payload: checked });
 
@@ -40,11 +40,11 @@ export function Form() {
         </div>
 
         <div className="space-between">
-          <span>🔆&ensp;默认展开</span>
+          <span>📌️&ensp;定位</span>
           <Radio.Group
-            options={EXPAND_OPTIONS}
-            onChange={(e: RadioChangeEvent) => setExpanded(e.target.value as boolean)}
-            value={settings.expanded}
+            options={POSITION_OPTIONS}
+            onChange={(e: RadioChangeEvent) => setPosition(e.target.value as string)}
+            value={settings.position}
             optionType="button"
             buttonStyle="solid"
           />
@@ -60,6 +60,7 @@ export function Form() {
             buttonStyle="solid"
           />
         </div>
+
         <Input.TextArea
           value={settings.whitelist}
           onChange={setWhitelist}

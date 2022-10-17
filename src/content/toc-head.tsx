@@ -1,10 +1,10 @@
 import React from 'react';
-import CollapseSvg from '../assets/collapse.svg?raw';
+import closeSvg from '../assets/close.svg?raw';
 import './toc-head.less';
 
 interface Props {
   title: string;
-  toggleExpanded: () => void;
+  hideToc: () => void;
 }
 
 export function TocHead(props: Props) {
@@ -14,10 +14,10 @@ export function TocHead(props: Props) {
         {props.title}
       </p>
       <div
-        onClick={props.toggleExpanded}
-        dangerouslySetInnerHTML={{ __html: CollapseSvg }}
-        className="toc-collapse-icon"
-        title="收起"
+        onClick={props.hideToc}
+        dangerouslySetInnerHTML={{ __html: closeSvg }}
+        className="toc-close-icon"
+        title="关闭"
       />
     </div>
   );

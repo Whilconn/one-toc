@@ -1,4 +1,4 @@
-import { SYMBOL } from '../content/constants';
+import { SYMBOL } from '../shared/constants';
 import { getText } from './dom-util';
 
 // TODO: 用于拷贝锚点链接

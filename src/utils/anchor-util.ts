@@ -1,4 +1,4 @@
-import { FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../content/constants';
+import { FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
 import { getText } from './dom-util';
 
 const INVALID_DISPLAYS = ['inline', 'none'];
