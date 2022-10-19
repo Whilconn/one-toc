@@ -14,18 +14,27 @@
 
   & > div {
     margin-bottom: 15px;
+  }
 
-    &.space-between {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+  .flex1 {
+    flex: 1;
+  }
+
+  .space-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .popup-title {
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
     text-align: left;
+  }
+
+  .shortcut {
+    color: #ccc;
+    word-spacing: 4px;
   }
 
   textarea {
@@ -38,7 +47,15 @@
   }
 
   .popup-footer {
-    padding-top: 10px;
+    margin: 40px 0 0 0;
+    color: #bbb;
+    border-top: 1px solid #eee;
+
+    p {
+      justify-content: space-around;
+      margin: 0;
+      padding-top: 10px;
+    }
 
     a {
       color: #1890FF;

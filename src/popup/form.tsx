@@ -18,13 +18,16 @@ export function Form() {
     dispatch({ type: SETTINGS_ACTION_NAMES.setWhitelist, payload: (evt.target as HTMLTextAreaElement).value });
   };
 
+  const ua = window.navigator.userAgent;
+  const isMacOs = /Mac\s*OS/gi.test(ua);
+  const cKey = isMacOs ? '⌘' : 'Ctrl';
+
   return (
     <>
       <section className="popup-container">
         <div className="popup-title space-between">
-          <span>
-            <b>{manifest.name}</b>&ensp;V{manifest.version}
-          </span>
+          <b className="flex1">设置</b>
+          <span className="shortcut">{cKey} B</span>&ensp;
           <Switch checked={settings.enabled} onChange={setEnabled} checkedChildren="开启" unCheckedChildren="关闭" />
         </div>
 
@@ -72,15 +75,24 @@ export function Form() {
         />
 
         <div className="popup-footer">
-          <span>❗&ensp;</span>
-          <a href={pkg.homepage + '#配置说明'} target="_blank" rel="noreferrer">
-            配置说明
-          </a>
-          <span>&emsp;&emsp;</span>
-          <span>🐞&ensp;</span>
-          <a href={pkg.bugs.url} target="_blank" rel="noreferrer">
-            反馈问题
-          </a>
+          <p className="space-between">
+            <a href={pkg.homepage + '#配置说明'} target="_blank" rel="noreferrer">
+              ❗&ensp;配置说明
+            </a>
+            <a
+              href={`https://support.qq.com/product/441695?clientInfo=${encodeURIComponent(ua)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              🙋&ensp;反馈建议
+            </a>
+            <a href={pkg.bugs.url} target="_blank" rel="noreferrer">
+              🐞&ensp;技术交流
+            </a>
+          </p>
+          <p className="space-between">
+            {manifest.name}&ensp;V{manifest.version}
+          </p>
         </div>
       </section>
     </>
