@@ -19,8 +19,7 @@ It's a browser extension which can append table of contents to the websites such
 ## 感谢
 感谢 JetBrains 提供的开源开发许可证支持！<br>
 
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="100px" alt="JetBrains Logo (Main) logo.">
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="100px" alt="WebStorm logo.">
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="100px" alt="JetBrains Logo (Main) logo."><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="100px" alt="WebStorm logo.">
 
 ## 如何使用
 ### Edge
