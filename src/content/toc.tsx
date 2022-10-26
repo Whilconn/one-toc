@@ -4,7 +4,7 @@ import Draggable from 'react-draggable';
 import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
-import { MSG_NAMES } from '../shared/constants';
+import { FIXED_POSITIONS, MSG_NAMES } from '../shared/constants';
 import * as BrowserMessage from '../utils/browser-message';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { POS_FIXED, Settings } from '../shared/default-settings';
@@ -73,23 +73,41 @@ function shouldHide(settings: Settings) {
   return !settings.allMatched && (!whitelist.length || !micromatch.some(url, whitelist));
 }
 
-function getLayoutNodes() {
-  return [document.body].filter((n) => n.clientWidth >= document.body.clientWidth && n.clientHeight);
+function getFixedNodes(right: number) {
+  const nodes = document.body.querySelectorAll('*');
+  const fixedNodes: Array<[HTMLElement, string]> = [];
+
+  for (const n of nodes) {
+    const rect = n.getBoundingClientRect();
+    const s = getComputedStyle(n);
+
+    // 根据 clientRect、computedStyle 判定 fixed
+    if (rect.right > window.innerWidth - right && FIXED_POSITIONS.includes(s.position) && /^[^0]\d/.test(s.right)) {
+      fixedNodes.push([n as HTMLElement, s.right]);
+    }
+  }
+
+  return fixedNodes;
 }
 
 function changeLayout() {
-  const nodes = getLayoutNodes();
-  nodes.forEach((n) => {
-    const w = '260px';
-    n.style.width = `calc(100vw - ${w})`;
-    n.style.transform = `translateX(${w})`;
+  const w = 260;
+  const width = `${w}px`;
+
+  const styleNode = document.createElement('style');
+  styleNode.innerHTML = `html * { max-width: calc(100vw - ${width}) }`;
+  document.head.appendChild(styleNode);
+
+  const fixedNodes = getFixedNodes(w);
+  fixedNodes.forEach(([n, r]) => {
+    n.style.right = `calc(${r} + ${width})`;
   });
 
   return function restoreLayout() {
-    const nodes = getLayoutNodes();
-    nodes.forEach((n) => {
-      n.style.removeProperty('width');
-      n.style.removeProperty('transform');
+    styleNode.remove();
+
+    fixedNodes.forEach(([n, r]) => {
+      n.style.right = r;
     });
   };
 }
