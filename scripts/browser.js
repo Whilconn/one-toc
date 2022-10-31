@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const puppeteer = require('puppeteer-core');
 const chromePath = require('chrome-location');
 const { DEST_ABS: extensionPath } = require('./config');

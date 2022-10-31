@@ -34,7 +34,7 @@
   position: fixed;
   display: flex;
   flex-direction: column;
-  width: 260px;
+  width: var(--onetoc-width);
   top: 100px;
   right: 20px;
   text-align: left;
@@ -47,14 +47,23 @@
 
   &.toc-embed {
     top: 0;
-    right: 0;
+    left: 0;
     bottom: 0;
+    height: 100vh;
     max-height: 100vh;
     border-radius: 0;
   }
 }
 
 // global class
-.toc-current-heading {
-  box-shadow: 0 2px 0 #007fff !important;
+html {
+  --onetoc-width: 260px;
+
+  .toc-current-heading {
+    box-shadow: 0 2px 0 #007fff !important;
+  }
+
+  body.toc-embed-mod {
+    padding-left: var(--onetoc-width);
+  }
 }

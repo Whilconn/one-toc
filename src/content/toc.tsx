@@ -73,17 +73,30 @@ function shouldHide(settings: Settings) {
   return !settings.allMatched && (!whitelist.length || !micromatch.some(url, whitelist));
 }
 
-function getFixedNodes(right: number) {
-  const nodes = document.body.querySelectorAll('*');
-  const fixedNodes: Array<[HTMLElement, string]> = [];
+function getFixedNodes(left: number) {
+  const nodes = [...document.body.querySelectorAll('*')] as HTMLElement[];
+  const fixedNodes: Array<[HTMLElement, Array<{ name: string; origin: string; target: string }>]> = [];
 
   for (const n of nodes) {
     const rect = n.getBoundingClientRect();
     const s = getComputedStyle(n);
 
     // 根据 clientRect、computedStyle 判定 fixed
-    if (rect.right > window.innerWidth - right && FIXED_POSITIONS.includes(s.position) && /^[^0]\d/.test(s.right)) {
-      fixedNodes.push([n as HTMLElement, s.right]);
+    if (rect.width * rect.height && rect.left < left && FIXED_POSITIONS.includes(s.position)) {
+      if (fixedNodes.some(([fn]) => fn.contains(n))) continue;
+      const attrs = [
+        {
+          name: 'left',
+          origin: n.style.left,
+          target: `calc(${rect.left}px + var(--onetoc-width))`,
+        },
+        {
+          name: 'maxWidth',
+          origin: n.style.maxWidth,
+          target: 'calc(100vw - var(--onetoc-width))',
+        },
+      ];
+      fixedNodes.push([n, attrs]);
     }
   }
 
@@ -92,22 +105,20 @@ function getFixedNodes(right: number) {
 
 function changeLayout() {
   const w = 260;
-  const width = `${w}px`;
 
-  const styleNode = document.createElement('style');
-  styleNode.innerHTML = `html * { max-width: calc(100vw - ${width}) }`;
-  document.head.appendChild(styleNode);
+  const cls = 'toc-embed-mod';
+  document.body.classList.add(cls);
 
   const fixedNodes = getFixedNodes(w);
-  fixedNodes.forEach(([n, r]) => {
-    n.style.right = `calc(${r} + ${width})`;
+  fixedNodes.forEach(([n, attrs]) => {
+    attrs.forEach((a) => n.style.setProperty(a.name, a.target));
   });
 
   return function restoreLayout() {
-    styleNode.remove();
+    document.body.classList.remove(cls);
 
-    fixedNodes.forEach(([n, r]) => {
-      n.style.right = r;
+    fixedNodes.forEach(([n, attrs]) => {
+      attrs.forEach((a) => n.style.setProperty(a.name, a.origin));
     });
   };
 }
