@@ -14,15 +14,15 @@
 <br>
 It's a browser extension which can append table of contents to the websites such as docs、 blogs and papers, to provide better reading experience.
 
-## 插件效果
-
-![screenshots](screenshots/1.png)
-
 ## 感谢
 
 感谢 JetBrains 提供的开源开发许可证支持！<br>
 
 <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="50px" alt="JetBrains Logo (Main) logo.">&emsp;&emsp;<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="50px" alt="WebStorm logo.">
+
+## 插件效果
+
+![screenshots](screenshots/content.png)
 
 ## 特性
 
@@ -116,7 +116,7 @@ It's a browser extension which can append table of contents to the websites such
 - NCBI：https://www.ncbi.nlm.nih.gov
 - 其他...
 
-# License
+## License
 
 [MIT](./LICENSE)
 
