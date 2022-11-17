@@ -1,7 +1,7 @@
-import { FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
-import { getText } from './dom-util';
+import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL, TOC_LEVEL } from '../shared/constants';
+import { genPathSelector, getLevel, getRect, getText } from './dom-util';
 
-const INVALID_DISPLAYS = ['inline', 'none'];
+const INVALID_DISPLAYS = ['none'];
 const INVALID_SELECTORS = [
   'header',
   'aside',
@@ -16,28 +16,106 @@ const INVALID_SELECTORS = [
 ];
 
 export function getAnchors() {
-  const selector = HEADING_SELECTORS.join(SYMBOL.COMMA);
+  const selector = [...HEADING_SELECTORS, ...BOLD_SELECTORS].join(SYMBOL.COMMA);
+
   let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
-  nodes = filterAnchors(nodes);
-  const groups = groupAnchors(nodes);
-  nodes = getAnchorsByWeight(groups);
-  nodes = shiftTitleFromAnchors(nodes);
+  nodes = filterNodes(nodes);
+  nodes = shiftTitle(nodes);
+  nodes = filterByFontSize(nodes);
   markAnchors(nodes);
 
   return nodes;
 }
 
-function filterAnchors(nodes: HTMLElement[]) {
+function filterByFontSize(nodes: HTMLElement[]) {
+  const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
+  const styleMap = nodes.reduce(
+    (map, node) => map.set(node, getComputedStyle(node)),
+    new WeakMap<HTMLElement, CSSStyleDeclaration>(),
+  );
+
+  const getSize = (style: CSSStyleDeclaration) => +style.fontSize.replace(/[^0-9]/g, '') || 0;
+
+  // 记录 h1~h6 各组最大字号
+  const sizeDict = nodes.reduce((dict, node) => {
+    const style = styleMap.get(node);
+    if (style && node.matches(headSelector)) {
+      const l = getLevel(node) - 1;
+      dict[l] = Math.max(dict[l] || 0, getSize(style));
+    }
+    return dict;
+  }, [] as number[]);
+
+  // 剔除 h1~h6 各组中字号偏小的节点
+  nodes = nodes.filter((node) => {
+    const style = styleMap.get(node);
+    if (!style || !node.matches(headSelector)) return true;
+
+    const l = getLevel(node) - 1;
+    return sizeDict[l] === getSize(style);
+  });
+
+  // 记录前 MAX_LEVEL 个字号
+  const MAX_LEVEL = HEADING_SELECTORS.length;
+  const sizeSet = nodes.reduce((set, node) => {
+    const style = styleMap.get(node);
+    const fontSize = style ? getSize(style) : -1;
+    if (fontSize > 0 && set.size < MAX_LEVEL) set.add(fontSize);
+    return set;
+  }, new Set<number>());
+
+  // 剔除字号小于 最小size 的节点
+  const minSize = Math.min(...sizeSet);
+  nodes = nodes.filter((node) => {
+    const style = styleMap.get(node);
+    if (!style) return true;
+
+    return getSize(style) >= minSize;
+  });
+
+  // 标记层级
+  const sizeArr = [...sizeSet].sort((a, b) => b - a);
+  nodes.forEach((node) => {
+    const style = styleMap.get(node);
+    if (!style) return;
+
+    const l = sizeArr.indexOf(getSize(style));
+    node.setAttribute(TOC_LEVEL, `${l}`);
+  });
+
+  return nodes;
+}
+
+function filterNodes(nodes: HTMLElement[]) {
+  const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
+  const invalidSelector = INVALID_SELECTORS.join(SYMBOL.COMMA);
+
   return nodes.filter((node) => {
+    // 没有文字
     if (!getText(node)) return false;
 
-    const selector = INVALID_SELECTORS.map((s) => `${s} ${node.tagName}`).join(SYMBOL.COMMA);
-    if (node.matches(selector)) return false;
+    // 节点不在文章主体中，如header、footer、sidebar等
+    if (node.closest(invalidSelector)) return false;
 
+    // 祖先节点有h1~h6
+    if (node?.parentElement?.closest(headSelector)) return false;
+
+    // 宽高过小
     const MIN = 8;
-    if (node.scrollWidth < MIN && node.scrollHeight < MIN) return false;
+    const { width, height } = getRect(node);
+    if (width < MIN && height < MIN) return false;
+
+    // 距离父节点左边界过远
+    const LEFT = 100;
+    if (node.offsetLeft > LEFT) return false;
 
     const style = getComputedStyle(node);
+
+    // 没有加粗
+    const FONT_WEIGHT = 500;
+    if (+style.fontWeight < FONT_WEIGHT) return false;
+
+    // 隐藏节点、fixed节点
     return !INVALID_DISPLAYS.includes(style.display) && !FIXED_POSITIONS.includes(style.position);
   });
 }
@@ -46,91 +124,24 @@ function markAnchors(nodes: HTMLElement[]) {
   nodes.map((n, i) => (n.id = n.id || `toc-anchor-${i}`));
 }
 
-function genSelector(node: HTMLElement) {
-  if (!node) return '';
-
-  const selectors = [];
-
-  while ((node = node.parentNode as HTMLElement)) {
-    selectors.push([node.tagName, ...(node.classList || [])].map((c) => '.' + c).join(''));
-  }
-
-  return selectors.reverse().join('>');
-}
-
 // TODO：添加分组策略，按左右边界是否对齐过滤
 
-function groupAnchors(nodes: HTMLElement[]) {
-  const groups: HTMLElement[][] = [];
-
-  let group: HTMLElement[], parent: HTMLElement, ancestorsSelector: string;
-
-  // group by parent selector
-  nodes.forEach((node) => {
-    if (parent?.contains(node)) {
-      return group.push(node);
-    }
-
-    const pSelector = genSelector(node);
-    if (ancestorsSelector && pSelector.startsWith(ancestorsSelector)) {
-      return group.push(node);
-    }
-
-    group = [];
-    parent = node.parentNode as HTMLElement;
-    ancestorsSelector = pSelector;
-    groups.push(group);
-    group.push(node);
-  });
-
-  return groups;
-}
-
-function getAnchorsByWeight(groups: HTMLElement[][]) {
-  if (!groups.length) return [];
-
-  const groupWeights = groups.map(() => 0);
-
-  function accWeights(weights: number[], scores: number[][], results: number[]) {
-    const sortedGroupIdxList = scores.sort((a, b) => b[1] - a[1]).map((s) => s[0]);
-    sortedGroupIdxList.forEach((gi, wi) => {
-      results[gi] += weights[wi] || 0;
-    });
-  }
-
-  const COUNT_WEIGHTS = [18, 16, 14, 12, 10, 8, 6, 4, 2];
-  const countScores = groups.map((g, i) => [i, g.length]);
-  accWeights(COUNT_WEIGHTS, countScores, groupWeights);
-
-  const HEIGHT_WEIGHTS = [18, 16, 14, 12, 10, 8, 6, 4, 2];
-  const heightScores = groups.map((g, i) => {
-    const gc1 = g[0].getBoundingClientRect();
-    const gc2 = g[g.length - 1].getBoundingClientRect();
-    return [i, gc2.bottom - gc1.top];
-  });
-  accWeights(HEIGHT_WEIGHTS, heightScores, groupWeights);
-
-  const ARTICLE_SELECTORS = ['article,.article', '.blog,.post'];
-  const SELECTOR_WEIGHTS = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2];
-  groups.forEach((g, i) => {
-    const si = ARTICLE_SELECTORS.findIndex((s) => {
-      return g[0].matches(`${s} ${g[0].tagName}`);
-    });
-    groupWeights[i] += SELECTOR_WEIGHTS[si] || 0;
-  });
-
-  const ws = groupWeights.map((w, i) => [i, w]).sort((a, b) => b[1] - a[1]);
-
-  return groups[ws[0][0]];
-}
-
-function shiftTitleFromAnchors(nodes: HTMLElement[]) {
+/**
+ * @description 剔除文章标题
+ * @param nodes
+ */
+function shiftTitle(nodes: HTMLElement[] = []) {
   const H1 = 'H1';
-  if (!nodes.length || nodes[0].tagName !== H1) return nodes;
+  const firstH1 = nodes.find((n) => n.tagName === H1);
+  if (firstH1?.tagName !== H1) return nodes;
 
-  const t2 = nodes.find((n, i) => i && n.tagName === H1);
-  if (!t2 || genSelector(t2) !== genSelector(nodes[0])) {
-    nodes.shift();
+  const text = getText(firstH1);
+  if (text === document.title) return nodes.slice(1);
+
+  const secondH1 = nodes.find((n, i) => i && n.tagName === H1);
+  if (!secondH1 || genPathSelector(secondH1) !== genPathSelector(firstH1)) {
+    return nodes.slice(1);
   }
+
   return nodes;
 }

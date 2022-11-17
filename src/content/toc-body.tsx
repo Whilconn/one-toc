@@ -3,7 +3,7 @@ import { useEventListener, useTitle } from './hooks';
 import { getAnchors } from '../utils/anchor-util';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { scrollByApi } from '../utils/scroll-util';
-import { getText } from '../utils/dom-util';
+import { getLevel, getText } from '../utils/dom-util';
 import './toc-body.less';
 
 export function TocBody() {
@@ -55,7 +55,7 @@ export function TocBody() {
   }
 
   const minLevel = anchorNodes.reduce((min, node) => {
-    const level = +node.tagName.replace(/[a-z]/gi, '');
+    const level = getLevel(node);
     return Math.min(min, level);
   }, Infinity);
 
@@ -65,7 +65,7 @@ export function TocBody() {
         const text = getText(node);
 
         // level
-        const level = +node.tagName.replace(/[a-z]/gi, '') - minLevel;
+        const level = getLevel(node) - minLevel;
         const style = { paddingLeft: `${20 * level}px` };
         const cls = i === current ? 'active' : '';
 
