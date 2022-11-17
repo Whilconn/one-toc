@@ -80,7 +80,7 @@ function filterByFontSize(nodes: HTMLElement[]) {
     if (!style) return;
 
     const l = sizeArr.indexOf(getSize(style));
-    node.setAttribute(TOC_LEVEL, `${l}`);
+    if (l >= 0) node.setAttribute(TOC_LEVEL, l.toString());
   });
 
   return nodes;

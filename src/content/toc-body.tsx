@@ -3,7 +3,8 @@ import { useEventListener, useTitle } from './hooks';
 import { getAnchors } from '../utils/anchor-util';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { scrollByApi } from '../utils/scroll-util';
-import { getLevel, getText } from '../utils/dom-util';
+import { getText } from '../utils/dom-util';
+import { TOC_LEVEL } from '../shared/constants';
 import './toc-body.less';
 
 export function TocBody() {
@@ -54,23 +55,14 @@ export function TocBody() {
     scrollByApi(anchorNode, height);
   }
 
-  const minLevel = anchorNodes.reduce((min, node) => {
-    const level = getLevel(node);
-    return Math.min(min, level);
-  }, Infinity);
-
   return (
     <div className="toc-body">
       {anchorNodes.map((node, i) => {
         const text = getText(node);
-
-        // level
-        const level = getLevel(node) - minLevel;
-        const style = { paddingLeft: `${20 * level}px` };
-        const cls = i === current ? 'active' : '';
+        const cls = [TOC_LEVEL + (node.getAttribute(TOC_LEVEL) || ''), i === current ? 'active' : ''].join(' ');
 
         return (
-          <a key={node.id} onClick={() => clickAnchor(i, node)} className={cls} style={style} title={text}>
+          <a key={node.id} onClick={() => clickAnchor(i, node)} className={cls} title={text}>
             {text}
           </a>
         );

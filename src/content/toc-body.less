@@ -24,6 +24,12 @@
       color: #007fff;
       font-weight: bold;
     }
+
+    each(range(0,10), {
+      &.toc-level@{value} {
+        padding-left: @value * 10px;
+      }
+    });
   }
 
   .no-content {

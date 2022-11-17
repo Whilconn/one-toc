@@ -12,4 +12,4 @@ export const FIXED_POSITIONS = ['sticky', 'fixed', 'absolute'];
 
 export const MSG_NAMES = { TOGGLE_TOC: 'toggle-toc' };
 
-export const TOC_LEVEL = 'data-one-toc-depth';
+export const TOC_LEVEL = 'toc-level';
