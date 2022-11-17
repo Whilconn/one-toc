@@ -68,9 +68,7 @@ function filterByFontSize(nodes: HTMLElement[]) {
   const minSize = Math.min(...sizeSet);
   nodes = nodes.filter((node) => {
     const style = styleMap.get(node);
-    if (!style) return true;
-
-    return getSize(style) >= minSize;
+    return !style || getSize(style) >= minSize;
   });
 
   // 标记层级
@@ -89,6 +87,7 @@ function filterByFontSize(nodes: HTMLElement[]) {
 function filterNodes(nodes: HTMLElement[]) {
   const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
   const invalidSelector = INVALID_SELECTORS.join(SYMBOL.COMMA);
+  const LEFT = window.innerWidth / 3;
 
   return nodes.filter((node) => {
     // 没有文字
@@ -106,7 +105,6 @@ function filterNodes(nodes: HTMLElement[]) {
     if (width < MIN && height < MIN) return false;
 
     // 距离父节点左边界过远
-    const LEFT = 100;
     if (node.offsetLeft > LEFT) return false;
 
     const style = getComputedStyle(node);
