@@ -46,8 +46,10 @@ export function getAnchors() {
 }
 
 function filterHeadings(nodes: HTMLElement[], rectMap: WeakMap<HTMLElement, DOMRect>) {
-  const maxWidth = nodes.reduce((w, n) => (isHeading(n) ? Math.max(w, rectMap.get(n)?.width || 0) : w), 0);
-  return nodes.filter((node) => !isHeading(node) || (rectMap.get(node)?.width || 0) > maxWidth * 0.75);
+  // let maxWidth = nodes.reduce((w, n) => (isHeading(n) ? Math.max(w, rectMap.get(n)?.width || 0) : w), 0);
+  // maxWidth = Math.max(Math.min(window.innerWidth / 3, 600), maxWidth * 0.8);
+  const maxWidth = Math.min(window.innerWidth / 3, 600);
+  return nodes.filter((node) => !isHeading(node) || (rectMap.get(node)?.width || 0) > maxWidth);
 }
 
 function filterById(nodes: HTMLElement[]) {
@@ -178,17 +180,14 @@ function markAnchors(nodes: HTMLElement[]) {
  * @param nodes
  */
 function removeTitle(nodes: HTMLElement[] = []) {
-  const H1 = 'H1';
-  const firstH1 = nodes.find((n) => n.tagName === H1);
-  if (firstH1?.tagName !== H1) return nodes;
+  const h1 = nodes.find((node) => {
+    const text = getText(node);
+    return text && document.title.includes(text);
+  });
+  if (h1) return nodes.filter((n) => n !== h1);
 
-  const text = getText(firstH1);
-  if (text === document.title) return nodes.slice(1);
-
-  const secondH1 = nodes.find((n, i) => i && n.tagName === H1);
-  if (!secondH1 || genPathSelector(secondH1) !== genPathSelector(firstH1)) {
-    return nodes.slice(1);
-  }
+  const h1Nodes = nodes.filter((n) => n.tagName === 'H1');
+  if (h1Nodes.length === 1) return nodes.filter((n) => n !== h1Nodes[0]);
 
   return nodes;
 }
