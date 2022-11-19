@@ -17,6 +17,6 @@ module.exports.links = [
   ['NCBI(EN)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6742634/', '22'],
   ['iteye', 'https://www.iteye.com/blog/aabbbaby-2538533', '6'],
   ['iteye', 'https://www.iteye.com/blog/kaizi1992-2538691', '5'],
-  ['iteye', 'https://www.iteye.com/news/32983', '28'],
+  ['iteye', 'https://www.iteye.com/news/32983', '27'],
   // ['Eslint(CN)', 'http://eslint.cn/docs/user-guide/getting-started', '4'],
 ];

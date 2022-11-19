@@ -49,15 +49,12 @@ export function getAnchors() {
 }
 
 function filterByLayout(nodes: HTMLElement[], rectMap: WeakMap<HTMLElement, DOMRect>) {
-  const widthMap = new Map<number, number>();
-  const leftMap = new Map<number, number>();
-
   const MID = window.innerWidth / 2;
   const maxWidth = Math.min(window.innerWidth / 3, 600);
 
-  return nodes.filter((node) => {
+  nodes = nodes.filter((node) => {
     const rect = rectMap.get(node);
-    if (!rect || !isHeading(node)) return true;
+    if (!rect) return true;
 
     // 需要横跨中轴
     if (MID < rect.left || MID > rect.right) return false;
@@ -65,6 +62,35 @@ function filterByLayout(nodes: HTMLElement[], rectMap: WeakMap<HTMLElement, DOMR
     // 宽度不能过小
     return rect.width >= maxWidth;
   });
+
+  // 根据布局信息中的左边界与宽度过滤，保留参数相同且占比多的节点（从众原则）
+  const leftMap = new Map<number, number>();
+  const widthMap = new Map<number, number>();
+  let mostLeft = -1;
+  let mostWidth = -1;
+
+  for (const node of nodes) {
+    const { left, width } = rectMap.get(node) || new DOMRect();
+    const lc = (leftMap.get(left) || 0) + 1;
+    leftMap.set(left, lc);
+    if (lc > (leftMap.get(mostLeft) || 0)) mostLeft = left;
+
+    const wc = (widthMap.get(width) || 0) + 1;
+    widthMap.set(width, wc);
+    if (wc > (widthMap.get(mostWidth) || 0)) mostWidth = width;
+  }
+
+  // 按标题的左边界过滤
+  if (mostLeft > -1) {
+    nodes = nodes.filter((node) => rectMap.get(node)?.left === mostLeft);
+  }
+
+  // 按标题的宽度过滤
+  if (mostWidth > -1) {
+    nodes = nodes.filter((node) => rectMap.get(node)?.width === mostWidth);
+  }
+
+  return nodes;
 }
 
 function filterById(nodes: HTMLElement[]) {
@@ -177,6 +203,7 @@ function filterBasic(
   });
 }
 
+// TODO: 最大标题不是h1时，padding-left错误
 function calcLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>) {
   // 记录所有字号
   const sizeSet = nodes.reduce((set, node) => {
@@ -213,8 +240,6 @@ function markAnchors(nodes: HTMLElement[]) {
   nodes.forEach((n, i) => (n.id = n.id || `toc-anchor-${i}`));
   return nodes;
 }
-
-// TODO：添加分组策略，按左右边界是否对齐过滤
 
 /**
  * @description 剔除文章标题
