@@ -1,41 +1,44 @@
 import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL, TOC_LEVEL } from '../shared/constants';
-import { genPathSelector, getFontSize, getLevel, getRect, getText, isHeading } from './dom-util';
+import { findAncestor, getFontSize, getLevel, getNextNode, getPrevNode, getRect, getText, isHeading } from './dom-util';
 
+const INLINE = 'inline';
 const INVALID_DISPLAYS = ['none'];
 const INVALID_SELECTORS = [
-  'header',
   'aside',
   'footer',
-  '.left',
-  '.right',
   '.side',
   '.foot',
+  '.left',
+  '.right',
   '.comment',
   '.comments',
-  '.blog_comment',
+  '.recommend',
   '[class*=aside]',
   '[class*=footer]',
-  '[class*=recommend]',
 ];
 
 export function getAnchors() {
   const selector = [...HEADING_SELECTORS, ...BOLD_SELECTORS].join(SYMBOL.COMMA);
 
   let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
-  const styleMap = nodes.reduce(
-    (map, node) => map.set(node, getComputedStyle(node)),
-    new WeakMap<HTMLElement, CSSStyleDeclaration>(),
-  );
-  const rectMap = nodes.reduce((map, node) => map.set(node, getRect(node)), new WeakMap<HTMLElement, DOMRect>());
 
-  nodes = filterNodes(nodes, styleMap, rectMap);
+  // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
+  const rectMap = new WeakMap<HTMLElement, DOMRect>();
+  const styleMap = new WeakMap<HTMLElement, CSSStyleDeclaration>();
+
+  for (const node of nodes) {
+    rectMap.set(node, getRect(node));
+    styleMap.set(node, getComputedStyle(node));
+  }
+
+  nodes = filterBasic(nodes, styleMap, rectMap);
   nodes = removeTitle(nodes);
-  nodes = filterHeadings(nodes, rectMap);
+
+  nodes = filterByLayout(nodes, rectMap);
   const count = nodes.length;
   nodes = filterById(nodes);
 
   if (count === nodes.length) {
-    nodes = filterBoldNodes(nodes);
     nodes = filterByFontSize(nodes, styleMap);
   }
 
@@ -45,11 +48,23 @@ export function getAnchors() {
   return nodes;
 }
 
-function filterHeadings(nodes: HTMLElement[], rectMap: WeakMap<HTMLElement, DOMRect>) {
-  // let maxWidth = nodes.reduce((w, n) => (isHeading(n) ? Math.max(w, rectMap.get(n)?.width || 0) : w), 0);
-  // maxWidth = Math.max(Math.min(window.innerWidth / 3, 600), maxWidth * 0.8);
+function filterByLayout(nodes: HTMLElement[], rectMap: WeakMap<HTMLElement, DOMRect>) {
+  const widthMap = new Map<number, number>();
+  const leftMap = new Map<number, number>();
+
+  const MID = window.innerWidth / 2;
   const maxWidth = Math.min(window.innerWidth / 3, 600);
-  return nodes.filter((node) => !isHeading(node) || (rectMap.get(node)?.width || 0) > maxWidth);
+
+  return nodes.filter((node) => {
+    const rect = rectMap.get(node);
+    if (!rect || !isHeading(node)) return true;
+
+    // 需要横跨中轴
+    if (MID < rect.left || MID > rect.right) return false;
+
+    // 宽度不能过小
+    return rect.width >= maxWidth;
+  });
 }
 
 function filterById(nodes: HTMLElement[]) {
@@ -83,56 +98,82 @@ function filterByFontSize(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, C
   });
 }
 
-function filterNodes(
+function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
+  if (isHeading(node) || !rect || !style?.display.includes(INLINE)) return true;
+
+  // 非 h1~h6 的节点，必须独占一行
+  const prevNode = getPrevNode(node);
+  const nextNode = getNextNode(node);
+
+  const y1 = prevNode ? getRect(prevNode).bottom : -Infinity;
+  const y2 = nextNode ? getRect(nextNode).top : Infinity;
+
+  const BREAK = '\n';
+  const prevText = prevNode?.textContent || '';
+  const nextText = nextNode?.textContent || '';
+
+  return (y1 <= rect.top || prevText.endsWith(BREAK)) && (rect.bottom <= y2 || nextText.startsWith(BREAK));
+}
+
+// 仅修改计算后的样式信息和布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
+function inlineToBlock(
+  node: HTMLElement,
+  styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>,
+  rectMap: WeakMap<HTMLElement, DOMRect>,
+) {
+  const rect = rectMap.get(node);
+  const style = styleMap.get(node);
+  if (!style || !rect || isHeading(node) || !style.display.includes(INLINE)) return;
+
+  const ancestor = findAncestor(node, (n) => {
+    return !getComputedStyle(n).display.includes(INLINE);
+  });
+
+  styleMap.set(node, { ...style, display: 'block' });
+  rect.width = ancestor ? ancestor.getBoundingClientRect().width : window.innerWidth;
+
+  if (import.meta.env.DEV) console.error('修改节点styleMap、rectMap', node);
+}
+
+function filterBasic(
   nodes: HTMLElement[],
   styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>,
   rectMap: WeakMap<HTMLElement, DOMRect>,
 ) {
   const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
   const invalidSelector = INVALID_SELECTORS.join(SYMBOL.COMMA);
-  const LEFT = window.innerWidth / 3;
+  const MIN = 10;
 
-  return nodes.filter((node) => {
+  return nodes.filter((node, i) => {
     // 没有文字
     if (!getText(node)) return false;
 
-    // 节点不在文章主体中，如header、footer、sidebar等
+    // 节点不在文章主体中，如footer、sidebar等
     if (node.closest(invalidSelector)) return false;
 
     // 祖先节点有h1~h6
     if (node?.parentElement?.closest(headSelector)) return false;
 
-    // 宽高过小
-    const MIN = 10;
     const rect = rectMap.get(node);
-    if (rect && Math.min(rect.width, rect.height) < MIN) return false;
-
-    // 距离父节点左边界过远
-    if (node.offsetLeft > LEFT) return false;
-
     const style = styleMap.get(node);
-    if (!style) return true;
+    if (!style || !rect) return true;
 
-    // 没有加粗
-    // const FONT_WEIGHT = 500;
-    // if (+style.fontWeight < FONT_WEIGHT) return false;
+    // 宽高过小
+    if (Math.min(rect.width, rect.height) < MIN) return false;
 
-    // 隐藏节点、fixed节点
-    return !INVALID_DISPLAYS.includes(style.display) && !FIXED_POSITIONS.includes(style.position);
-  });
-}
+    // 剔除隐藏节点、fixed节点
+    if (INVALID_DISPLAYS.includes(style.display) || FIXED_POSITIONS.includes(style.position)) return false;
 
-function filterBoldNodes(nodes: HTMLElement[]) {
-  const hc = nodes.reduce((c, n) => c + (isHeading(n) ? 1 : 0), 0);
+    // 必须独占一行
+    if (!isOneLine(node, style, rect)) return false;
 
-  return nodes.filter((node) => {
-    if (isHeading(node)) return true;
+    inlineToBlock(node, styleMap, rectMap);
 
-    if (hc > 1) return false;
-
-    if ([node.previousSibling, node.nextSibling].some((n) => getText(n))) return false;
-
-    return true;
+    // 剔除与相邻标题的 top 或 bottom 相等的节点
+    return ![nodes[i - 1], nodes[i + 1]].some((n) => {
+      const r = rectMap.get(n);
+      return r?.top === rect.top || r?.bottom === rect.bottom;
+    });
   });
 }
 
@@ -180,14 +221,19 @@ function markAnchors(nodes: HTMLElement[]) {
  * @param nodes
  */
 function removeTitle(nodes: HTMLElement[] = []) {
-  const h1 = nodes.find((node) => {
+  let titleNode: HTMLElement;
+  const h1Nodes: HTMLElement[] = [];
+
+  nodes.forEach((node) => {
+    if (node.tagName === 'H1') h1Nodes.push(node);
+
     const text = getText(node);
-    return text && document.title.includes(text);
+    if (!titleNode && text && document.title.includes(text)) titleNode = node;
   });
-  if (h1) return nodes.filter((n) => n !== h1);
 
-  const h1Nodes = nodes.filter((n) => n.tagName === 'H1');
-  if (h1Nodes.length === 1) return nodes.filter((n) => n !== h1Nodes[0]);
-
-  return nodes;
+  return nodes.filter((n) => {
+    if (titleNode) return n !== titleNode;
+    if (h1Nodes.length === 1) return n !== h1Nodes[0];
+    return true;
+  });
 }
