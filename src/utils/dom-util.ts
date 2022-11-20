@@ -56,15 +56,13 @@ export function findAncestor(node: HTMLElement, judge: (n: HTMLElement) => boole
   return null;
 }
 
-export function genPathSelector(node: HTMLElement) {
-  if (!node) return '';
-
+export function getDepthAndPath(node: HTMLElement) {
   const selectors = [];
 
-  while ((node = node.parentElement as HTMLElement)) {
-    const cls = [...node.classList].map((c) => '.' + c);
+  while ((node = node.parentElement as HTMLElement) && node !== document.body) {
+    const cls = [...node.classList].sort().map((c) => '.' + c);
     selectors.push([node.tagName, ...cls].join(''));
   }
 
-  return selectors.reverse().join('>');
+  return [selectors.length, selectors.reverse().join('>')];
 }

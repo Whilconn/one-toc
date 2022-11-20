@@ -1,6 +1,7 @@
 import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL, TOC_LEVEL } from '../shared/constants';
 import { findAncestor, getFontSize, getLevel, getNextNode, getPrevNode, getRect, getText, isHeading } from './dom-util';
 
+const MW = 10;
 const INLINE = 'inline';
 const INVALID_DISPLAYS = ['none'];
 const INVALID_SELECTORS = [
@@ -17,6 +18,11 @@ const INVALID_SELECTORS = [
   '[class*=footer]',
 ];
 
+// TODO
+//  1、过滤
+//  2、分类：根据left、width、tagName、id、path等进行分类
+//  3、计算相似度，按相似度归类，取数量多、非法匹配少的作为结果
+
 export function getAnchors() {
   const selector = [...HEADING_SELECTORS, ...BOLD_SELECTORS].join(SYMBOL.COMMA);
 
@@ -32,8 +38,7 @@ export function getAnchors() {
   }
 
   nodes = filterBasic(nodes, styleMap, rectMap);
-  nodes = removeTitle(nodes);
-
+  nodes = removeTitle(nodes, rectMap);
   nodes = filterByLayout(nodes, rectMap);
   const count = nodes.length;
   nodes = filterById(nodes);
@@ -43,9 +48,17 @@ export function getAnchors() {
   }
 
   nodes = calcLevel(nodes, styleMap);
-  nodes = markAnchors(nodes);
+  // 必须放最后的过滤规则：(h1 ~ h6) 与 (b、strong) 二选一
+  nodes = filterHeading(nodes);
+
+  markAnchors(nodes);
 
   return nodes;
+}
+
+function filterHeading(nodes: HTMLElement[]) {
+  const headings = nodes.filter((n) => isHeading(n));
+  return headings.length ? headings : nodes;
 }
 
 function filterByLayout(nodes: HTMLElement[], rectMap: WeakMap<HTMLElement, DOMRect>) {
@@ -141,6 +154,16 @@ function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect)
   return (y1 <= rect.top || prevText.endsWith(BREAK)) && (rect.bottom <= y2 || nextText.startsWith(BREAK));
 }
 
+function hasContent(n1: HTMLElement, n2: HTMLElement) {
+  if (!n1 || !n2 || getLevel(n1) < getLevel(n2)) return true;
+
+  const range = new Range();
+  range.setStartAfter(n1);
+  range.setEndBefore(n2);
+  const { width, height } = range.getBoundingClientRect();
+  return width > MW && height > MW;
+}
+
 // 仅修改计算后的样式信息和布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
 function inlineToBlock(
   node: HTMLElement,
@@ -168,7 +191,6 @@ function filterBasic(
 ) {
   const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
   const invalidSelector = INVALID_SELECTORS.join(SYMBOL.COMMA);
-  const MIN = 10;
 
   return nodes.filter((node, i) => {
     // 没有文字
@@ -185,10 +207,13 @@ function filterBasic(
     if (!style || !rect) return true;
 
     // 宽高过小
-    if (Math.min(rect.width, rect.height) < MIN) return false;
+    if (Math.min(rect.width, rect.height) < MW) return false;
 
     // 剔除隐藏节点、fixed节点
     if (INVALID_DISPLAYS.includes(style.display) || FIXED_POSITIONS.includes(style.position)) return false;
+
+    // 标题之间必须有内容
+    if (!hasContent(node, nodes[i + 1])) return false;
 
     // 必须独占一行
     if (!isOneLine(node, style, rect)) return false;
@@ -238,27 +263,35 @@ function calcLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSStyle
 
 function markAnchors(nodes: HTMLElement[]) {
   nodes.forEach((n, i) => (n.id = n.id || `toc-anchor-${i}`));
-  return nodes;
 }
 
 /**
  * @description 剔除文章标题
  * @param nodes
+ * @param rectMap
  */
-function removeTitle(nodes: HTMLElement[] = []) {
-  let titleNode: HTMLElement;
+function removeTitle(nodes: HTMLElement[] = [], rectMap: WeakMap<HTMLElement, DOMRect>) {
+  const H = 300;
+  const titleNodes: HTMLElement[] = [];
   const h1Nodes: HTMLElement[] = [];
 
   nodes.forEach((node) => {
+    const t = rectMap.get(node)?.top || 0;
+    if (t > H) return;
+
     if (node.tagName === 'H1') h1Nodes.push(node);
 
     const text = getText(node);
-    if (!titleNode && text && document.title.includes(text)) titleNode = node;
+    if (text && document.title.includes(text)) titleNodes.push(node);
   });
 
-  return nodes.filter((n) => {
-    if (titleNode) return n !== titleNode;
-    if (h1Nodes.length === 1) return n !== h1Nodes[0];
-    return true;
-  });
+  if (titleNodes.length) {
+    return nodes.filter((n) => !titleNodes.includes(n));
+  }
+
+  if (h1Nodes.length === 1) {
+    return nodes.filter((n) => n !== h1Nodes[0]);
+  }
+
+  return nodes;
 }
