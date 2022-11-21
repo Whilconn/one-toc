@@ -23,7 +23,7 @@ export function isHeading(node: HTMLElement) {
 }
 
 export function getFontSize(style: CSSStyleDeclaration) {
-  return +style.fontSize.replace(/[^0-9]/g, '') || 0;
+  return +style.fontSize.replace(/[a-z]/gi, '') || 0;
 }
 
 // 获取视觉上的前一个节点
@@ -49,8 +49,8 @@ export function getNextNode(node: HTMLElement) {
 // 查找符合条件的祖先节点
 export function findAncestor(node: HTMLElement, judge: (n: HTMLElement) => boolean) {
   while (node && node !== document.body) {
-    if (judge(node)) return node;
     node = node.parentElement as HTMLElement;
+    if (judge(node)) return node;
   }
 
   return null;
@@ -59,7 +59,7 @@ export function findAncestor(node: HTMLElement, judge: (n: HTMLElement) => boole
 export function getDepthAndPath(node: HTMLElement) {
   const selectors = [];
 
-  while (node !== document.body) {
+  while (node && node !== document.body) {
     node = node.parentElement as HTMLElement;
     const cls = [...node.classList].sort().map((c) => '.' + c);
     selectors.push([node.tagName, ...cls].join(''));

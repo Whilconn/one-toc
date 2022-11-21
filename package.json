@@ -1,6 +1,6 @@
 {
   "name": "one-toc",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "为技术文档、技术博客等网站添加导航目录的浏览器插件，提供更好的阅读体验。",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "build": "node scripts/build/build-prod.js",
     "pack:zip": "pnpm build && node scripts/pack.js",
     "version:inc": "node scripts/version.js",
-    "test": "jest",
+    "test": "pnpm build && jest",
     "lint": "eslint src/"
   },
   "repository": {
