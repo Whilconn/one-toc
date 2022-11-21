@@ -59,7 +59,8 @@ export function findAncestor(node: HTMLElement, judge: (n: HTMLElement) => boole
 export function getDepthAndPath(node: HTMLElement) {
   const selectors = [];
 
-  while ((node = node.parentElement as HTMLElement) && node !== document.body) {
+  while (node !== document.body) {
+    node = node.parentElement as HTMLElement;
     const cls = [...node.classList].sort().map((c) => '.' + c);
     selectors.push([node.tagName, ...cls].join(''));
   }

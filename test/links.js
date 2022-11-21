@@ -1,9 +1,10 @@
 module.exports.links = [
+  ['微信', 'https://mp.weixin.qq.com/s/hERgwl3TKM2DzDqAe5Fi-A', '17'],
   ['React Doc(CN)', 'https://react.docschina.org/docs/getting-started.html', '19'],
-  ['微信', 'https://mp.weixin.qq.com/s/7hMdPkNcFihKXypKY2DMHg', '22'],
+  ['微信', 'https://mp.weixin.qq.com/s/7hMdPkNcFihKXypKY2DMHg', '21'],
   ['掘金', 'https://juejin.cn/post/7135756687134162980', '5'],
   ['知乎', 'https://zhuanlan.zhihu.com/p/24650288', '62'],
-  ['开源中国', 'https://my.oschina.net/u/4843764/blog/5528481', '18'],
+  ['开源中国', 'https://my.oschina.net/u/4843764/blog/5528481', '17'],
   ['博客园', 'https://www.cnblogs.com/teach/p/16295605.html', '11'],
   ['CSDN', 'https://blog.csdn.net/csdnnews/article/details/124880259', '2'],
   ['51cto', 'https://blog.51cto.com/harmonyos/5318953', '13'],
