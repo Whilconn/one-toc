@@ -303,3 +303,44 @@ function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSS
     if (l >= 0) node.setAttribute(TOC_LEVEL, l.toString());
   });
 }
+
+// array to tree: tested
+// function groupByLevel(nodes: HTMLElement[]) {
+//   let group: Heading[] = [];
+//   const groups = [group];
+//
+//   for (let i = 0; i < nodes.length; i++) {
+//     const heading = new Heading(nodes[i]);
+//
+//     if (!group.length) {
+//       group.push(heading);
+//       continue;
+//     }
+//
+//     const n1 = group[group.length - 1];
+//     const l1 = +(n1.node.getAttribute(TOC_LEVEL) || 0);
+//     const l2 = +(heading.node.getAttribute(TOC_LEVEL) || 0);
+//
+//     if (l1 === l2) group.push(heading);
+//     else if (l1 > l2) {
+//       groups.pop();
+//       group = groups[groups.length - 1];
+//       i--;
+//     } else {
+//       group = n1.children;
+//       group.push(heading);
+//       groups.push(group);
+//     }
+//   }
+//
+//   return groups[0];
+// }
+//
+// class Heading {
+//   node: HTMLElement;
+//   children: Heading[] = [];
+//
+//   constructor(node: HTMLElement) {
+//     this.node = node;
+//   }
+// }
