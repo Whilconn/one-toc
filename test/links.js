@@ -1,4 +1,5 @@
 module.exports.links = [
+  ['51cto', 'https://blog.51cto.com/harmonyos/5318953', '13'],
   ['微信', 'https://mp.weixin.qq.com/s/au2vtN4b_xSVZ1x_ADNO8w', '13'],
   ['微信', 'https://mp.weixin.qq.com/s/hERgwl3TKM2DzDqAe5Fi-A', '17'],
   ['React Doc(CN)', 'https://react.docschina.org/docs/getting-started.html', '19'],

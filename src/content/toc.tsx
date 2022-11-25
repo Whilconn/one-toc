@@ -4,9 +4,10 @@ import Draggable from 'react-draggable';
 import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
-import { FIXED_POSITIONS, MSG_NAMES } from '../shared/constants';
+import { MSG_NAMES } from '../shared/constants';
 import * as BrowserMessage from '../utils/browser-message';
 import { getFixedHeaderHeight } from '../utils/header-util';
+import { changeLayout } from '../utils/layout-util';
 import { POS_FIXED, Settings } from '../shared/default-settings';
 import { SETTINGS_ACTION_NAMES, useSettings } from '../shared/use-settings';
 import './toc.less';
@@ -46,11 +47,13 @@ export function Toc() {
 
   if (!visible) return null;
 
+  const noDrag = settings.position !== POS_FIXED;
+
   return (
-    <Draggable nodeRef={dragRef} bounds="html" cancel=".toc-body">
+    <Draggable nodeRef={dragRef} disabled={noDrag} bounds="html" cancel=".toc-body">
       <nav
         ref={dragRef}
-        className={`toc-container ${!isFixed ? 'toc-embed' : ''}`}
+        className={`toc-container ${!isFixed ? 'toc-embed' : ''} ${noDrag ? 'no-drag' : ''}`}
         style={style}
         data-theme={settings.theme}
       >
@@ -71,54 +74,4 @@ function shouldHide(settings: Settings) {
     .filter(Boolean);
 
   return !settings.allMatched && (!whitelist.length || !micromatch.some(url, whitelist));
-}
-
-function getFixedNodes(left: number) {
-  const nodes = [...document.body.querySelectorAll('*')] as HTMLElement[];
-  const fixedNodes: Array<[HTMLElement, Array<{ name: string; origin: string; target: string }>]> = [];
-
-  for (const n of nodes) {
-    const rect = n.getBoundingClientRect();
-    const s = getComputedStyle(n);
-
-    // 根据 clientRect、computedStyle 判定 fixed
-    if (rect.width * rect.height && rect.left < left && FIXED_POSITIONS.includes(s.position)) {
-      if (fixedNodes.some(([fn]) => fn.contains(n))) continue;
-      const attrs = [
-        {
-          name: 'left',
-          origin: n.style.left,
-          target: `calc(${rect.left}px + var(--onetoc-width))`,
-        },
-        {
-          name: 'maxWidth',
-          origin: n.style.maxWidth,
-          target: 'calc(100vw - var(--onetoc-width))',
-        },
-      ];
-      fixedNodes.push([n, attrs]);
-    }
-  }
-
-  return fixedNodes;
-}
-
-function changeLayout() {
-  const w = 260;
-
-  const cls = 'toc-embed-mod';
-  document.body.classList.add(cls);
-
-  const fixedNodes = getFixedNodes(w);
-  fixedNodes.forEach(([n, attrs]) => {
-    attrs.forEach((a) => n.style.setProperty(a.name, a.target));
-  });
-
-  return function restoreLayout() {
-    document.body.classList.remove(cls);
-
-    fixedNodes.forEach(([n, attrs]) => {
-      attrs.forEach((a) => n.style.setProperty(a.name, a.origin));
-    });
-  };
 }
