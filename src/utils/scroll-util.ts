@@ -58,7 +58,7 @@ export function scrollByHash(headingNode: HTMLElement, fixedHeaderHeight: number
 }
 
 function markCurrentHeading(headingNode: HTMLElement) {
-  const styleName = 'toc-current-heading';
+  const styleName = 'onetoc-current-heading';
   if (headingNode.classList.contains(styleName)) return;
 
   headingNode.classList.add(styleName);

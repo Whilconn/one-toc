@@ -1,6 +1,6 @@
 import { FIXED_POSITIONS } from '../shared/constants';
 
-const EMBED_MOD = 'toc-embed-mod';
+const EMBED_MOD = 'onetoc-embed-mod';
 const TOC_WIDTH = 260;
 
 function getFixedNodes(left: number) {

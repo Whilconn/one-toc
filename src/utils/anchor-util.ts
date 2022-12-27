@@ -293,7 +293,7 @@ function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSS
 
   nodes.forEach((node, i) => {
     // 标记 id
-    node.id = node.id || `toc-anchor-${i}`;
+    node.id = node.id || `onetoc-anchor-${i}`;
 
     const style = styleMap.get(node);
     if (!style) return;

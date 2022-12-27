@@ -56,7 +56,7 @@ export function TocBody() {
   }
 
   return (
-    <div className="toc-body">
+    <div className="onetoc-body">
       {anchorNodes.map((node, i) => {
         const text = getText(node);
         const cls = [TOC_LEVEL + (node.getAttribute(TOC_LEVEL) || ''), i === current ? 'active' : ''].join(' ');

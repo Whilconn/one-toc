@@ -1,8 +1,7 @@
 import { Dispatch, useEffect, useReducer } from 'react';
-import { DEFAULT_SETTINGS, Settings } from './default-settings';
+import { SETTINGS_KEYS, Settings } from './settings';
 import * as BrowserStorage from '../utils/browser-storage';
 
-const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);
 const keyToSetterName = (key: string) => 'set' + key[0].toUpperCase() + key.slice(1);
 
 /**

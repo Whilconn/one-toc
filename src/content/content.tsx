@@ -1,20 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { CID } from '../shared/constants';
-import { Toc } from './toc';
-import { ErrorBoundary } from '../shared/error-boundary';
+import { renderToc } from './toc';
+import { MSG_NAMES } from '../shared/constants';
+import * as BrowserMessage from '../utils/browser-message';
 
-const rootNode = document.getElementById(CID) || document.createElement('div');
-if (!rootNode.isConnected) {
-  rootNode.id = CID;
-  rootNode.classList.add('toc-root');
-  document.documentElement.append(rootNode);
-}
-
-ReactDOM.createRoot(rootNode).render(
-  <React.StrictMode>
-    <ErrorBoundary className="toc-container toc-embed">
-      <Toc />
-    </ErrorBoundary>
-  </React.StrictMode>,
-);
+// 监听后台消息，用于监听开启、关闭快捷键 Command+B
+BrowserMessage.addListener((msg: BrowserMessage.Message) => {
+  if (msg.name === MSG_NAMES.TOGGLE_TOC) renderToc();
+});

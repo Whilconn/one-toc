@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev:content": "node scripts/dev/dev-content.js",
+    "dev:options": "node scripts/dev/dev-options.js",
     "dev:popup": "node scripts/dev/dev-popup.js",
     "build": "node scripts/build/build-prod.js",
     "pack:zip": "pnpm build && node scripts/pack.js",
@@ -25,7 +26,6 @@
   "homepage": "https://github.com/Whilconn/one-toc",
   "dependencies": {
     "antd": "^4.22.8",
-    "micromatch": "^4.0.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-draggable": "^4.4.5"
@@ -34,7 +34,6 @@
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@types/jest": "^28.1.7",
-    "@types/micromatch": "^4.0.2",
     "@types/node": "^18.7.4",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

@@ -1,12 +1,12 @@
 @import "../assets/variables";
 
-.toc-root {
+.onetoc-root {
   position: fixed;
   z-index: 999999;
   user-select: none;
 }
 
-.toc-container {
+.onetoc-container {
   &, &[data-theme='aero'] {
     .var-aero();
   }
@@ -45,7 +45,7 @@
   overflow: hidden;
   z-index: 999999;
 
-  &.toc-embed {
+  &.onetoc-embed {
     top: 0;
     left: 0;
     bottom: 0;
@@ -59,11 +59,11 @@
 html {
   --onetoc-width: 260px;
 
-  .toc-current-heading {
+  .onetoc-current-heading {
     box-shadow: 0 2px 0 #007fff !important;
   }
 
-  body.toc-embed-mod {
+  body.onetoc-embed-mod {
     padding-left: var(--onetoc-width);
   }
 }

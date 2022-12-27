@@ -1,4 +1,4 @@
-export const CID = 'toc-1652755589611';
+export const CID = 'onetoc-1652755589611';
 
 export const HEADER_HEIGHT = 100;
 
@@ -12,4 +12,4 @@ export const FIXED_POSITIONS = ['sticky', 'fixed', 'absolute'];
 
 export const MSG_NAMES = { TOGGLE_TOC: 'toggle-toc' };
 
-export const TOC_LEVEL = 'toc-level';
+export const TOC_LEVEL = 'onetoc-level';

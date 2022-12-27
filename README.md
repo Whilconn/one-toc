@@ -14,12 +14,6 @@
 <br>
 It's a browser extension which can append table of contents to the websites such as docs、 blogs and papers, to provide better reading experience.
 
-## 感谢
-
-感谢 JetBrains 提供的开源开发许可证支持！<br>
-
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="50px" alt="JetBrains Logo (Main) logo.">&emsp;&emsp;<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="50px" alt="WebStorm logo.">
-
 ## 插件效果
 
 ![screenshots](screenshots/content.png)
@@ -32,7 +26,6 @@ It's a browser extension which can append table of contents to the websites such
 - 支持浅色、深色主题
 - 可自由拖拽
 - 可自由开关，支持实时开关和快捷键开关
-- 可自由定制网站匹配规则，可在全部网站显示或指定网站显示
 - 可设置浮动或内嵌等定位方式
 
 ## 插件安装
@@ -57,11 +50,9 @@ It's a browser extension which can append table of contents to the websites such
 
 ### 开启和关闭
 
-插件提供开启或关闭2种状态
+插件提供开启和关闭2种状态
 
-- 开启：默认选项，页面加载完成后自动显示 `OneToc`
-- 关闭：页面加载完成后不显示 `OneToc`
-- 快捷键：Mac `Command+B`，windows/linux `Ctrl+B`
+- 可使用快捷键快速开启或关闭，Mac `Command+B`，windows/linux `Ctrl+B`
 
 ### 主题
 
@@ -75,30 +66,6 @@ It's a browser extension which can append table of contents to the websites such
 - 嵌入定位：嵌入网页左侧，将网页内容整体右移，不会遮挡网页内容，目前可拖拽
 
 > 嵌入效果与 `vscode` 左侧目录边栏类似，同样使用 `Command+B` 快捷键开启或关闭
-
-### 匹配网站
-
-插件提供所有、定制等2种匹配方式
-
-- 所有：默认选项，在所有网站上显示 `OneToc`
-- 定制：在指定网站上显示 `OneToc`，需自行编写匹配规则，符合匹配规则的页面才会显示 `OneToc`
-  - 匹配规则请使用 [glob](https://en.wikipedia.org/wiki/Glob_(programming)) 编写
-  - 匹配逻辑使用的库是 [micromatch](https://github.com/micromatch/micromatch)
-  - 示例1：匹配所有页面的规则为 `**`
-  - 示例2：常用的技术网站匹配规则如下
-
-```text
-*reactjs.org/(docs|blog)/**
-*zhihu.com/p/**
-*jianshu.com/p/**
-*oschina.net/**
-*cnblogs.com/**
-*csdn.net/**
-*github.com/*/**
-*eslint.(org|cn)/docs/**
-*blog.51cto.com/**
-*www.ncbi.nlm.nih.gov/**
-```
 
 ## 适配情况
 
@@ -121,3 +88,9 @@ It's a browser extension which can append table of contents to the websites such
 [MIT](./LICENSE)
 
 Copyright (c) 2022-present, Whilconn
+
+## 感谢
+
+感谢 JetBrains 提供的开源开发许可证支持！<br>
+
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="50px" alt="JetBrains Logo (Main) logo.">&emsp;&emsp;<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="50px" alt="WebStorm logo.">

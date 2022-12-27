@@ -1,3 +1,5 @@
+import * as BrowserStorage from '../utils/browser-storage';
+
 export interface Settings {
   enabled: boolean;
   position: string;
@@ -31,3 +33,9 @@ export const DEFAULT_SETTINGS: Settings = {
   allMatched: true,
   whitelist: '**',
 };
+
+export const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);
+
+export function getSettings() {
+  return BrowserStorage.get(SETTINGS_KEYS);
+}

@@ -9,14 +9,14 @@ interface Props {
 
 export function TocHead(props: Props) {
   return (
-    <div className="toc-head">
-      <p className="toc-title" title={props.title}>
+    <div className="onetoc-head">
+      <p className="onetoc-title" title={props.title}>
         {props.title}
       </p>
       <div
         onClick={props.hideToc}
         dangerouslySetInnerHTML={{ __html: closeSvg }}
-        className="toc-close-icon"
+        className="onetoc-close-icon"
         title="关闭"
       />
     </div>

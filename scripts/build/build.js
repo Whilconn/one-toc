@@ -50,7 +50,7 @@ function build(mode) {
 
   const entries = {
     content: 'src/content/content.tsx',
-    popup: 'src/popup/popup.tsx',
+    options: 'src/options/options.tsx',
     background: 'src/background/background.ts',
   };
 

@@ -1,4 +1,4 @@
-.toc-container .toc-body {
+.onetoc-container .onetoc-body {
   flex: 1;
   padding: 15px;
   overflow: auto;
@@ -25,8 +25,8 @@
       font-weight: bold;
     }
 
-    each(range(0,10), {
-      &.toc-level@{value} {
+    each(range(0, 10), {
+      &.onetoc-level@{value} {
         padding-left: @value * 10px;
       }
     });
@@ -35,5 +35,4 @@
   .no-content {
     text-align: center;
   }
-
 }
