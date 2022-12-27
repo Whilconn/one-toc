@@ -1,27 +1,33 @@
-import React from 'react';
-import { Radio, RadioChangeEvent } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Radio, RadioChangeEvent } from 'antd';
 import { THEME_OPTIONS, POSITION_OPTIONS } from '../shared/settings';
 import { SETTINGS_ACTION_NAMES, useSettings } from '../shared/use-settings';
+import { createTab } from '../utils/browser-tabs';
+import { Command, getAllCommands } from '../utils/browser-commands';
 import pkg from '../../package.json';
 import manifest from '../../public/manifest.json';
 import './form.less';
 
+function openShortcutsPage() {
+  createTab('chrome://extensions/shortcuts');
+}
+
 export function Form() {
+  const ua = window.navigator.userAgent;
   const [settings, dispatch] = useSettings();
 
   const setPosition = (position: string) => dispatch({ type: SETTINGS_ACTION_NAMES.setPosition, payload: position });
   const setTheme = (theme: string) => dispatch({ type: SETTINGS_ACTION_NAMES.setTheme, payload: theme });
 
-  const ua = window.navigator.userAgent;
-  const isMacOs = /Mac\s*OS/gi.test(ua);
-  const cKey = isMacOs ? '⌘' : 'Ctrl';
+  const [commands, setCommands] = useState<Command[]>();
+  useEffect(() => {
+    void getAllCommands().then((c) => setCommands(c));
+  }, []);
 
   return (
     <>
       <section className="settings-container">
-        <div className="settings-title space-between">
-          <b className="flex1">设置</b>
-        </div>
+        <div className="settings-title">外观设置</div>
 
         <div className="space-between">
           <span>🌈️&ensp;主题</span>
@@ -45,10 +51,21 @@ export function Form() {
           />
         </div>
 
-        <div className="space-between">
-          <span>🚀&ensp;快捷键</span>
-          <span className="shortcut">{cKey} B</span>&ensp;
-        </div>
+        <div className="settings-title">快捷键设置</div>
+
+        {commands?.map((c) => {
+          return (
+            <div key={c.name} className="space-between">
+              <span>
+                {c.shortcut}&ensp;-&ensp;
+                <span className="shortcut-desc">{c.description}</span>
+              </span>
+              <Button onClick={openShortcutsPage} type="link">
+                去设置
+              </Button>
+            </div>
+          );
+        })}
 
         <div className="settings-footer">
           <p className="space-between">
