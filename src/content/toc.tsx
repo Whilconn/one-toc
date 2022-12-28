@@ -6,9 +6,9 @@ import { ErrorBoundary } from '../shared/error-boundary';
 import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
-import { getFixedHeaderHeight } from '../utils/header-util';
-import { changeLayout } from '../utils/layout-util';
-import { loadSettings, POS_EMBED, Settings } from '../shared/settings';
+import { getFixedHeaderHeight } from '../content-utils/header-util';
+import { changeLayout } from '../content-utils/layout-util';
+import { loadSettings, POS_EMBED, Settings } from '../extensions/settings';
 import './toc.less';
 
 let oneTocRoot: Root | null = null;

@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEventListener, useTitle } from './hooks';
-import { getAnchors } from '../utils/anchor-util';
-import { getFixedHeaderHeight } from '../utils/header-util';
-import { scrollByApi } from '../utils/scroll-util';
-import { getText } from '../utils/dom-util';
+import { getAnchors } from '../content-utils/anchor-util';
+import { getFixedHeaderHeight } from '../content-utils/header-util';
+import { scrollByApi } from '../content-utils/scroll-util';
+import { getText } from '../content-utils/dom-util';
 import { TOC_LEVEL } from '../shared/constants';
 import './toc-body.less';
 

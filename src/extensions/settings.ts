@@ -1,4 +1,4 @@
-import * as BrowserStorage from '../utils/browser-storage';
+import { loadStorage, saveStorage } from './api';
 
 export interface Settings {
   position: string;
@@ -30,9 +30,9 @@ export const SETTINGS_KEYMAP = {
 };
 
 export function loadSettings() {
-  return BrowserStorage.get(SETTINGS_KEYS);
+  return loadStorage(SETTINGS_KEYS) as Promise<Settings>;
 }
 
 export function saveSettings(settings: Settings) {
-  return BrowserStorage.set(settings);
+  return saveStorage(settings) as Promise<void>;
 }
