@@ -11,11 +11,11 @@ export const THEME_OPTIONS = [
   { label: '深色', value: 'dark' },
 ];
 
-export const POS_FIXED = 'fixed';
+export const POS_EMBED = 'embed';
 
 export const POSITION_OPTIONS = [
-  { label: '浮动', value: POS_FIXED },
-  { label: '内嵌', value: 'embed' },
+  { label: '浮动', value: 'fixed' },
+  { label: '内嵌', value: POS_EMBED },
 ];
 
 export const DEFAULT_SETTINGS: Settings = {

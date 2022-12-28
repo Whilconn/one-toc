@@ -33,12 +33,13 @@ function Options() {
 
   // 获取最新快捷键
   useEffect(() => {
+    const eventName = 'visibilitychange';
     const handler = () => {
       if (document.visibilityState === 'hidden') return;
       void getAllCommands().then(setCommands);
     };
-    document.addEventListener('visibilitychange', handler);
-    return () => document.removeEventListener('visibilitychange', handler);
+    document.addEventListener(eventName, handler);
+    return () => document.removeEventListener(eventName, handler);
   }, []);
 
   function save(st: Settings) {

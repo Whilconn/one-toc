@@ -8,7 +8,7 @@ import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { changeLayout } from '../utils/layout-util';
-import { loadSettings, POS_FIXED, Settings } from '../shared/settings';
+import { loadSettings, POS_EMBED, Settings } from '../shared/settings';
 import './toc.less';
 
 let oneTocRoot: Root | null = null;
@@ -41,33 +41,39 @@ export function Toc() {
   const dragRef = useRef(null);
 
   const [settings, setSettings] = useState<Settings>();
+
+  // 初始化获取配置，页面切换获取最新配置
   useEffect(() => {
-    void loadSettings().then((settings) => setSettings(settings));
+    const eventName = 'visibilitychange';
+    const handler = () => {
+      void loadSettings().then((settings) => setSettings(settings));
+    };
+    handler();
+    document.addEventListener(eventName, handler);
+    return () => document.removeEventListener(eventName, handler);
   }, []);
 
-  const isFixed = settings?.position === POS_FIXED;
+  const isEmbed = settings?.position === POS_EMBED;
 
   const title = useTitle();
   const top = useMemo(getFixedHeaderHeight, [title]);
-  const style = isFixed ? { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` } : {};
+  const style = isEmbed ? {} : { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
   // 内嵌模式下修改源网页的布局
   useEffect(() => {
-    if (isFixed) return;
+    if (!isEmbed) return;
 
     const restoreLayout = changeLayout();
     return () => restoreLayout();
-  }, [isFixed]);
-
-  const noDrag = settings?.position !== POS_FIXED;
+  }, [isEmbed]);
 
   if (!settings) return null;
 
   return (
-    <Draggable nodeRef={dragRef} disabled={noDrag} bounds="html" cancel=".onetoc-body">
+    <Draggable nodeRef={dragRef} disabled={isEmbed} bounds="html" cancel=".onetoc-body">
       <nav
         ref={dragRef}
-        className={`onetoc-container ${!isFixed ? 'onetoc-embed' : ''} ${noDrag ? 'no-drag' : ''}`}
+        className={`onetoc-container ${isEmbed ? 'onetoc-embed no-drag' : ''}`}
         style={style}
         data-theme={settings.theme}
       >
