@@ -8,7 +8,7 @@ import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../utils/header-util';
 import { changeLayout } from '../utils/layout-util';
-import { DEFAULT_SETTINGS, getSettings, POS_FIXED, Settings } from '../shared/settings';
+import { loadSettings, POS_FIXED, Settings } from '../shared/settings';
 import './toc.less';
 
 let oneTocRoot: Root | null = null;
@@ -40,12 +40,12 @@ function unmountToc() {
 export function Toc() {
   const dragRef = useRef(null);
 
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<Settings>();
   useEffect(() => {
-    void getSettings().then((settings) => setSettings(settings));
+    void loadSettings().then((settings) => setSettings(settings));
   }, []);
 
-  const isFixed = settings.position === POS_FIXED;
+  const isFixed = settings?.position === POS_FIXED;
 
   const title = useTitle();
   const top = useMemo(getFixedHeaderHeight, [title]);
@@ -59,7 +59,9 @@ export function Toc() {
     return () => restoreLayout();
   }, [isFixed]);
 
-  const noDrag = settings.position !== POS_FIXED;
+  const noDrag = settings?.position !== POS_FIXED;
+
+  if (!settings) return null;
 
   return (
     <Draggable nodeRef={dragRef} disabled={noDrag} bounds="html" cancel=".onetoc-body">

@@ -1,11 +1,8 @@
 import * as BrowserStorage from '../utils/browser-storage';
 
 export interface Settings {
-  enabled: boolean;
   position: string;
   theme: string;
-  allMatched: boolean;
-  whitelist: string;
 }
 
 export const THEME_OPTIONS = [
@@ -21,21 +18,21 @@ export const POSITION_OPTIONS = [
   { label: '内嵌', value: 'embed' },
 ];
 
-export const ALL_MATCHED_OPTIONS = [
-  { label: '所有', value: true },
-  { label: '定制', value: false },
-];
-
 export const DEFAULT_SETTINGS: Settings = {
-  enabled: true,
   position: POSITION_OPTIONS[0].value,
   theme: THEME_OPTIONS[0].value,
-  allMatched: true,
-  whitelist: '**',
 };
 
 export const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);
+export const SETTINGS_KEYMAP = {
+  ...DEFAULT_SETTINGS,
+  ...Object.fromEntries(SETTINGS_KEYS.map((s) => [s, s])),
+};
 
-export function getSettings() {
+export function loadSettings() {
   return BrowserStorage.get(SETTINGS_KEYS);
+}
+
+export function saveSettings(settings: Settings) {
+  return BrowserStorage.set(settings);
 }

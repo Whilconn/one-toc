@@ -7,15 +7,19 @@
   font-style: normal;
 }
 
+#root {
+  padding: 10px;
+}
+
 .settings-container {
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 15px;
   width: 500px;
   color: #333;
+  border-radius: 8px;
+  box-shadow: rgba(60, 64, 67, 0.3) 0 1px 2px 0, rgba(60, 64, 67, 0.15) 0 2px 6px 2px;
 
-  & > div {
-    margin-bottom: 15px;
-  }
+
 
   .space-between {
     display: flex;
@@ -24,10 +28,10 @@
   }
 
   .settings-title {
-    border-bottom: 1px solid #eee;
-    padding: 10px 0;
-    text-align: left;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
     font-weight: bold;
+    border-bottom: 1px solid #eee;
   }
 
   .shortcut-desc {
@@ -35,7 +39,7 @@
   }
 
   .settings-footer {
-    margin: 100px 0 0 0;
+    margin: 60px 0 0 0;
     color: #bbb;
     border-top: 1px solid #eee;
 
