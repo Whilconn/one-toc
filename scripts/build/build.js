@@ -49,8 +49,8 @@ function build(mode) {
   const buildConfig = CONFIG[mode];
 
   const entries = {
-    content: 'src/content/content.tsx',
-    options: 'src/options/options.tsx',
+    content: 'src/content-view/content.tsx',
+    options: 'src/options-view/options.tsx',
     background: 'src/background/background.ts',
   };
 

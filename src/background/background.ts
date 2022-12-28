@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, saveSettings } from '../extensions/settings';
+import { DEFAULT_SETTINGS, saveSettings } from '../extension-utils/settings';
 import { MSG_NAMES } from '../shared/constants';
 import {
   addClickActionListener,
@@ -7,7 +7,7 @@ import {
   INSTALL_REASON,
   sendTabMessage,
   Tab,
-} from '../extensions/api';
+} from '../extension-utils/api';
 
 // 安装时保存默认配置
 addInstalledListener((details: { reason: string }) => {

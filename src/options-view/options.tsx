@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { Button, Form, message, Radio, Space } from 'antd';
-import { Command, createTab, getAllCommands } from '../extensions/api';
+import { Command, createTab, getAllCommands } from '../extension-utils/api';
 import {
   THEME_OPTIONS,
   POSITION_OPTIONS,
@@ -10,7 +10,7 @@ import {
   DEFAULT_SETTINGS,
   loadSettings,
   saveSettings,
-} from '../extensions/settings';
+} from '../extension-utils/settings';
 import pkg from '../../package.json';
 import manifest from '../../public/manifest.json';
 import './options.less';

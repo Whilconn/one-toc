@@ -7,7 +7,7 @@ module.exports = defineConfig({
   mode: 'production',
   build: {
     lib: {
-      entry: 'src/content/content.tsx',
+      entry: 'src/content-view/content.tsx',
       name: 'OneTocContent',
       formats: ['iife'],
       fileName: () => 'content.js',

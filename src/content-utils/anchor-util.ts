@@ -92,7 +92,7 @@ function updateRect(
   rect.x = ar.x;
   rect.width = ar.width;
 
-  if (import.meta.env.DEV) console.log('修改节点styleMap、rectMap', node);
+  if (import.meta.env.DEV) console.debug('修改节点styleMap、rectMap', node);
 }
 
 function filterBasic(

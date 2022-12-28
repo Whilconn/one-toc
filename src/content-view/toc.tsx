@@ -8,7 +8,7 @@ import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { changeLayout } from '../content-utils/layout-util';
-import { loadSettings, POS_EMBED, Settings } from '../extensions/settings';
+import { loadSettings, POS_EMBED, Settings } from '../extension-utils/settings';
 import './toc.less';
 
 let oneTocRoot: Root | null = null;

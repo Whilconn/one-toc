@@ -79,7 +79,7 @@ export function addCommandListener(callback: (name: string, tab: Tab) => void) {
 }
 
 export function addClickActionListener(callback: (tab: Tab) => void) {
-  chrome.commands.onCommand.addListener(async (tab: Tab) => {
+  chrome.action.onClicked.addListener(async (tab: Tab) => {
     if (!tab?.id) tab = await getCurrentTab();
     await callback(tab);
   });
