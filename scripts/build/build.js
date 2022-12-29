@@ -1,43 +1,31 @@
 const fs = require('fs');
 const path = require('path');
 const vite = require('vite');
-const _ = require('lodash');
-const { ROOT_ABS, DEST_ABS, PUBLIC_ABS } = require('../config');
-const viteConfigDev = require('../vite.config.dev');
-const viteConfigProd = require('../vite.config.prod');
-const manifest = require('../../public/manifest.json');
+const { configFn, ROOT_ABS, DEST_ABS, PUBLIC_ABS } = require('../vite.config');
 
 const MODE = { DEV: 'development', PROD: 'production' };
-
-const CONFIG = {
-  development: {
-    viteConfig: viteConfigDev,
-    sourceFiles: [
-      'node_modules/react/umd/react.development.js',
-      'node_modules/react-dom/umd/react-dom.development.js',
-      'node_modules/antd/dist/antd.min.js',
-      'node_modules/antd/dist/antd.min.css',
-    ],
-  },
-  production: {
-    viteConfig: viteConfigProd,
-    sourceFiles: [
-      'node_modules/react/umd/react.production.min.js',
-      'node_modules/react-dom/umd/react-dom.production.min.js',
-      'node_modules/antd/dist/antd.min.js',
-      'node_modules/antd/dist/antd.min.css',
-    ],
-  },
-};
 
 function clearDest() {
   if (fs.existsSync(DEST_ABS)) fs.rmSync(DEST_ABS, { recursive: true });
 }
 
-function copyReactLibs(mode) {
-  const buildConfig = CONFIG[mode];
+function copyLibs(mode) {
+  const sourceFiles = {
+    development: [
+      'node_modules/react/umd/react.development.js',
+      'node_modules/react-dom/umd/react-dom.development.js',
+      'node_modules/antd/dist/antd.min.js',
+      'node_modules/antd/dist/antd.min.css',
+    ],
+    production: [
+      'node_modules/react/umd/react.production.min.js',
+      'node_modules/react-dom/umd/react-dom.production.min.js',
+      'node_modules/antd/dist/antd.min.js',
+      'node_modules/antd/dist/antd.min.css',
+    ],
+  };
 
-  buildConfig.sourceFiles.forEach((src) => {
+  sourceFiles[mode].forEach((src) => {
     let target = src.replace(/.+\//, '').replace(/\..+\./, '.');
     src = path.resolve(ROOT_ABS, src);
     target = path.resolve(PUBLIC_ABS, target);
@@ -46,38 +34,26 @@ function copyReactLibs(mode) {
 }
 
 function build(mode) {
-  const buildConfig = CONFIG[mode];
+  const entries = ['src/background/background.ts', 'src/content-view/content.tsx', 'src/options-view/options.tsx'];
 
-  const entries = {
-    content: 'src/content-view/content.tsx',
-    options: 'src/options-view/options.tsx',
-    background: 'src/background/background.ts',
-  };
+  const tasks = entries.map((entry) => {
+    const config = configFn({ mode });
+    config.build.rollupOptions.input = path.resolve(config.root, entry);
+    return vite.build({ ...config });
+  });
 
-  const buildTasks = [];
-  for (const [key, entry] of Object.entries(entries)) {
-    const cfg = _.cloneDeep(buildConfig.viteConfig);
-    cfg.build.lib = {
-      ...cfg.build.lib,
-      entry,
-      name: manifest.name + key[0].toUpperCase() + key.slice(1),
-      fileName: () => key + '.js',
-    };
-    buildTasks.push(vite.build(cfg));
-  }
-
-  return Promise.all(buildTasks);
+  return Promise.all(tasks);
 }
 
 module.exports.clearDest = clearDest;
 
 module.exports.buildProd = () => {
   clearDest();
-  copyReactLibs(MODE.PROD);
+  copyLibs(MODE.PROD);
   return build(MODE.PROD);
 };
 
 module.exports.buildDev = () => {
-  copyReactLibs(MODE.DEV);
+  copyLibs(MODE.DEV);
   return build(MODE.DEV);
 };

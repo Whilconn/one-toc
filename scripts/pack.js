@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const JSZip = require('jszip');
-const { ROOT_ABS, DEST_ABS } = require('./config');
+const { ROOT_ABS, DEST_ABS } = require('./vite.config');
 const manifest = require('../public/manifest.json');
 
 const fileName = path.relative(ROOT_ABS, __filename);

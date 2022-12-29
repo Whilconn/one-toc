@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer-core');
 const chromePath = require('chrome-location');
-const { DEST_ABS: extensionPath } = require('./config');
+const { DEST_ABS: extensionPath } = require('./vite.config');
 
 const TIMEOUT = 20e3;
 const SW = 1920;
