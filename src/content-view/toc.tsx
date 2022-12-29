@@ -37,6 +37,12 @@ function unmountToc() {
   oneTocRoot?.render(<></>);
 }
 
+// 浅比较
+function equals(a: object | undefined | null, b: object | undefined | null) {
+  if (a === b) return true;
+  return a && b && Object.entries(a).flat().join() === Object.entries(b).flat().join();
+}
+
 export function Toc() {
   const dragRef = useRef(null);
 
@@ -46,7 +52,11 @@ export function Toc() {
   useEffect(() => {
     const eventName = 'visibilitychange';
     const handler = () => {
-      void loadSettings().then((settings) => setSettings(settings));
+      void loadSettings().then((st) => {
+        setSettings((prevSt) => {
+          return equals(prevSt, st) ? prevSt : st;
+        });
+      });
     };
     handler();
     document.addEventListener(eventName, handler);
