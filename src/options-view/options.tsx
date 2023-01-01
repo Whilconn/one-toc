@@ -12,7 +12,6 @@ import {
   saveSettings,
 } from '../extension-utils/settings';
 import pkg from '../../package.json';
-import manifest from '../../public/manifest.json';
 import './options.less';
 
 function openShortcutsPage() {
@@ -101,7 +100,7 @@ function Options() {
           </a>
         </p>
         <p className="space-between">
-          {manifest.name}&ensp;V{manifest.version}
+          {pkg.extName}&ensp;V{pkg.version}
         </p>
       </div>
     </Form>

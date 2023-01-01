@@ -3,7 +3,7 @@ const path = require('path');
 const glob = require('glob');
 const JSZip = require('jszip');
 const { ROOT_ABS, DEST_ABS } = require('./vite.config');
-const manifest = require('../public/manifest.json');
+const pkg = require('../package.json');
 
 function zip() {
   const fileName = path.relative(ROOT_ABS, __filename);
@@ -12,7 +12,7 @@ function zip() {
   const inputPattern = path.resolve(DEST_ABS, '**/*.*');
   const files = glob.sync(inputPattern) || [];
   const zipTask = JSZip();
-  const zipName = `${manifest.name}-v${manifest.version}`;
+  const zipName = `${pkg.extName}-v${pkg.version}`;
 
   for (const file of files) {
     const content = fs.readFileSync(file);

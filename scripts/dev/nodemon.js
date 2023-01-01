@@ -1,7 +1,7 @@
 const nodemon = require('nodemon');
 const { buildDev } = require('../build');
 const { openBrowser, openPage } = require('./browser');
-const manifest = require('../../public/manifest.json');
+const pkg = require('../../package.json');
 
 const EXT_URL = 'chrome://extensions';
 const EXT_TAG = 'extensions-manager';
@@ -14,7 +14,7 @@ async function startExtension() {
     (node, name) => {
       if (node) return node.extensions_.filter((e) => e.name === name)[0];
     },
-    manifest.name,
+    pkg.extName,
   );
 
   return [browser, { extPage }, extInfo];
@@ -34,7 +34,7 @@ function startNodemon(startHandler, reloadHandler, reloadExtPage) {
     ext: '*',
     delay: 2000,
     watch: ['src', 'scripts', 'public', 'test'],
-    ignore: ['.git/', '**/node_modules/', 'dist/', 'public/*.js', 'public/*.css'],
+    ignore: ['.git/', '**/node_modules/', 'dist/'],
   });
 
   nodemon
