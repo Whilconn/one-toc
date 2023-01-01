@@ -1,4 +1,4 @@
-const { openBrowser } = require('../scripts/browser');
+const { openBrowser } = require('../scripts/dev/browser');
 
 module.exports = async function () {
   global.browser = await openBrowser();

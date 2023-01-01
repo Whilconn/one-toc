@@ -1,6 +1,30 @@
 const nodemon = require('nodemon');
-const { buildDev, clearDest } = require('../build/build');
-const { start: startBase, reload: reloadBase } = require('./dev-base');
+const { buildDev } = require('../build');
+const { openBrowser, openPage } = require('./browser');
+const manifest = require('../../public/manifest.json');
+
+const EXT_URL = 'chrome://extensions';
+const EXT_TAG = 'extensions-manager';
+
+async function startExtension() {
+  const browser = await openBrowser();
+  const extPage = await openPage(browser, EXT_URL);
+  const extInfo = await extPage.$eval(
+    EXT_TAG,
+    (node, name) => {
+      if (node) return node.extensions_.filter((e) => e.name === name)[0];
+    },
+    manifest.name,
+  );
+
+  return [browser, { extPage }, extInfo];
+}
+
+async function reloadExtension(browser, pages) {
+  await pages.extPage.$eval(EXT_TAG, (node) => {
+    if (node) return node.delegate.updateAllExtensions(node.extensions_);
+  });
+}
 
 let browser, pages, extInfo;
 
@@ -17,10 +41,9 @@ function startNodemon(startHandler, reloadHandler, reloadExtPage) {
     .on('start', async () => {
       if (browser) return;
 
-      clearDest();
-      await buildDev();
+      await buildDev(true);
 
-      [browser, pages, extInfo] = await startBase();
+      [browser, pages, extInfo] = await startExtension();
       if (startHandler) await startHandler(browser, pages, extInfo);
 
       console.log(`🔔 Pages and extensions loaded at ${new Date().toTimeString()}`);
@@ -30,7 +53,7 @@ function startNodemon(startHandler, reloadHandler, reloadExtPage) {
 
       await buildDev();
 
-      if (reloadExtPage) await reloadBase(browser, pages);
+      if (reloadExtPage) await reloadExtension(browser, pages);
       if (reloadHandler) await reloadHandler(browser, pages, extInfo);
 
       console.log(`🔔 Pages and extensions reloaded at ${new Date().toTimeString()}`);
@@ -41,4 +64,4 @@ function startNodemon(startHandler, reloadHandler, reloadExtPage) {
     });
 }
 
-module.exports.startNodemon = startNodemon;
+module.exports = { startNodemon };

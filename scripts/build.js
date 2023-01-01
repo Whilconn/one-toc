@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const vite = require('vite');
-const { configFn, ROOT_ABS, DEST_ABS, PUBLIC_ABS } = require('../vite.config');
+const { configFn, ROOT_ABS, DEST_ABS, PUBLIC_ABS } = require('./vite.config');
 
 const MODE = { DEV: 'development', PROD: 'production' };
 
@@ -45,15 +45,14 @@ function build(mode) {
   return Promise.all(tasks);
 }
 
-module.exports.clearDest = clearDest;
-
 module.exports.buildProd = () => {
   clearDest();
   copyLibs(MODE.PROD);
   return build(MODE.PROD);
 };
 
-module.exports.buildDev = () => {
+module.exports.buildDev = (clear) => {
+  if (clear) clearDest();
   copyLibs(MODE.DEV);
   return build(MODE.DEV);
 };
