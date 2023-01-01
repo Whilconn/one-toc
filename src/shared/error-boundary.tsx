@@ -26,7 +26,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.error) {
       return (
         <div className={`error-boundary ${className}`}>
-          <p>{pkg.name}插件出现错误</p>
+          <p>{pkg.extName}插件出现错误</p>
           <p className="grey">错误信息：{this.state.error.message}</p>
           <p>
             <a onClick={() => location.reload()}>刷新页面</a>试试，或者联系
