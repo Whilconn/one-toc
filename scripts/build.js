@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const vite = require('vite');
 const { configFn, ROOT_ABS, DEST_ABS, PUBLIC_ABS } = require('./vite.config');
+const pkg = require('../package.json');
+const manifest = require('../public/manifest.json');
 
 const MODE = { DEV: 'development', PROD: 'production' };
 
@@ -10,27 +12,31 @@ function clearDest() {
 }
 
 function copyLibs(mode) {
-  const sourceFiles = {
-    development: [
-      'node_modules/react/umd/react.development.js',
-      'node_modules/react-dom/umd/react-dom.development.js',
-      'node_modules/antd/dist/antd.min.js',
-      'node_modules/antd/dist/antd.min.css',
-    ],
-    production: [
-      'node_modules/react/umd/react.production.min.js',
-      'node_modules/react-dom/umd/react-dom.production.min.js',
-      'node_modules/antd/dist/antd.min.js',
-      'node_modules/antd/dist/antd.min.css',
-    ],
+  let sourceFiles = {
+    'react.js': 'node_modules/react/umd/react.production.min.js',
+    'react-dom.js': 'node_modules/react-dom/umd/react-dom.production.min.js',
+    'antd.js': 'node_modules/antd/dist/antd.min.js',
+    'antd.css': 'node_modules/antd/dist/antd.min.css',
   };
 
-  sourceFiles[mode].forEach((src) => {
-    let target = src.replace(/.+\//, '').replace(/\..+\./, '.');
+  if (mode === MODE.DEV) {
+    sourceFiles['react.js'] = 'node_modules/react/umd/react.development.js';
+    sourceFiles['react-dom.js'] = 'node_modules/react-dom/umd/react-dom.development.js';
+  }
+
+  Object.entries(sourceFiles).forEach(([dest, src]) => {
     src = path.resolve(ROOT_ABS, src);
-    target = path.resolve(PUBLIC_ABS, target);
-    fs.copyFileSync(src, target);
+    dest = path.resolve(DEST_ABS, dest);
+    fs.copyFileSync(src, dest);
   });
+}
+
+function genManifest() {
+  const dest = path.resolve(DEST_ABS, 'manifest.json');
+  const keys = ['version', 'description'];
+  keys.forEach((k) => (manifest[k] = pkg[k]));
+
+  fs.writeFileSync(dest, JSON.stringify(manifest, null, 2));
 }
 
 function build(mode) {
@@ -45,14 +51,16 @@ function build(mode) {
   return Promise.all(tasks);
 }
 
-module.exports.buildProd = () => {
+module.exports.buildProd = async () => {
   clearDest();
+  await build(MODE.PROD);
   copyLibs(MODE.PROD);
-  return build(MODE.PROD);
+  genManifest();
 };
 
-module.exports.buildDev = (clear) => {
+module.exports.buildDev = async (clear) => {
   if (clear) clearDest();
+  await build(MODE.DEV);
   copyLibs(MODE.DEV);
-  return build(MODE.DEV);
+  genManifest();
 };
