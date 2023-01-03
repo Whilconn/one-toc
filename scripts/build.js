@@ -44,6 +44,9 @@ function build(mode) {
 
   const tasks = entries.map((entry) => {
     const config = configFn({ mode });
+    // vite build({mode:'development'}) 时 process.env.NODE_ENV 仍然会被强制设置为 production，导致import.meta.env.MODE='development' 而 import.meta.env.DEV=false）
+    // hack：强制改变 vite build 时的环境变量 process.env.NODE_ENV
+    process.env.NODE_ENV = mode;
     config.build.rollupOptions.input = path.resolve(config.root, entry);
     return vite.build({ ...config });
   });

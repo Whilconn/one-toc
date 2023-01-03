@@ -1,7 +1,7 @@
 const path = require('path');
 const { dev } = require('./dev/dev');
-const { buildProd } = require('./build');
-const { zip } = require('./pack');
+const { buildProd, buildDev } = require('./build');
+const { zip } = require('./zip');
 const { COMMANDS } = require('./constant');
 
 async function start() {
@@ -12,6 +12,8 @@ async function start() {
 
   if (command === COMMANDS.BUILD) {
     await buildProd();
+  } else if (command === COMMANDS.BUILD_DEV) {
+    await buildDev(true);
   } else if (command.startsWith(COMMANDS.DEV)) {
     dev(command);
   } else if (command === COMMANDS.ZIP) {

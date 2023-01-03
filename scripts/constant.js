@@ -4,6 +4,7 @@ const COMMANDS = {
   DEV_OPTIONS: 'dev:options',
   DEV_POPUP: 'dev:popup',
   BUILD: 'build',
+  BUILD_DEV: 'build:dev',
   ZIP: 'zip',
 };
 
