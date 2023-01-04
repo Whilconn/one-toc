@@ -1,4 +1,4 @@
-import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL, TOC_LEVEL } from '../shared/constants';
+import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, NODE_NAME, SYMBOL, TOC_LEVEL } from '../shared/constants';
 import {
   findAncestor,
   getDepthAndPath,
@@ -176,6 +176,7 @@ function filterByScore(
     FONT_BOLD: 'fontBold',
     NOISE_NODE: 'noiseNode',
     NOISE_PARENT: 'noiseParent',
+    RECOMMEND_LINK: 'recommendLink',
     DOC_TITLE: 'docTitle',
     LEVEL_BREAK: 'levelBreak',
   };
@@ -185,6 +186,7 @@ function filterByScore(
     [`${FEATS.ID}-true`]: 3,
     [`${FEATS.NOISE_NODE}-true`]: -10,
     [`${FEATS.NOISE_PARENT}-true`]: -10,
+    [`${FEATS.RECOMMEND_LINK}-true`]: -100,
     [`${FEATS.DOC_TITLE}-true`]: -10,
     [`${FEATS.LEVEL_BREAK}-true`]: -10,
   };
@@ -230,6 +232,11 @@ function filterByScore(
     // 节点不在文章主体中，如footer、sidebar等
     addFeatIdx(FEATS.NOISE_NODE, node.matches(noiseSelector), i);
     addFeatIdx(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
+
+    // 推荐链接
+    const recommendLink = (node.querySelector(NODE_NAME.a) || node.closest(NODE_NAME.a)) as HTMLAnchorElement;
+    const valRL = recommendLink && !recommendLink.href.startsWith(location.href);
+    addFeatIdx(FEATS.RECOMMEND_LINK, !!valRL, i);
 
     // level突变，如 h2 -> h5
     for (let j = i + 1; nodes[j] && getLevel(nodes[j]) - getLevel(node) > 1; j++) {
