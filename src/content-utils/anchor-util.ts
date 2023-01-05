@@ -72,6 +72,13 @@ function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElem
   return width > MW && height > MW;
 }
 
+// 是否推荐链接
+function isRecommendLink(node: HTMLElement) {
+  const recommendLink = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
+  const path = location.origin + location.pathname;
+  return recommendLink?.href && !recommendLink.href.startsWith(path);
+}
+
 // 修改计算后的布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
 function updateRect(
   node: HTMLElement,
@@ -131,6 +138,9 @@ function filterBasic(
     // 必须独占一行
     if (!isOneLine(node, style, rect)) return false;
 
+    // 剔除推荐链接
+    if (isRecommendLink(node)) return false;
+
     updateRect(node, styleMap, rectMap);
 
     // 横跨三分轴或中轴
@@ -176,7 +186,6 @@ function filterByScore(
     FONT_BOLD: 'fontBold',
     NOISE_NODE: 'noiseNode',
     NOISE_PARENT: 'noiseParent',
-    RECOMMEND_LINK: 'recommendLink',
     DOC_TITLE: 'docTitle',
     LEVEL_BREAK: 'levelBreak',
   };
@@ -184,9 +193,9 @@ function filterByScore(
   const BASE_SCORE = {
     [`${FEATS.TAG}-H`]: 3,
     [`${FEATS.ID}-true`]: 3,
+    [`${FEATS.FONT_BOLD}-true`]: 3,
     [`${FEATS.NOISE_NODE}-true`]: -10,
     [`${FEATS.NOISE_PARENT}-true`]: -10,
-    [`${FEATS.RECOMMEND_LINK}-true`]: -100,
     [`${FEATS.DOC_TITLE}-true`]: -10,
     [`${FEATS.LEVEL_BREAK}-true`]: -10,
   };
@@ -206,7 +215,7 @@ function filterByScore(
 
   nodes.forEach((node, i) => {
     const valId = node.id || node.getAttribute('name');
-    addFeatIdx(FEATS.ID, !!valId, i);
+    if (valId) addFeatIdx(FEATS.ID, true, i);
 
     const valTag = node.tagName.startsWith('H') ? 'H' : 'B';
     addFeatIdx(FEATS.TAG, valTag, i);
@@ -233,11 +242,6 @@ function filterByScore(
     addFeatIdx(FEATS.NOISE_NODE, node.matches(noiseSelector), i);
     addFeatIdx(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
 
-    // 推荐链接
-    const recommendLink = (node.querySelector(NODE_NAME.a) || node.closest(NODE_NAME.a)) as HTMLAnchorElement;
-    const valRL = recommendLink && !recommendLink.href.startsWith(location.href);
-    addFeatIdx(FEATS.RECOMMEND_LINK, !!valRL, i);
-
     // level突变，如 h2 -> h5
     for (let j = i + 1; nodes[j] && getLevel(nodes[j]) - getLevel(node) > 1; j++) {
       addFeatIdx(FEATS.LEVEL_BREAK, true, j);
@@ -256,7 +260,7 @@ function filterByScore(
     addFeatIdx(FEATS.FONT_SIZE, `${node.tagName}-` + fontSize.toString(), i);
 
     const fontWeight = +(style ? style.fontWeight : -1);
-    addFeatIdx(FEATS.FONT_BOLD, fontWeight > 400, i);
+    if (fontWeight > 400) addFeatIdx(FEATS.FONT_BOLD, true, i);
 
     for (const p of styleFeats) {
       addFeatIdx(p, style?.getPropertyValue(p) as string, i);

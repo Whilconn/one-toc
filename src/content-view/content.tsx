@@ -7,4 +7,4 @@ addMessageListener((msg: Message) => {
   if (msg.name === MSG_NAMES.TOGGLE_TOC) renderToc();
 });
 
-if (import.meta.env.DEV) renderToc();
+if (import.meta.env.DEV) setTimeout(renderToc, 1000);

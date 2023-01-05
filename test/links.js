@@ -9,7 +9,6 @@ module.exports.links = [
   ['开源中国', 'https://my.oschina.net/u/4843764/blog/5528481', '18'],
   ['博客园', 'https://www.cnblogs.com/teach/p/16295605.html', '11'],
   ['CSDN', 'https://blog.csdn.net/csdnnews/article/details/124880259', '2'],
-  ['51cto', 'https://blog.51cto.com/harmonyos/5318953', '13'],
   ['思否', 'https://segmentfault.com/a/1190000041806654', '5'],
   ['MDN', 'https://developer.mozilla.org/zh-CN/docs/Web/API/Window/location', '15'],
   ['简书', 'https://www.jianshu.com/p/a2cb1e3a79be', '17'],
