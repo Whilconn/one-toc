@@ -20,7 +20,8 @@ const NOISE_SELECTORS = ['header', 'aside', 'footer'];
 ['id', 'class'].forEach((a) => NOISE_SELECTORS.push(...WORDS.map((w) => `[${a}*=${w}]`)));
 
 export function getAnchors() {
-  const selector = [...HEADING_SELECTORS, ...BOLD_SELECTORS].join(SYMBOL.COMMA);
+  const tags = [...HEADING_SELECTORS, ...BOLD_SELECTORS];
+  const selector = tags.join(SYMBOL.COMMA);
 
   let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
 
@@ -34,7 +35,15 @@ export function getAnchors() {
   }
 
   nodes = filterBasic(nodes, styleMap, rectMap);
-  nodes = filterByScore(nodes, styleMap, rectMap);
+
+  const invalidNodes = filterByScore(nodes, styleMap, rectMap, 0.8);
+  for (const tag of tags) {
+    const tNodes = nodes.filter((n) => n.tagName === tag.toUpperCase());
+    const ns = filterByScore(tNodes, styleMap, rectMap, 1);
+    if (ns.length) invalidNodes.push(...ns);
+  }
+  const invalidNodeSet = new Set(invalidNodes);
+  if (invalidNodeSet.size) nodes = nodes.filter((n) => !invalidNodeSet.has(n));
 
   markIdAndLevel(nodes, styleMap);
 
@@ -158,24 +167,11 @@ function filterBasic(
   });
 }
 
-function getDiffFeats(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>) {
-  const feats = ['display', 'margin', 'padding', 'color', 'background-color', 'font-family'];
-  const sets = feats.map(() => new Set());
-  for (const node of nodes) {
-    const style = styleMap.get(node);
-    for (const [i, p] of feats.entries()) {
-      const val = style?.getPropertyValue(p);
-      if (val) sets[i].add(val);
-    }
-  }
-
-  return feats.filter((p, i) => sets[i].size > 1);
-}
-
 function filterByScore(
   nodes: HTMLElement[],
   styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>,
   rectMap: WeakMap<HTMLElement, DOMRect>,
+  factor: number,
 ) {
   const FEATS = {
     ID: 'nodeId',
@@ -194,7 +190,9 @@ function filterByScore(
     LEVEL_BREAK: 'levelBreak',
   };
 
-  const BASE_SCORE = {
+  const commonStyleFeats = ['display', 'margin', 'padding', 'color', 'background-color', 'font-family'];
+
+  const SPECIAL_SCORE = {
     [`${FEATS.TAG}-H`]: 3,
     [`${FEATS.ID}-true`]: 3,
     [`${FEATS.FONT_BOLD}-true`]: 3,
@@ -207,75 +205,74 @@ function filterByScore(
   const maxWidth = Math.min(window.innerWidth / 3, 600);
   const noiseSelector = NOISE_SELECTORS.join(SYMBOL.COMMA);
 
-  const featIdxMap = new Map<string, number[]>();
-  const addFeatIdx = (feat: string, val: string | number | boolean, idx: number) => {
+  const featGroup = new Map<string, number[]>();
+  const groupByFeat = (feat: string, val: string | number | boolean, idx: number) => {
     const key = `${feat}-${val.toString()}`;
-    featIdxMap.has(key) ? featIdxMap.get(key)?.push(idx) : featIdxMap.set(key, [idx]);
+    if (!featGroup.has(key)) featGroup.set(key, []);
+    featGroup.get(key)?.push(idx);
   };
-
-  const styleFeats = getDiffFeats(nodes, styleMap);
 
   let h1Count = 0;
 
   nodes.forEach((node, i) => {
     const valId = node.id || node.getAttribute('name');
-    if (valId) addFeatIdx(FEATS.ID, true, i);
+    if (valId) groupByFeat(FEATS.ID, true, i);
 
     const valTag = node.tagName.startsWith('H') ? 'H' : 'B';
-    addFeatIdx(FEATS.TAG, valTag, i);
+    groupByFeat(FEATS.TAG, valTag, i);
 
     const [valDepth, valPath] = getDepthAndPath(node);
-    addFeatIdx(FEATS.DEPTH, valDepth, i);
-    addFeatIdx(FEATS.PATH, valPath, i);
+    groupByFeat(FEATS.DEPTH, valDepth, i);
+    groupByFeat(FEATS.PATH, valPath, i);
 
     // document.title 包含该节点完整的文本内容，可能是文章标题
     const text = getText(node);
-    addFeatIdx(FEATS.DOC_TITLE, !!(text && document.title.includes(text)), i);
+    groupByFeat(FEATS.DOC_TITLE, !!(text && document.title.includes(text)), i);
     // 唯一的 H1，可能是文章标题（是否附加：top<300？最大的 heading？）
     const H1 = 'H1';
     if (!h1Count && node.tagName === H1) {
       h1Count++;
       const h1Node = nodes.filter((n, j) => j > i && n.tagName === H1);
-      if (h1Node) addFeatIdx(FEATS.DOC_TITLE, true, i);
+      if (h1Node) groupByFeat(FEATS.DOC_TITLE, true, i);
     }
 
     // 包含特殊标点符号
     const reg = /[,，；;。]|\.$/;
-    if (reg.test(text)) addFeatIdx(FEATS.NOISE_NODE, true, i);
+    if (reg.test(text)) groupByFeat(FEATS.NOISE_NODE, true, i);
     // 节点不在文章主体中，如footer、sidebar等
-    addFeatIdx(FEATS.NOISE_NODE, node.matches(noiseSelector), i);
-    addFeatIdx(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
+    groupByFeat(FEATS.NOISE_NODE, node.matches(noiseSelector), i);
+    groupByFeat(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
 
     // level突变，如 h2 -> h5
     for (let j = i + 1; nodes[j] && getLevel(nodes[j]) - getLevel(node) > 1; j++) {
-      addFeatIdx(FEATS.LEVEL_BREAK, true, j);
+      groupByFeat(FEATS.LEVEL_BREAK, true, j);
     }
 
     const rect = rectMap.get(node) || new DOMRect(-1, -1, -1, -1);
     const style = styleMap.get(node);
 
-    addFeatIdx(FEATS.LEFT, rect.left, i);
-    addFeatIdx(FEATS.WIDTH, rect.width, i);
-    addFeatIdx(FEATS.MID, ((rect.left + rect.right) / 2) >> 0, i);
+    groupByFeat(FEATS.LEFT, rect.left, i);
+    groupByFeat(FEATS.WIDTH, rect.width, i);
+    groupByFeat(FEATS.MID, ((rect.left + rect.right) / 2) >> 0, i);
     // width 有最小限制
-    if (rect.width >= maxWidth) addFeatIdx(FEATS.MX_WIDTH, true, i);
+    if (rect.width >= maxWidth) groupByFeat(FEATS.MX_WIDTH, true, i);
 
     const fontSize = style ? getFontSize(style) : -1;
-    addFeatIdx(FEATS.FONT_SIZE, `${node.tagName}-` + fontSize.toString(), i);
+    groupByFeat(FEATS.FONT_SIZE, fontSize.toString(), i);
 
     const fontWeight = +(style ? style.fontWeight : -1);
-    if (fontWeight > 400) addFeatIdx(FEATS.FONT_BOLD, true, i);
+    if (fontWeight > 400) groupByFeat(FEATS.FONT_BOLD, true, i);
 
-    for (const p of styleFeats) {
-      addFeatIdx(p, style?.getPropertyValue(p) as string, i);
+    for (const p of commonStyleFeats) {
+      groupByFeat(p, style?.getPropertyValue(p) as string, i);
     }
   });
 
   let totalScore = 0;
   const scoreMap = new WeakMap<HTMLElement, number>();
 
-  for (const [key, idxList] of featIdxMap) {
-    const baseScore = BASE_SCORE[key] || 1;
+  for (const [key, idxList] of featGroup) {
+    const baseScore = SPECIAL_SCORE[key] || 1;
 
     for (const i of idxList) {
       const n = nodes[i];
@@ -285,10 +282,10 @@ function filterByScore(
     }
   }
 
-  const avgScore = (totalScore / nodes.length) * 0.9;
+  const avgScore = (totalScore / nodes.length) * factor;
 
   return nodes.filter((node) => {
-    return (scoreMap.get(node) || -Infinity) >= avgScore;
+    return (scoreMap.get(node) ?? -Infinity) < avgScore;
   });
 }
 
