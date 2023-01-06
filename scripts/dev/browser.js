@@ -2,9 +2,10 @@ const puppeteer = require('puppeteer-core');
 const chromePath = require('chrome-location');
 const { DEST_ABS: extensionPath } = require('../vite.config');
 
-const TIMEOUT = 20e3;
 const SW = 1920;
 const SH = 1080;
+const TIMEOUT = 20e3;
+const WAIT_UNTIL = 'domcontentloaded';
 
 async function openBrowser() {
   return await puppeteer.launch({
@@ -28,9 +29,12 @@ async function openBrowser() {
 async function openPage(browser, url, timeout = TIMEOUT) {
   const page = await browser.newPage();
   page.setDefaultTimeout(timeout);
-  await page.goto(url);
-
+  await page.goto(url, { waitUntil: WAIT_UNTIL });
   return page;
+}
+
+function reloadPage(page) {
+  return page.reload({ waitUntil: WAIT_UNTIL });
 }
 
 async function getNodes(page, selector) {
@@ -38,4 +42,4 @@ async function getNodes(page, selector) {
   return await page.$$(selector);
 }
 
-module.exports = { openBrowser, openPage, getNodes };
+module.exports = { openBrowser, openPage, reloadPage, getNodes };

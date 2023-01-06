@@ -1,5 +1,5 @@
 const { startNodemon } = require('./nodemon');
-const { openPage } = require('./browser');
+const { openPage, reloadPage } = require('./browser');
 const { COMMANDS } = require('../constant');
 const { links } = require('../../test/links');
 const manifest = require('../../public/manifest.json');
@@ -9,7 +9,7 @@ function dev(command) {
     pages.contentPage = await openPage(browser, links[0][1]);
   };
 
-  let reload = (browser, pages) => pages.contentPage.reload();
+  let reload = (browser, pages) => reloadPage(pages.contentPage);
   let reloadExtPage = true;
 
   // default command is COMMANDS.DEV_CONTENT
@@ -18,7 +18,7 @@ function dev(command) {
       pages.optionsPage = await openPage(browser, extInfo.optionsPage.url);
     };
 
-    reload = (browser, pages) => pages.optionsPage.reload();
+    reload = (browser, pages) => reloadPage(pages.optionsPage);
     reloadExtPage = false;
   } else if (command === COMMANDS.DEV_POPUP) {
     start = async (browser, pages, extInfo) => {
@@ -26,7 +26,7 @@ function dev(command) {
       pages.popupPage = await openPage(browser, url);
     };
 
-    reload = (browser, pages) => pages.popupPage.reload();
+    reload = (browser, pages) => reloadPage(pages.popupPage);
     reloadExtPage = false;
   }
 

@@ -1,8 +1,10 @@
 module.exports.links = [
+  ['React Doc(CN)', 'https://react.docschina.org/docs/hooks-reference.html', '30'],
+  ['wikipedia', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD', '60'],
+  ['wikipedia', 'https://en.wikipedia.org/wiki/China', '61'],
   ['51cto', 'https://blog.51cto.com/harmonyos/5318953', '13'],
   ['微信', 'https://mp.weixin.qq.com/s/au2vtN4b_xSVZ1x_ADNO8w', '13'],
   ['微信', 'https://mp.weixin.qq.com/s/hERgwl3TKM2DzDqAe5Fi-A', '17'],
-  ['React Doc(CN)', 'https://react.docschina.org/docs/getting-started.html', '19'],
   ['微信', 'https://mp.weixin.qq.com/s/7hMdPkNcFihKXypKY2DMHg', '21'],
   ['掘金', 'https://juejin.cn/post/7135756687134162980', '5'],
   ['知乎', 'https://zhuanlan.zhihu.com/p/24650288', '62'],
