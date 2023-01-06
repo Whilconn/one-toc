@@ -74,9 +74,13 @@ function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElem
 
 // 是否推荐链接
 function isRecommendLink(node: HTMLElement) {
-  const recommendLink = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
-  const path = location.origin + location.pathname;
-  return recommendLink?.href && !recommendLink.href.startsWith(path);
+  const linkNode = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
+
+  // a标签与页面 origin 相同，才可能是推荐链接
+  if (linkNode?.origin !== location.origin) return false;
+
+  // 剔除出自文章内部的链接
+  return !linkNode?.pathname.startsWith(location.pathname);
 }
 
 // 修改计算后的布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
