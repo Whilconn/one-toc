@@ -27,21 +27,22 @@ export function getAnchors() {
 
   // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
   const rectMap = new WeakMap<HTMLElement, DOMRect>();
-  const styleMap = new WeakMap<HTMLElement, CSSStyleDeclaration>();
+  const styleMap = new WeakMap<HTMLElement, Styles>();
 
   for (const node of nodes) {
     rectMap.set(node, getRect(node));
-    styleMap.set(node, getComputedStyle(node));
+    styleMap.set(node, getHeadingStyle(node));
   }
 
   nodes = filterBasic(nodes, styleMap, rectMap);
 
-  const invalidNodes = filterByScore(nodes, styleMap, rectMap, 0.8);
-  for (const tag of tags) {
-    const tNodes = nodes.filter((n) => n.tagName === tag.toUpperCase());
-    const ns = filterByScore(tNodes, styleMap, rectMap, 1);
-    if (ns.length) invalidNodes.push(...ns);
-  }
+  const invalidNodes = filterByScore(nodes, styleMap, rectMap, 0.9);
+  // for (const tag of tags) {
+  //   const tNodes = nodes.filter((n) => n.tagName === tag.toUpperCase());
+  //   if (tNodes.length < 2) continue;
+  //   const ns = filterByScore(tNodes, styleMap, rectMap, 1);
+  //   if (ns.length) invalidNodes.push(...ns);
+  // }
   const invalidNodeSet = new Set(invalidNodes);
   if (invalidNodeSet.size) nodes = nodes.filter((n) => !invalidNodeSet.has(n));
 
@@ -50,7 +51,25 @@ export function getAnchors() {
   return nodes;
 }
 
-function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
+function getHeadingStyle(node: HTMLElement) {
+  const text = getText(node);
+  const style = getComputedStyle(node);
+  if (!text) return style;
+
+  const childNode = [...node.children].find((c) => {
+    const childText = getText(c);
+    if (text.startsWith(childText)) return c;
+  }) as HTMLElement;
+
+  if (!childNode) return style;
+
+  const childStyle = getComputedStyle(childNode);
+  const { color, fontSize, fontFamily, fontWeight } = childStyle;
+
+  return { ...style, color, fontSize, fontFamily, fontWeight };
+}
+
+function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
   if (isHeading(node) || !rect || !style?.display.includes(INLINE)) return true;
 
   // 非 h1~h6 的节点，必须独占一行
@@ -67,7 +86,7 @@ function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect)
   return (y1 <= rect.top || prevText.endsWith(BREAK)) && (rect.bottom <= y2 || nextText.startsWith(BREAK));
 }
 
-function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>) {
+function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {
   if (!n1 || !n2 || getLevel(n1) < getLevel(n2)) return true;
 
   const s1 = styleMap.get(n1);
@@ -93,11 +112,7 @@ function isRecommendLink(node: HTMLElement) {
 }
 
 // 修改计算后的布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
-function updateRect(
-  node: HTMLElement,
-  styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>,
-  rectMap: WeakMap<HTMLElement, DOMRect>,
-) {
+function updateRect(node: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>, rectMap: WeakMap<HTMLElement, DOMRect>) {
   const rect = rectMap.get(node);
   const style = styleMap.get(node);
   if (!style || !rect) return;
@@ -117,7 +132,7 @@ function updateRect(
 
 function filterBasic(
   nodes: HTMLElement[],
-  styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>,
+  styleMap: WeakMap<HTMLElement, Styles>,
   rectMap: WeakMap<HTMLElement, DOMRect>,
 ) {
   const MIN_FS = 14;
@@ -169,7 +184,7 @@ function filterBasic(
 
 function filterByScore(
   nodes: HTMLElement[],
-  styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>,
+  styleMap: WeakMap<HTMLElement, Styles>,
   rectMap: WeakMap<HTMLElement, DOMRect>,
   factor: number,
 ) {
@@ -190,12 +205,22 @@ function filterByScore(
     LEVEL_BREAK: 'levelBreak',
   };
 
-  const commonStyleFeats = ['display', 'margin', 'padding', 'color', 'background-color', 'font-family'];
+  const commonStyleFeats: Array<keyof Styles> = [
+    'display',
+    'margin',
+    'padding',
+    'color',
+    'backgroundColor',
+    'fontFamily',
+  ];
 
   const SPECIAL_SCORE = {
     [`${FEATS.TAG}-H`]: 3,
     [`${FEATS.ID}-true`]: 3,
     [`${FEATS.FONT_BOLD}-true`]: 3,
+    [`${FEATS.LEFT}-true`]: 3,
+    [`${FEATS.MID}-true`]: 3,
+    [`${FEATS.WIDTH}-true`]: 3,
     [`${FEATS.NOISE_NODE}-true`]: -10,
     [`${FEATS.NOISE_PARENT}-true`]: -10,
     [`${FEATS.DOC_TITLE}-true`]: -10,
@@ -227,13 +252,16 @@ function filterByScore(
 
     // document.title 包含该节点完整的文本内容，可能是文章标题
     const text = getText(node);
-    groupByFeat(FEATS.DOC_TITLE, !!(text && document.title.includes(text)), i);
-    // 唯一的 H1，可能是文章标题（是否附加：top<300？最大的 heading？）
-    const H1 = 'H1';
-    if (!h1Count && node.tagName === H1) {
-      h1Count++;
-      const h1Node = nodes.filter((n, j) => j > i && n.tagName === H1);
-      if (h1Node) groupByFeat(FEATS.DOC_TITLE, true, i);
+
+    if (factor !== 1) {
+      groupByFeat(FEATS.DOC_TITLE, !!(text && document.title.includes(text)), i);
+      // 唯一的 H1，可能是文章标题（是否附加：top<300？最大的 heading？）
+      const H1 = 'H1';
+      if (!h1Count && node.tagName === H1) {
+        h1Count++;
+        const h1Node = nodes.filter((n, j) => j > i && n.tagName === H1);
+        if (h1Node) groupByFeat(FEATS.DOC_TITLE, true, i);
+      }
     }
 
     // 包含特殊标点符号
@@ -249,7 +277,7 @@ function filterByScore(
     }
 
     const rect = rectMap.get(node) || new DOMRect(-1, -1, -1, -1);
-    const style = styleMap.get(node);
+    const style = styleMap.get(node) || new CSSStyleDeclaration();
 
     groupByFeat(FEATS.LEFT, rect.left, i);
     groupByFeat(FEATS.WIDTH, rect.width, i);
@@ -258,13 +286,13 @@ function filterByScore(
     if (rect.width >= maxWidth) groupByFeat(FEATS.MX_WIDTH, true, i);
 
     const fontSize = style ? getFontSize(style) : -1;
-    groupByFeat(FEATS.FONT_SIZE, fontSize.toString(), i);
+    groupByFeat(FEATS.FONT_SIZE, `${node.tagName}-${fontSize}`, i);
 
     const fontWeight = +(style ? style.fontWeight : -1);
     if (fontWeight > 400) groupByFeat(FEATS.FONT_BOLD, true, i);
 
     for (const p of commonStyleFeats) {
-      groupByFeat(p, style?.getPropertyValue(p) as string, i);
+      groupByFeat(p as string, style[p] as string, i);
     }
   });
 
@@ -289,7 +317,7 @@ function filterByScore(
   });
 }
 
-function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>) {
+function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>) {
   // 记录所有字号
   const sizeSet = nodes.reduce((set, node) => {
     const style = styleMap.get(node);
@@ -315,6 +343,11 @@ function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSS
     if (l >= 0) node.setAttribute(TOC_LEVEL, l.toString());
   });
 }
+
+type Styles = Omit<
+  CSSStyleDeclaration,
+  'getPropertyPriority' | 'getPropertyValue' | 'item' | 'removeProperty' | 'setProperty'
+>;
 
 // array to tree: tested
 // function groupByLevel(nodes: HTMLElement[]) {

@@ -22,7 +22,7 @@ export function isHeading(node: HTMLElement) {
   return node.matches(headSelector);
 }
 
-export function getFontSize(style: CSSStyleDeclaration) {
+export function getFontSize(style: Pick<CSSStyleDeclaration, 'fontSize'>) {
   return +style.fontSize.replace(/[a-z]/gi, '') || 0;
 }
 
