@@ -13,7 +13,7 @@
     "build:dev": "node scripts/cli.js build:dev",
     "zip": "node scripts/cli.js zip",
     "ver": "npm version patch",
-    "test": "pnpm build:dev && jest",
+    "test": "npm run build:dev && jest",
     "lint": "eslint src/"
   },
   "repository": {
@@ -57,5 +57,13 @@
     "puppeteer-core": "^16.1.1",
     "typescript": "^4.7.2",
     "vite": "^4.0.3"
+  },
+  "engines": {
+    "node": ">=19.2",
+    "npm": ">=9.5"
+  },
+  "volta": {
+    "node": "19.2.0",
+    "npm": "9.5.0"
   }
 }
