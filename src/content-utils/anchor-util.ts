@@ -87,8 +87,15 @@ function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
 }
 
 function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {
-  if (!n1 || !n2 || getLevel(n1) < getLevel(n2)) return true;
+  // 两个heading必须都存在
+  if (!n1 || !n2) return true;
 
+  // 两个都是h1~h6可忽略，n2的层级更大可忽略
+  const l1 = getLevel(n1);
+  const l2 = getLevel(n2);
+  if (Math.max(l1, l2) <= HEADING_SELECTORS.length || l1 < l2) return true;
+
+  // 样式上n1的字号更大可忽略
   const s1 = styleMap.get(n1);
   const s2 = styleMap.get(n2);
   if (!s1 || !s2 || getFontSize(s1) > getFontSize(s2)) return true;
