@@ -22,7 +22,7 @@ function zip() {
     zipTask.file(filePath, content);
   }
 
-  const outPath = path.resolve(ROOT_ABS, `${zipName}.zip`);
+  const outPath = path.resolve(DEST_ABS, `${zipName}.zip`);
 
   zipTask
     .generateNodeStream({ type: 'nodebuffer', streamFiles: true })

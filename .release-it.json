@@ -1,0 +1,46 @@
+{
+  "hooks": {
+    "after:bump": "npm run build && npm run zip"
+  },
+  "git": {
+    "changelog": "git log --pretty=format:\"* %s (%h)\" ${from}...${to}",
+    "requireCleanWorkingDir": true,
+    "requireBranch": false,
+    "requireUpstream": true,
+    "requireCommits": false,
+    "addUntrackedFiles": false,
+    "commit": true,
+    "commitMessage": "Release v${version}",
+    "commitArgs": [],
+    "tag": true,
+    "tagExclude": null,
+    "tagName": "v${version}",
+    "tagMatch": null,
+    "tagAnnotation": "Release ${version}",
+    "tagArgs": [],
+    "push": true,
+    "pushArgs": ["--follow-tags"],
+    "pushRepo": ""
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}",
+    "releaseNotes": null,
+    "autoGenerate": false,
+    "preRelease": false,
+    "draft": false,
+    "tokenRef": "GITHUB_TOKEN",
+    "assets": ["dist/*.zip"],
+    "host": null,
+    "timeout": 0,
+    "proxy": null,
+    "skipChecks": false,
+    "web": false
+  },
+  "npm": {
+    "publish": false
+  },
+  "gitlab": {
+    "release": false
+  }
+}

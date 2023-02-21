@@ -17,7 +17,6 @@ async function start() {
   } else if (command.startsWith(COMMANDS.DEV)) {
     dev(command);
   } else if (command === COMMANDS.ZIP) {
-    await buildProd();
     zip();
   }
 }
