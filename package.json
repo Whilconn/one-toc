@@ -12,7 +12,7 @@
     "build": "node scripts/cli.js build",
     "build:dev": "node scripts/cli.js build:dev",
     "zip": "node scripts/cli.js zip",
-    "release": "dotenv release-it --",
+    "release": "dotenv -c .env.local release-it --",
     "test": "npm run build:dev && jest",
     "lint": "eslint src/"
   },
