@@ -20,13 +20,13 @@ It's a browser extension which can append table of contents to the websites such
 
 ## 特性
 
-- 页面加载完自动解析网页中的标题：`H1 ~ H6`
-- 根据标题生成多层级导航目录，便于阅读和跳转
+- 解析网页中的标题：包括 `H1 ~ H6`、`b`、`strong` 等标签
+- 生成多层级导航目录，便于阅读和跳转
 - 随页面滚动自动高亮当前标题
 - 支持浅色、深色主题
+- 支持浮动或内嵌等呈现方式
 - 可自由拖拽
-- 可自由开关，支持实时开关和快捷键开关
-- 可设置浮动或内嵌等定位方式
+- 可自由开关，支持快捷键
 
 ## 插件安装
 
@@ -42,17 +42,19 @@ It's a browser extension which can append table of contents to the websites such
 - 点击页面右上角开启 `开发者模式`
 - 点击页面左上角 `加载已解压的扩展程序`，最后选择上述解压目录
 
+## 插件使用
+- 安装插件后打开任意网页，如：https://reactjs.org/docs/getting-started.html
+- 点击地址栏右侧的 `OneToc` 图标显示目录
+- 按下快捷键 `Ctrl+B` 显示目录（Mac `Command+B`，windows/linux `Ctrl+B`）
+- 效果参考前文[插件效果](#插件效果)
+
 ## 配置说明
 
-点击地址栏右侧的 `OneToc` 图标即可打开配置弹窗，修改配置会立即生效。
+右键点击地址栏右侧的 `OneToc` 图标，再点击选项按钮即可打开配置页面，修改配置后点击保存会立即生效。
 
-![popup](screenshots/popup.png)
+![options](screenshots/open-options-page.png)
 
-### 开启和关闭
-
-插件提供开启和关闭2种状态
-
-- 可使用快捷键快速开启或关闭，Mac `Command+B`，windows/linux `Ctrl+B`
+![options](screenshots/options-page.png)
 
 ### 主题
 
@@ -66,6 +68,10 @@ It's a browser extension which can append table of contents to the websites such
 - 嵌入定位：嵌入网页左侧，将网页内容整体右移，不会遮挡网页内容，目前可拖拽
 
 > 嵌入效果与 `vscode` 左侧目录边栏类似，同样使用 `Command+B` 快捷键开启或关闭
+
+### 快捷键
+- 显示目录的快捷键默认为 Mac `Command+B`，windows/linux `Ctrl+B`
+- 可点击 `去设置` 跳转到快捷键设置页面自行修改
 
 ## 适配情况
 
@@ -83,14 +89,14 @@ It's a browser extension which can append table of contents to the websites such
 - NCBI：https://www.ncbi.nlm.nih.gov
 - 其他...
 
-## License
-
-[MIT](./LICENSE)
-
-Copyright (c) 2022-present, Whilconn
-
 ## 感谢
 
 感谢 JetBrains 提供的开源开发许可证支持！<br>
 
 <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" width="50px" alt="JetBrains Logo (Main) logo.">&emsp;&emsp;<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm_icon.svg" width="50px" alt="WebStorm logo.">
+
+## License
+
+[MIT](./LICENSE)
+
+Copyright (c) 2022-present, Whilconn
