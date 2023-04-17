@@ -24,6 +24,8 @@ export function getAnchors() {
   const selector = tags.join(SYMBOL.COMMA);
 
   let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
+  // 剔除嵌套的heading节点，如h1 b,h2 strong 等
+  nodes = nodes.filter((node) => !node.parentElement?.closest(selector));
 
   // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
   const rectMap = new WeakMap<HTMLElement, DOMRect>();
@@ -145,14 +147,10 @@ function filterBasic(
   const MIN_FS = 14;
   const M1 = window.innerWidth / 3;
   const M2 = window.innerWidth / 2;
-  const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
 
   return nodes.filter((node, i) => {
     // 没有文字
     if (!getText(node)) return false;
-
-    // 祖先节点有h1~h6
-    if (node?.parentElement?.closest(headSelector)) return false;
 
     const rect = rectMap.get(node);
     const style = styleMap.get(node);

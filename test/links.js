@@ -1,4 +1,5 @@
 module.exports.links = [
+  ['少数派', 'https://sspai.com/post/76060', '30'],
   ['React Doc(CN)', 'https://react.docschina.org/docs/hooks-reference.html', '30'],
   // ['wikipedia', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD', '60'],
   // ['wikipedia', 'https://en.wikipedia.org/wiki/China', '61'],
