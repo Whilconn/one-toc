@@ -1,10 +1,11 @@
 import { FIXED_POSITIONS } from '../shared/constants';
+import { queryAll } from './dom-util';
 
 const EMBED_MOD = 'onetoc-embed-mod';
 const TOC_WIDTH = 260;
 
 function getFixedNodes(left: number) {
-  const nodes = [...document.body.querySelectorAll('*')] as HTMLElement[];
+  const nodes = queryAll('*');
   const fixedNodes: Array<[HTMLElement, Array<{ name: string; origin: string; target: string }>]> = [];
 
   for (const n of nodes) {

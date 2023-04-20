@@ -9,6 +9,7 @@ import {
   getRect,
   getText,
   isHeading,
+  queryAll,
 } from './dom-util';
 
 const MW = 10;
@@ -19,11 +20,11 @@ const WORDS = ['side', 'left', 'right', 'foot', 'title', 'comment'];
 const NOISE_SELECTORS = ['header', 'aside', 'footer'];
 ['id', 'class'].forEach((a) => NOISE_SELECTORS.push(...WORDS.map((w) => `[${a}*=${w}]`)));
 
-export function getAnchors() {
+export function resolveNonStdHeadings() {
   const tags = [...HEADING_SELECTORS, ...BOLD_SELECTORS];
   const selector = tags.join(SYMBOL.COMMA);
 
-  let nodes: HTMLElement[] = [...document.querySelectorAll(selector)] as HTMLElement[];
+  let nodes: HTMLElement[] = queryAll(selector);
   // 剔除嵌套的heading节点，如h1 b,h2 strong 等
   nodes = nodes.filter((node) => !node.parentElement?.closest(selector));
 

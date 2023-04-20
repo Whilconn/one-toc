@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEventListener, useTitle } from './hooks';
-import { getAnchors } from '../content-utils/anchor-util';
+import { resolveNonStdHeadings } from '../content-utils/heading-non-std-util';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { scrollByApi } from '../content-utils/scroll-util';
 import { getText } from '../content-utils/dom-util';
@@ -13,7 +13,7 @@ export function TocBody() {
   const [headerHeight, setHeaderHeight] = useState(0);
 
   const title = useTitle();
-  const anchorNodes = useMemo(getAnchors, [title]);
+  const anchorNodes = useMemo(resolveNonStdHeadings, [title]);
 
   function activeLink() {
     const now = Date.now();
@@ -62,7 +62,7 @@ export function TocBody() {
         const cls = [TOC_LEVEL + (node.getAttribute(TOC_LEVEL) || ''), i === current ? 'active' : ''].join(' ');
 
         return (
-          <a key={node.id} onClick={() => clickAnchor(i, node)} className={cls} title={text}>
+          <a key={node.id} onClick={() => clickAnchor(i, node)} data-index={i} className={cls} title={text}>
             {text}
           </a>
         );

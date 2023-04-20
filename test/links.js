@@ -2,8 +2,8 @@ module.exports.links = [
   ['CSDN', 'https://blog.csdn.net/AABBbaby/article/details/130193656', '6'],
   ['少数派', 'https://sspai.com/post/76060', '21'],
   ['React Doc(CN)', 'https://react.docschina.org/docs/hooks-reference.html', '30'],
-  // ['wikipedia', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD', '60'],
-  // ['wikipedia', 'https://en.wikipedia.org/wiki/China', '61'],
+  ['wikipedia', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD', '60'],
+  ['wikipedia', 'https://en.wikipedia.org/wiki/China', '58'],
   ['51cto', 'https://blog.51cto.com/harmonyos/5318953', '13'],
   ['微信', 'https://mp.weixin.qq.com/s/au2vtN4b_xSVZ1x_ADNO8w', '13'],
   ['微信', 'https://mp.weixin.qq.com/s/hERgwl3TKM2DzDqAe5Fi-A', '17'],
@@ -24,5 +24,4 @@ module.exports.links = [
   ['NCBI(EN)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6742634/', '22'],
   ['iteye', 'https://www.iteye.com/blog/kaizi1992-2538691', '5'],
   ['iteye', 'https://www.iteye.com/news/32983', '29'],
-  // ['Eslint(CN)', 'http://eslint.cn/docs/user-guide/getting-started', '4'],
 ];

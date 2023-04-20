@@ -67,3 +67,7 @@ export function getDepthAndPath(node: HTMLElement) {
 
   return [selectors.length, selectors.reverse().join('>')];
 }
+
+export function queryAll(selector: string, parent: HTMLElement = document.body) {
+  return [...parent.querySelectorAll(selector)] as HTMLElement[];
+}
