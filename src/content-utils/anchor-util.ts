@@ -71,21 +71,25 @@ function getHeadingStyle(node: HTMLElement) {
   return { ...style, color, fontSize, fontFamily, fontWeight };
 }
 
+// 非 h1~h6 的节点，必须独占一行
 function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
   if (isHeading(node) || !rect || !style?.display.includes(INLINE)) return true;
 
-  // 非 h1~h6 的节点，必须独占一行
+  // 文字换行则判定为不是标题
+  const lineCount = rect.height / +style.lineHeight.replace(/[^0-9]+$/, '');
+  if (lineCount > 1) return false;
+
   const prevNode = getPrevNode(node);
   const nextNode = getNextNode(node);
 
   const y1 = prevNode ? getRect(prevNode).bottom : -Infinity;
   const y2 = nextNode ? getRect(nextNode).top : Infinity;
 
-  const BREAK = '\n';
   const prevText = prevNode?.textContent || '';
   const nextText = nextNode?.textContent || '';
 
-  return (y1 <= rect.top || prevText.endsWith(BREAK)) && (rect.bottom <= y2 || nextText.startsWith(BREAK));
+  // 前后节点与当前节点不在同一行
+  return (y1 <= rect.top || /[\r\n]\s*$/.test(prevText)) && (rect.bottom <= y2 || /^\s*[\r\n]/.test(nextText));
 }
 
 function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {
@@ -180,10 +184,12 @@ function filterBasic(
     if (M2 < rect.left || M1 > rect.right) return false;
 
     // 剔除与相邻标题的 top 或 bottom 相等的节点
-    return ![nodes[i - 1], nodes[i + 1]].some((n) => {
+    const hasParallelNode = [nodes[i - 1], nodes[i + 1]].some((n) => {
       const r = rectMap.get(n);
       return r?.top === rect.top || r?.bottom === rect.bottom;
     });
+
+    return !hasParallelNode;
   });
 }
 
