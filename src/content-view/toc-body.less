@@ -6,24 +6,6 @@
   a {
     display: block;
     padding: 8px 0;
-    color: var(--onetoc-color);
-    text-decoration: none;
-    outline: 0;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    border: none;
-    background: none;
-    cursor: pointer;
-
-    &:hover {
-      color: #007fff;
-    }
-
-    &.active {
-      color: #007fff;
-      font-weight: bold;
-    }
 
     each(range(0, 10), {
       &.onetoc-level@{value} {

@@ -2,7 +2,7 @@ import { FIXED_POSITIONS } from '../shared/constants';
 import { queryAll } from './dom-util';
 
 const EMBED_MOD = 'onetoc-embed-mod';
-const TOC_WIDTH = 260;
+const TOC_WIDTH = 300;
 
 function getFixedNodes(left: number) {
   const nodes = queryAll('*');

@@ -1,183 +1,32 @@
-import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, NODE_NAME, SYMBOL, TOC_LEVEL } from '../shared/constants';
-import {
-  findAncestor,
-  getDepthAndPath,
-  getFontSize,
-  getLevel,
-  getNextNode,
-  getPrevNode,
-  getRect,
-  getText,
-  isHeading,
-  queryAll,
-} from './dom-util';
+import { HEADING_SELECTORS, SYMBOL, TOC_LEVEL } from '../shared/constants';
+import { findAncestor, getDepthAndPath, getFontSize, getLevel, getText, isHeading } from './dom-util';
+import { RectMap, StyleMap, Styles } from './heading-all-util';
 
 const MW = 10;
+const M1 = window.innerWidth / 3;
+const M2 = window.innerWidth / 2;
 const INLINE = 'inline';
-const INVALID_DISPLAYS = ['none'];
 
-const WORDS = ['side', 'left', 'right', 'foot', 'title', 'comment'];
-const NOISE_SELECTORS = ['header', 'aside', 'footer'];
-['id', 'class'].forEach((a) => NOISE_SELECTORS.push(...WORDS.map((w) => `[${a}*=${w}]`)));
+export function inferHeadings(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
+  nodes = filterByStyleRuleP1(nodes, styleMap, rectMap);
 
-export function resolveNonStdHeadings() {
-  const tags = [...HEADING_SELECTORS, ...BOLD_SELECTORS];
-  const selector = tags.join(SYMBOL.COMMA);
-
-  let nodes: HTMLElement[] = queryAll(selector);
-  // 剔除嵌套的heading节点，如h1 b,h2 strong 等
-  nodes = nodes.filter((node) => !node.parentElement?.closest(selector));
-
-  // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
-  const rectMap = new WeakMap<HTMLElement, DOMRect>();
-  const styleMap = new WeakMap<HTMLElement, Styles>();
-
-  for (const node of nodes) {
-    rectMap.set(node, getRect(node));
-    styleMap.set(node, getHeadingStyle(node));
-  }
-
-  nodes = filterBasic(nodes, styleMap, rectMap);
-
-  const invalidNodes = filterByScore(nodes, styleMap, rectMap, 0.9);
-  // for (const tag of tags) {
-  //   const tNodes = nodes.filter((n) => n.tagName === tag.toUpperCase());
-  //   if (tNodes.length < 2) continue;
-  //   const ns = filterByScore(tNodes, styleMap, rectMap, 1);
-  //   if (ns.length) invalidNodes.push(...ns);
-  // }
+  const invalidNodes = filterByScoreRuleP2(nodes, styleMap, rectMap, 0.9);
   const invalidNodeSet = new Set(invalidNodes);
   if (invalidNodeSet.size) nodes = nodes.filter((n) => !invalidNodeSet.has(n));
 
-  markIdAndLevel(nodes, styleMap);
+  markLevel(nodes, styleMap);
 
   return nodes;
 }
 
-function getHeadingStyle(node: HTMLElement) {
-  const text = getText(node);
-  const style = getComputedStyle(node);
-  if (!text) return style;
-
-  const childNode = [...node.children].find((c) => {
-    const childText = getText(c);
-    if (text.startsWith(childText)) return c;
-  }) as HTMLElement;
-
-  if (!childNode) return style;
-
-  const childStyle = getComputedStyle(childNode);
-  const { color, fontSize, fontFamily, fontWeight } = childStyle;
-
-  return { ...style, color, fontSize, fontFamily, fontWeight };
-}
-
-// 非 h1~h6 的节点，必须独占一行
-function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
-  if (isHeading(node) || !rect || !style?.display.includes(INLINE)) return true;
-
-  // 文字换行则判定为不是标题
-  const lineCount = rect.height / +style.lineHeight.replace(/[^0-9]+$/, '');
-  if (lineCount > 1) return false;
-
-  const prevNode = getPrevNode(node);
-  const nextNode = getNextNode(node);
-
-  const y1 = prevNode ? getRect(prevNode).bottom : -Infinity;
-  const y2 = nextNode ? getRect(nextNode).top : Infinity;
-
-  const prevText = prevNode?.textContent || '';
-  const nextText = nextNode?.textContent || '';
-
-  // 前后节点与当前节点不在同一行
-  return (y1 <= rect.top || /[\r\n]\s*$/.test(prevText)) && (rect.bottom <= y2 || /^\s*[\r\n]/.test(nextText));
-}
-
-function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {
-  // 两个heading必须都存在
-  if (!n1 || !n2) return true;
-
-  // 两个都是h1~h6可忽略，n2的层级更大可忽略
-  const l1 = getLevel(n1);
-  const l2 = getLevel(n2);
-  if (Math.max(l1, l2) <= HEADING_SELECTORS.length || l1 < l2) return true;
-
-  // 样式上n1的字号更大可忽略
-  const s1 = styleMap.get(n1);
-  const s2 = styleMap.get(n2);
-  if (!s1 || !s2 || getFontSize(s1) > getFontSize(s2)) return true;
-
-  const range = new Range();
-  range.setStartAfter(n1);
-  range.setEndBefore(n2);
-  const { width, height } = range.getBoundingClientRect();
-  return width > MW && height > MW;
-}
-
-// 是否推荐链接
-function isRecommendLink(node: HTMLElement) {
-  const linkNode = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
-
-  // a标签与页面 origin 相同，才可能是推荐链接
-  if (linkNode?.origin !== location.origin) return false;
-
-  // 剔除出自文章内部的链接
-  return !linkNode?.pathname.startsWith(location.pathname);
-}
-
-// 修改计算后的布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
-function updateRect(node: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>, rectMap: WeakMap<HTMLElement, DOMRect>) {
-  const rect = rectMap.get(node);
-  const style = styleMap.get(node);
-  if (!style || !rect) return;
-
-  const ancestor = findAncestor(node, (n) => {
-    return !getComputedStyle(n).display.includes(INLINE);
-  });
-
-  if (!ancestor) return;
-
-  const ar = ancestor.getBoundingClientRect();
-  rect.x = ar.x;
-  rect.width = ar.width;
-
-  if (import.meta.env.DEV) console.debug('修改节点styleMap、rectMap', node);
-}
-
-function filterBasic(
-  nodes: HTMLElement[],
-  styleMap: WeakMap<HTMLElement, Styles>,
-  rectMap: WeakMap<HTMLElement, DOMRect>,
-) {
-  const MIN_FS = 14;
-  const M1 = window.innerWidth / 3;
-  const M2 = window.innerWidth / 2;
-
+function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
   return nodes.filter((node, i) => {
-    // 没有文字
-    if (!getText(node)) return false;
-
     const rect = rectMap.get(node);
     const style = styleMap.get(node);
     if (!style || !rect) return true;
 
-    // 宽高不小于 10px
-    if (Math.min(rect.width, rect.height) < MW) return false;
-
-    // 字号不小于 14px 的
-    if (getFontSize(style) < MIN_FS) return false;
-
-    // 剔除隐藏节点、fixed节点
-    if (INVALID_DISPLAYS.includes(style.display) || FIXED_POSITIONS.includes(style.position)) return false;
-
     // 标题之间必须有内容
     if (!hasContent(node, nodes[i + 1], styleMap)) return false;
-
-    // 必须独占一行
-    if (!isOneLine(node, style, rect)) return false;
-
-    // 剔除推荐链接
-    if (isRecommendLink(node)) return false;
 
     updateRect(node, styleMap, rectMap);
 
@@ -194,12 +43,7 @@ function filterBasic(
   });
 }
 
-function filterByScore(
-  nodes: HTMLElement[],
-  styleMap: WeakMap<HTMLElement, Styles>,
-  rectMap: WeakMap<HTMLElement, DOMRect>,
-  factor: number,
-) {
+function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap, factor: number) {
   const FEATS = {
     ID: 'nodeId',
     TAG: 'nodeTag',
@@ -238,6 +82,10 @@ function filterByScore(
     [`${FEATS.DOC_TITLE}-true`]: -10,
     [`${FEATS.LEVEL_BREAK}-true`]: -10,
   };
+
+  const WORDS = ['side', 'left', 'right', 'foot', 'title', 'comment'];
+  const NOISE_SELECTORS = ['header', 'aside', 'footer'];
+  ['id', 'class'].forEach((a) => NOISE_SELECTORS.push(...WORDS.map((w) => `[${a}*=${w}]`)));
 
   const maxWidth = Math.min(window.innerWidth / 3, 600);
   const noiseSelector = NOISE_SELECTORS.join(SYMBOL.COMMA);
@@ -329,7 +177,47 @@ function filterByScore(
   });
 }
 
-function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>) {
+function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {
+  // 两个heading必须都存在
+  if (!n1 || !n2) return true;
+
+  // 两个都是h1~h6可忽略，n2的层级更大可忽略
+  const l1 = getLevel(n1);
+  const l2 = getLevel(n2);
+  if (Math.max(l1, l2) <= HEADING_SELECTORS.length || l1 < l2) return true;
+
+  // 样式上n1的字号更大可忽略
+  const s1 = styleMap.get(n1);
+  const s2 = styleMap.get(n2);
+  if (!s1 || !s2 || getFontSize(s1) > getFontSize(s2)) return true;
+
+  const range = new Range();
+  range.setStartAfter(n1);
+  range.setEndBefore(n2);
+  const { width, height } = range.getBoundingClientRect();
+  return width > MW && height > MW;
+}
+
+// 修改计算后的布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
+function updateRect(node: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>, rectMap: WeakMap<HTMLElement, DOMRect>) {
+  const rect = rectMap.get(node);
+  const style = styleMap.get(node);
+  if (!style || !rect) return;
+
+  const ancestor = findAncestor(node, (n) => {
+    return !getComputedStyle(n).display.includes(INLINE);
+  });
+
+  if (!ancestor) return;
+
+  const ar = ancestor.getBoundingClientRect();
+  rect.x = ar.x;
+  rect.width = ar.width;
+
+  if (import.meta.env.DEV) console.debug('修改节点styleMap、rectMap', node);
+}
+
+function markLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>) {
   // 记录所有字号
   const sizeSet = nodes.reduce((set, node) => {
     const style = styleMap.get(node);
@@ -343,10 +231,7 @@ function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Sty
     .sort((a, b) => b - a)
     .slice(0, HEADING_SELECTORS.length);
 
-  nodes.forEach((node, i) => {
-    // 标记 id
-    node.id = node.id || `onetoc-anchor-${i}`;
-
+  nodes.forEach((node) => {
     const style = styleMap.get(node);
     if (!style) return;
 
@@ -355,11 +240,6 @@ function markIdAndLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Sty
     if (l >= 0) node.setAttribute(TOC_LEVEL, l.toString());
   });
 }
-
-type Styles = Omit<
-  CSSStyleDeclaration,
-  'getPropertyPriority' | 'getPropertyValue' | 'item' | 'removeProperty' | 'setProperty'
->;
 
 // array to tree: tested
 // function groupByLevel(nodes: HTMLElement[]) {

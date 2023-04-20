@@ -1,17 +1,12 @@
-import { getText, queryAll } from './dom-util';
+import { queryAll } from './dom-util';
 import { HEADING_SELECTORS, SYMBOL } from '../shared/constants';
 
 // 根据标准与网页自带锚点获取heading
-export function getOfficialHeadings() {
-  let headings = getStandardHeadings();
-  const anchors = getAnchors();
-  const selectors = anchors.map((node) => {
-    const href = node.getAttribute('href') || '';
-    const id = hrefToId(href);
-    const s = `#${id},[name='${id}']`;
-    return `:is(${s},:has(${s}))`;
-  });
+export function filterOfficialHeadings(headings: HTMLElement[]) {
+  const selectors = inferHeadingSelectors();
+  headings = filterStandardHeadings(headings);
 
+  // 过滤出既满足标准，又存在页内超链接的 heading
   headings = headings.filter((node) => {
     return selectors.find((s) => node.matches(s));
   });
@@ -20,27 +15,34 @@ export function getOfficialHeadings() {
 }
 
 // 根据标准获取heading
-export function getStandardHeadings() {
+function filterStandardHeadings(headings: HTMLElement[]) {
   const headingSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
-  // 选择自身或子孙节点带有 id,name 属性的所有heading
-  const selector = `:is(${headingSelector}):is([id],[name],:has([id],[name]))`;
-  return queryAll(selector).filter((n) => {
-    return getText(n);
-  });
+  // 标准：提取自身或子孙节点带有 id,name 属性的所有heading
+  const exactSelector = `:is(${headingSelector}):is([id],[name],:has([id],[name]))`;
+
+  return headings.filter((n) => n.matches(exactSelector));
 }
 
-function getAnchors() {
-  const nodes = queryAll('a[href^="#"]');
-
+// 根据所有 页内超链接 推断出所有可能的 heading 选择器
+function inferHeadingSelectors() {
   const set = new Set();
+  const selectors = [];
+  const anchors = queryAll('a[href^="#"]');
 
-  return nodes.filter((n) => {
-    const href = n.getAttribute('href') || '';
-    const duplicated = set.has(href);
+  for (const node of anchors) {
+    const href = (node.getAttribute('href') || '').trim();
+
+    // 跳过 href === '#'，跳过重复
+    if (href.length === 1 || set.has(href)) continue;
+
     set.add(href);
 
-    return !duplicated;
-  });
+    const id = hrefToId(href);
+    const s = `#${id},[name='${id}']`;
+    selectors.push(`:is(${s},:has(${s}))`);
+  }
+
+  return selectors;
 }
 
 function hrefToId(href: string) {

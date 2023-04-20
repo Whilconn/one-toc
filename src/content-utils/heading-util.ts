@@ -1,9 +1,11 @@
-import { getOfficialHeadings, getStandardHeadings } from './heading-std-util';
-import { resolveNonStdHeadings } from './heading-non-std-util';
+import { filterOfficialHeadings } from './heading-std-util';
+import { inferHeadings } from './heading-infer-util';
+import { getAllHeadings } from './heading-all-util';
 
 export function resolveHeadings() {
-  const standardHeadings = getStandardHeadings();
-  const officialHeadings = getOfficialHeadings();
-  const nonStdHeadings = resolveNonStdHeadings();
-  return { standardHeadings, officialHeadings, nonStdHeadings };
+  const { allHeadings, styleMap, rectMap } = getAllHeadings();
+  const officialHeadings = filterOfficialHeadings(allHeadings);
+  const inferredHeadings = inferHeadings(allHeadings, styleMap, rectMap);
+
+  return { allHeadings, officialHeadings, inferredHeadings };
 }

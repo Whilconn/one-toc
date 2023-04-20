@@ -1,49 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import ReactDOM, { Root } from 'react-dom/client';
 import Draggable from 'react-draggable';
-import { CID } from '../shared/constants';
-import { ErrorBoundary } from '../shared/error-boundary';
-import { TocHead } from './toc-head';
 import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { changeLayout } from '../content-utils/layout-util';
 import { loadSettings, POS_EMBED, Settings } from '../extension-utils/settings';
+import { resolveHeadings } from '../content-utils/heading-util';
+import closeSvg from '../assets/close.svg?raw';
 import './toc.less';
 
-let oneTocRoot: Root | null = null;
-export function renderToc() {
-  const rootNode = document.getElementById(CID) || document.createElement('div');
-  if (!rootNode.isConnected) {
-    rootNode.id = CID;
-    rootNode.classList.add('onetoc-root');
-    document.documentElement.append(rootNode);
-  }
-
-  if (!oneTocRoot) oneTocRoot = ReactDOM.createRoot(rootNode);
-
-  if (rootNode.children.length) return unmountToc();
-
-  oneTocRoot.render(
-    <React.StrictMode>
-      <ErrorBoundary className="onetoc-container onetoc-embed">
-        <Toc />
-      </ErrorBoundary>
-    </React.StrictMode>,
-  );
-}
-
-function unmountToc() {
-  oneTocRoot?.render(<></>);
-}
-
-// 浅比较
-function equals(a: object | undefined | null, b: object | undefined | null) {
-  if (a === b) return true;
-  return a && b && Object.entries(a).flat().join() === Object.entries(b).flat().join();
-}
-
-export function Toc() {
+export function Toc({ hideToc }: Props) {
   const dragRef = useRef(null);
 
   const [settings, setSettings] = useState<Settings>();
@@ -77,6 +43,20 @@ export function Toc() {
     return () => restoreLayout();
   }, [isEmbed]);
 
+  const [mode, setMode] = useState(0);
+  const [headingGroups, setHeadingGroups] = useState<HTMLElement[][]>([]);
+  const headingNames = ['自带', '精选', '所有'];
+
+  useEffect(() => {
+    const { inferredHeadings, allHeadings, officialHeadings } = resolveHeadings();
+    const groups = [officialHeadings, inferredHeadings, allHeadings];
+    setHeadingGroups(groups);
+
+    if (groups[0].length) setMode(0);
+    else if (groups[1].length) setMode(1);
+    else setMode(2);
+  }, [title]);
+
   if (!settings) return null;
 
   return (
@@ -87,9 +67,37 @@ export function Toc() {
         style={style}
         data-theme={settings.theme}
       >
-        <TocHead title={title} hideToc={unmountToc} />
-        <TocBody />
+        <div className="onetoc-head">
+          <p className="onetoc-title" title={title}>
+            {headingNames.map((n, i) => {
+              if (!headingGroups[i].length) return null;
+              return (
+                <a key={n} onClick={() => setMode(i)} className={i === mode ? 'active' : ''}>
+                  {n}&emsp;
+                </a>
+              );
+            })}
+          </p>
+          <span
+            onClick={hideToc}
+            dangerouslySetInnerHTML={{ __html: closeSvg }}
+            className="onetoc-close-icon"
+            title="关闭"
+          />
+        </div>
+
+        <TocBody headings={headingGroups[mode]} />
       </nav>
     </Draggable>
   );
 }
+
+// 浅比较
+function equals(a: object | undefined | null, b: object | undefined | null) {
+  if (a === b) return true;
+  return a && b && Object.entries(a).flat().join() === Object.entries(b).flat().join();
+}
+
+type Props = {
+  hideToc: () => void;
+};

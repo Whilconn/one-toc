@@ -1,19 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useEventListener, useTitle } from './hooks';
-import { resolveNonStdHeadings } from '../content-utils/heading-non-std-util';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useEventListener } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { scrollByApi } from '../content-utils/scroll-util';
 import { getText } from '../content-utils/dom-util';
 import { TOC_LEVEL } from '../shared/constants';
 import './toc-body.less';
 
-export function TocBody() {
+export function TocBody({ headings }: Props) {
   const [current, setCurrent] = useState(0);
   const [activeTime, setActiveTime] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(0);
-
-  const title = useTitle();
-  const anchorNodes = useMemo(resolveNonStdHeadings, [title]);
 
   function activeLink() {
     const now = Date.now();
@@ -26,10 +22,10 @@ export function TocBody() {
     if (height > headerHeight) setHeaderHeight(height);
 
     const offset = 5;
-    const idx = anchorNodes.findIndex((n, i) => {
-      if (i === anchorNodes.length - 1) return i;
+    const idx = headings.findIndex((n, i) => {
+      if (i === headings.length - 1) return i;
 
-      const top = anchorNodes[i + 1].getBoundingClientRect().top;
+      const top = headings[i + 1].getBoundingClientRect().top;
       return top > height + offset;
     });
 
@@ -37,10 +33,10 @@ export function TocBody() {
   }
 
   // 高亮链接：首次进入页面
-  useEffect(activeLink, [anchorNodes]);
+  useEffect(activeLink, [headings]);
 
   // 高亮链接：滚动页面
-  const memoActiveLink = useCallback(activeLink, [anchorNodes, activeTime, headerHeight]);
+  const memoActiveLink = useCallback(activeLink, [headings, activeTime, headerHeight]);
   useEventListener(window, 'scroll', memoActiveLink);
 
   function clickAnchor(i: number, anchorNode: HTMLElement) {
@@ -57,17 +53,19 @@ export function TocBody() {
 
   return (
     <div className="onetoc-body">
-      {anchorNodes.map((node, i) => {
+      {headings.map((node, i) => {
         const text = getText(node);
         const cls = [TOC_LEVEL + (node.getAttribute(TOC_LEVEL) || ''), i === current ? 'active' : ''].join(' ');
 
         return (
-          <a key={node.id} onClick={() => clickAnchor(i, node)} data-index={i} className={cls} title={text}>
+          <a key={i} onClick={() => clickAnchor(i, node)} data-index={i} className={cls} title={text}>
             {text}
           </a>
         );
       })}
-      {!anchorNodes.length && <p className="no-content">暂无数据</p>}
+      {!headings.length && <p className="no-content">暂无数据</p>}
     </div>
   );
 }
+
+type Props = { headings: HTMLElement[] };

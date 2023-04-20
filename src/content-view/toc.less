@@ -53,11 +53,67 @@
     max-height: 100vh;
     border-radius: 0;
   }
+
+
+  a {
+    color: var(--onetoc-color);
+    text-decoration: none;
+    outline: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    border: none;
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      color: #007fff;
+    }
+
+    &.active {
+      color: #007fff;
+      font-weight: bold;
+    }
+  }
 }
 
-// global class
+// toc head styles
+.onetoc-container {
+  .onetoc-head {
+    display: flex;
+    align-items: center;
+    border-bottom: .5px solid #e4e6eb;
+    cursor: move;
+
+    .onetoc-title {
+      flex: 1;
+      padding-left: 15px;
+      font-weight: bold;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .onetoc-close-icon {
+      padding: 12px;
+      line-height: 0;
+      fill: var(--onetoc-color);
+      cursor: pointer;
+
+      &:hover {
+        fill: #007fff;
+      }
+    }
+  }
+
+  &.no-drag .onetoc-head {
+    cursor: default;
+  }
+}
+
+// global styles
 html {
-  --onetoc-width: 260px;
+  --onetoc-width: 300px;
 
   .onetoc-current-heading {
     box-shadow: 0 2px 0 #007fff !important;
