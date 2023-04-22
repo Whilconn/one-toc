@@ -1,4 +1,4 @@
-import { HEADING_SELECTORS, SYMBOL, TOC_LEVEL } from '../shared/constants';
+import { HEADING_SELECTORS, NODE_NAME, SYMBOL, TOC_LEVEL } from '../shared/constants';
 import { findAncestor, getDepthAndPath, getFontSize, getLevel, getText, isHeading } from './dom-util';
 import { RectMap, StyleMap, Styles } from './heading-all-util';
 
@@ -20,10 +20,15 @@ export function inferHeadings(nodes: HTMLElement[], styleMap: StyleMap, rectMap:
 }
 
 function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
+  let top = -Infinity;
+
   return nodes.filter((node, i) => {
     const rect = rectMap.get(node);
     const style = styleMap.get(node);
     if (!style || !rect) return true;
+
+    // 不能是推荐链接
+    if (isRecommendLink(node)) return false;
 
     // 标题之间必须有内容
     if (!hasContent(node, nodes[i + 1], styleMap)) return false;
@@ -32,6 +37,10 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 
     // 横跨三分轴或中轴
     if (M2 < rect.left || M1 > rect.right) return false;
+
+    // 逻辑与视觉上的前后不能冲突，TODO:需要测试
+    if (rect.top < top) return false;
+    top = rect.top;
 
     // 剔除与相邻标题的 top 或 bottom 相等的节点
     const hasParallelNode = [nodes[i - 1], nodes[i + 1]].some((n) => {
@@ -175,6 +184,18 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
   return nodes.filter((node) => {
     return (scoreMap.get(node) ?? -Infinity) < avgScore;
   });
+}
+
+// 是否推荐链接
+function isRecommendLink(node: HTMLElement) {
+  // TODO: https://en.wikipedia.org/wiki/International_Olympic_Committee
+  const linkNode = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
+
+  // a标签与页面 origin 相同，才可能是推荐链接
+  if (linkNode?.origin !== location.origin) return false;
+
+  // 剔除出自文章内部的链接
+  return !linkNode?.pathname.startsWith(location.pathname);
 }
 
 function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {

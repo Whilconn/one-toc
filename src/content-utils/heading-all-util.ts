@@ -31,10 +31,7 @@ function filterByRuleP0(nodes: HTMLElement[]) {
 
     // 不能是嵌套的heading节点，如h1 h2,h1 b,h2 strong 等
     const nested = !!node.parentElement?.closest(headingSelector);
-    if (nested) return false;
-
-    // 不能是推荐链接
-    return !isRecommendLink(node);
+    return !nested;
   });
 }
 
@@ -96,17 +93,6 @@ function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
 
   // 前后节点与当前节点不在同一行
   return (y1 <= rect.top || /[\r\n]\s*$/.test(prevText)) && (rect.bottom <= y2 || /^\s*[\r\n]/.test(nextText));
-}
-
-// 是否推荐链接
-function isRecommendLink(node: HTMLElement) {
-  const linkNode = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
-
-  // a标签与页面 origin 相同，才可能是推荐链接
-  if (linkNode?.origin !== location.origin) return false;
-
-  // 剔除出自文章内部的链接
-  return !linkNode?.pathname.startsWith(location.pathname);
 }
 
 export type Styles = Omit<

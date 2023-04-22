@@ -73,10 +73,13 @@ export function Toc({ hideToc }: Props) {
               if (!headingGroups[i].length) return null;
               return (
                 <a key={n} onClick={() => setMode(i)} className={i === mode ? 'active' : ''}>
-                  {n}&emsp;
+                  {n}
+                  {import.meta.env.DEV && `[${headingGroups[i].length}]`}
+                  &emsp;
                 </a>
               );
             })}
+            {headingGroups.every((g) => !g.length) && title}
           </p>
           <span
             onClick={hideToc}

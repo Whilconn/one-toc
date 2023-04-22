@@ -40,7 +40,7 @@ function filterStandardHeadings(headings: HTMLElement[]) {
 
 // 根据所有 页内超链接 推断出所有可能的 heading 选择器
 function inferHeadingSelectorMap() {
-  const anchors = queryAll('a[href^="#"]');
+  const anchors = queryAll('a[href*="#"]') as HTMLAnchorElement[];
   const selectorMap = new Map<string, number>();
 
   for (const node of anchors) {
@@ -56,5 +56,5 @@ function inferHeadingSelectorMap() {
 }
 
 function hrefToId(href: string) {
-  return href.replace(/^#/, '').replace(/([^0-9a-z])/gi, '\\$1');
+  return href.replace(/^[^#]*#/, '').replace(/([^0-9a-z])/gi, '\\$1');
 }

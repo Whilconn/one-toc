@@ -12,5 +12,7 @@ describe('counts toc heading', () => {
     const nodes = await getNodes(page, selector);
 
     expect(nodes.length).toBe(+num);
+
+    if (nodes.length === +num) page.close();
   });
 });
