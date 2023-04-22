@@ -3,13 +3,28 @@ import { HEADING_SELECTORS, SYMBOL } from '../shared/constants';
 
 // 根据标准与网页自带锚点获取heading
 export function filterOfficialHeadings(headings: HTMLElement[]) {
-  const selectors = inferHeadingSelectors();
+  const selectorCountMap = inferHeadingSelectorMap();
+  const selectors = [...selectorCountMap.keys()];
   headings = filterStandardHeadings(headings);
 
   // 过滤出既满足标准，又存在页内超链接的 heading
+  let c1 = 0;
+  const counts: number[] = [];
   headings = headings.filter((node) => {
-    return selectors.find((s) => node.matches(s));
+    const selector = selectors.find((s) => node.matches(s));
+    if (!selector) return false;
+
+    const count = selectorCountMap.get(selector) || 0;
+    counts.push(count);
+    if (count === 1) c1 += 1;
+
+    return true;
   });
+
+  const rate = c1 / counts.length;
+  if (rate < 0.2 && c1 < 10) {
+    headings = headings.filter((_, i) => counts[i] > 1);
+  }
 
   return headings;
 }
@@ -24,25 +39,20 @@ function filterStandardHeadings(headings: HTMLElement[]) {
 }
 
 // 根据所有 页内超链接 推断出所有可能的 heading 选择器
-function inferHeadingSelectors() {
-  const set = new Set();
-  const selectors = [];
+function inferHeadingSelectorMap() {
   const anchors = queryAll('a[href^="#"]');
+  const selectorMap = new Map<string, number>();
 
   for (const node of anchors) {
     const href = (node.getAttribute('href') || '').trim();
-
-    // 跳过 href === '#'，跳过重复
-    if (href.length === 1 || set.has(href)) continue;
-
-    set.add(href);
-
     const id = hrefToId(href);
     const s = `#${id},[name='${id}']`;
-    selectors.push(`:is(${s},:has(${s}))`);
+    const selector = `:is(${s},:has(${s}))`;
+
+    selectorMap.set(selector, (selectorMap.get(selector) || 0) + 1);
   }
 
-  return selectors;
+  return selectorMap;
 }
 
 function hrefToId(href: string) {
