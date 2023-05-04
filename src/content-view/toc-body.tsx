@@ -3,6 +3,7 @@ import { useEventListener } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { scrollByApi } from '../content-utils/scroll-util';
 import { getText } from '../content-utils/dom-util';
+import { Heading } from '../content-utils/heading-util';
 import { TOC_LEVEL } from '../shared/constants';
 import './toc-body.less';
 
@@ -25,7 +26,7 @@ export function TocBody({ headings }: Props) {
     const idx = headings.findIndex((n, i) => {
       if (i === headings.length - 1) return i;
 
-      const top = headings[i + 1].getBoundingClientRect().top;
+      const top = headings[i + 1].node.getBoundingClientRect().top;
       return top > height + offset;
     });
 
@@ -53,12 +54,12 @@ export function TocBody({ headings }: Props) {
 
   return (
     <div className="onetoc-body">
-      {headings.map((node, i) => {
+      {headings.map(({ node, level }, i) => {
         const text = getText(node);
-        const cls = [TOC_LEVEL + (node.getAttribute(TOC_LEVEL) || ''), i === current ? 'active' : ''].join(' ');
+        const cls = [`${TOC_LEVEL}${level}`, i === current ? 'active' : ''].join(' ');
 
         return (
-          <a key={i} onClick={() => clickAnchor(i, node)} data-index={i} className={cls} title={text}>
+          <a key={i} onClick={() => clickAnchor(i, node)} className={cls} title={text}>
             {text}
           </a>
         );
@@ -68,4 +69,4 @@ export function TocBody({ headings }: Props) {
   );
 }
 
-type Props = { headings: HTMLElement[] };
+type Props = { headings: Heading[] };

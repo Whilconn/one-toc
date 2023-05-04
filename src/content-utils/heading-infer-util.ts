@@ -1,5 +1,5 @@
-import { HEADING_SELECTORS, NODE_NAME, SYMBOL, TOC_LEVEL } from '../shared/constants';
-import { findAncestor, getDepthAndPath, getFontSize, getLevel, getText, isHeading } from './dom-util';
+import { HEADING_SELECTORS, NODE_NAME, SYMBOL } from '../shared/constants';
+import { findAncestor, getDepthAndPath, getFontSize, getLevel, getText } from './dom-util';
 import { RectMap, StyleMap, Styles } from './heading-all-util';
 
 const MW = 10;
@@ -13,8 +13,6 @@ export function inferHeadings(nodes: HTMLElement[], styleMap: StyleMap, rectMap:
   const invalidNodes = filterByScoreRuleP2(nodes, styleMap, rectMap, 0.9);
   const invalidNodeSet = new Set(invalidNodes);
   if (invalidNodeSet.size) nodes = nodes.filter((n) => !invalidNodeSet.has(n));
-
-  markLevel(nodes, styleMap);
 
   return nodes;
 }
@@ -237,68 +235,3 @@ function updateRect(node: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>, r
 
   if (import.meta.env.DEV) console.debug('修改节点styleMap、rectMap', node);
 }
-
-function markLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>) {
-  // 记录所有字号
-  const sizeSet = nodes.reduce((set, node) => {
-    const style = styleMap.get(node);
-    const fontSize = style ? getFontSize(style) : -1;
-    return set.add(fontSize);
-  }, new Set<number>());
-
-  // 字号过滤、排序、截取
-  const sizeArr = [...sizeSet]
-    .filter((s) => s > 0)
-    .sort((a, b) => b - a)
-    .slice(0, HEADING_SELECTORS.length);
-
-  nodes.forEach((node) => {
-    const style = styleMap.get(node);
-    if (!style) return;
-
-    // 标记 level
-    const l = sizeArr.indexOf(getFontSize(style)) + (isHeading(node) ? 0 : 1);
-    if (l >= 0) node.setAttribute(TOC_LEVEL, l.toString());
-  });
-}
-
-// array to tree: tested
-// function groupByLevel(nodes: HTMLElement[]) {
-//   let group: Heading[] = [];
-//   const groups = [group];
-//
-//   for (let i = 0; i < nodes.length; i++) {
-//     const heading = new Heading(nodes[i]);
-//
-//     if (!group.length) {
-//       group.push(heading);
-//       continue;
-//     }
-//
-//     const n1 = group[group.length - 1];
-//     const l1 = +(n1.node.getAttribute(TOC_LEVEL) || 0);
-//     const l2 = +(heading.node.getAttribute(TOC_LEVEL) || 0);
-//
-//     if (l1 === l2) group.push(heading);
-//     else if (l1 > l2) {
-//       groups.pop();
-//       group = groups[groups.length - 1];
-//       i--;
-//     } else {
-//       group = n1.children;
-//       group.push(heading);
-//       groups.push(group);
-//     }
-//   }
-//
-//   return groups[0];
-// }
-//
-// class Heading {
-//   node: HTMLElement;
-//   children: Heading[] = [];
-//
-//   constructor(node: HTMLElement) {
-//     this.node = node;
-//   }
-// }

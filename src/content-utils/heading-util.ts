@@ -1,7 +1,8 @@
 import { filterOfficialHeadings } from './heading-std-util';
 import { inferHeadings } from './heading-infer-util';
-import { getAllHeadings } from './heading-all-util';
-import { queryAll } from './dom-util';
+import { getAllHeadings, Styles } from './heading-all-util';
+import { getFontSize, isHeading, queryAll } from './dom-util';
+import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
   const { allHeadings, styleMap, rectMap } = getAllHeadings();
@@ -11,7 +12,11 @@ export function resolveHeadings() {
   const articleHeadings = allHeadings.filter((n) => articleNode.contains(n));
   const inferredHeadings = inferHeadings(articleHeadings, styleMap, rectMap);
 
-  return { allHeadings, officialHeadings, inferredHeadings };
+  return {
+    allHeadings: attachLevel(allHeadings, styleMap),
+    officialHeadings: attachLevel(officialHeadings, styleMap),
+    inferredHeadings: attachLevel(inferredHeadings, styleMap),
+  };
 }
 
 function resolveArticle(): HTMLElement {
@@ -69,4 +74,32 @@ function getValidText(node: HTMLElement) {
   return (node.innerText || '').replace(/\s/g, '');
 }
 
+function attachLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>): Heading[] {
+  // 记录所有字号
+  const sizeSet = nodes.reduce((set, node) => {
+    const style = styleMap.get(node);
+    const size = style ? +style.fontWeight * getFontSize(style) : -1;
+    return set.add(size);
+  }, new Set<number>());
+
+  // 字号过滤、排序、截取
+  const sizeArr = [...sizeSet]
+    .filter((s) => s > 0)
+    .sort((a, b) => b - a)
+    .slice(0, HEADING_SELECTORS.length);
+
+  return nodes.map((node) => {
+    const style = styleMap.get(node);
+
+    const size = style ? +style.fontWeight * getFontSize(style) : -1;
+    const index = sizeArr.findIndex((s) => size >= s);
+
+    // 计算 level
+    const level = (index >= 0 ? index : sizeArr.length) + (isHeading(node) ? 0 : 1);
+    return { node, level };
+  });
+}
+
 type NodeMap = WeakMap<HTMLElement, { textCount: number; rect: DOMRect }>;
+
+export type Heading = { node: HTMLElement; level: number };

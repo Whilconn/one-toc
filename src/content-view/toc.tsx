@@ -5,7 +5,7 @@ import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { changeLayout } from '../content-utils/layout-util';
 import { loadSettings, POS_EMBED, Settings } from '../extension-utils/settings';
-import { resolveHeadings } from '../content-utils/heading-util';
+import { Heading, resolveHeadings } from '../content-utils/heading-util';
 import closeSvg from '../assets/close.svg?raw';
 import './toc.less';
 
@@ -44,7 +44,7 @@ export function Toc({ hideToc }: Props) {
   }, [isEmbed]);
 
   const [mode, setMode] = useState(0);
-  const [headingGroups, setHeadingGroups] = useState<HTMLElement[][]>([]);
+  const [headingGroups, setHeadingGroups] = useState<Heading[][]>([]);
   const headingNames = ['自带', '精选', '所有'];
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export function Toc({ hideToc }: Props) {
     const groups = [officialHeadings, inferredHeadings, allHeadings];
     setHeadingGroups(groups);
 
-    if (groups[0].length) setMode(0);
+    if (groups[0].length > 1) setMode(0);
     else if (groups[1].length) setMode(1);
     else setMode(2);
   }, [title]);
