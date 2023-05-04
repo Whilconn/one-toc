@@ -1,4 +1,4 @@
-import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, NODE_NAME, SYMBOL } from '../shared/constants';
+import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
 import { getFontSize, getNextNode, getPrevNode, getRect, getText, isHeading, queryAll } from './dom-util';
 
 const MW = 10;

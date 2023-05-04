@@ -35,7 +35,7 @@ function getFixedNodes(left: number) {
 }
 
 export function changeLayout() {
-  document.body.classList.add(EMBED_MOD);
+  document.body.toggleAttribute(EMBED_MOD, true);
 
   const fixedNodes = getFixedNodes(TOC_WIDTH);
   fixedNodes.forEach(([n, attrs]) => {
@@ -43,7 +43,7 @@ export function changeLayout() {
   });
 
   return function restoreLayout() {
-    document.body.classList.remove(EMBED_MOD);
+    document.body.toggleAttribute(EMBED_MOD, false);
 
     fixedNodes.forEach(([n, attrs]) => {
       attrs.forEach((a) => n.style.setProperty(a.name, a.origin));

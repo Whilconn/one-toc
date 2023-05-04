@@ -63,6 +63,8 @@ function Options() {
       </Form.Item>
 
       {commands?.map((c) => {
+        if (!c.description) return null;
+
         return (
           <Form.Item key={c.name} label="🚀&ensp;快捷键">
             {c.shortcut}&ensp;
