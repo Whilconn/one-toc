@@ -1,6 +1,8 @@
 module.exports.links = [
   ['CSDN', 'https://blog.csdn.net/AABBbaby/article/details/130193656', '6'],
   ['少数派', 'https://sspai.com/post/76060', '21'],
+  ['36氪金', 'https://36kr.com/p/2231774512672388', '9'],
+  ['品玩', 'https://www.pingwest.com/a/279127', '8'],
   ['wikipedia', 'https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9B%BD', '60'],
   ['wikipedia', 'https://en.wikipedia.org/wiki/China', '58'],
   ['51cto', 'https://blog.51cto.com/harmonyos/5318953', '13'],
@@ -36,6 +38,12 @@ module.exports.links = [
   ['Echarts', 'https://echarts.apache.org/handbook/zh/concepts/dataset/', '13'],
   ['docusaurus', 'https://docusaurus.io/docs', '15'],
   ['NCBI(EN)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6742634/', '11'],
+  ['阮一峰博客', 'https://www.ruanyifeng.com/blog/2021/08/weekly-issue-170.html', '12'],
+  ['张鑫旭博客', 'https://www.zhangxinxu.com/wordpress/2023/04/ai-code-tool-codeium-github-copilot/', '23'],
+  // TODO: 识别优化
+  // ['雷锋网', 'https://www.leiphone.com/category/zaobao/Jp1XvGFjehpedqja.html', '20'],
+  // TODO: 兼容仅 font-weight > bold 的标题
+  // ['虎嗅', 'https://www.huxiu.com/article/1421112.html', '2'],
   // TODO: 内容在 iframe 中；开启content_scripts.all_frames，识别内容区唯一iframe
   // ['threejs', 'https://threejs.org/docs/index.html#manual/en/introduction/Installation', '15'],
 ];

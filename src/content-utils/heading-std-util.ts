@@ -26,7 +26,7 @@ export function filterOfficialHeadings(headings: HTMLElement[]) {
     headings = headings.filter((_, i) => counts[i] > 1);
   }
 
-  return headings;
+  return headings.length > 1 ? headings : [];
 }
 
 // 根据标准获取heading

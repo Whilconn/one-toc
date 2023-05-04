@@ -43,18 +43,30 @@ export function Toc({ hideToc }: Props) {
     return () => restoreLayout();
   }, [isEmbed]);
 
-  const [mode, setMode] = useState(0);
+  const [group, setGroup] = useState(0);
   const [headingGroups, setHeadingGroups] = useState<Heading[][]>([]);
   const headingNames = ['自带', '精选', '所有'];
 
   useEffect(() => {
     const { inferredHeadings, allHeadings, officialHeadings } = resolveHeadings();
     const groups = [officialHeadings, inferredHeadings, allHeadings];
-    setHeadingGroups(groups);
 
-    if (groups[0].length > 1) setMode(0);
-    else if (groups[1].length) setMode(1);
-    else setMode(2);
+    // 两组heading相同时，仅保留下标小的分组
+    for (let i = groups.length - 1; i > 0; i--) {
+      for (let j = 0; j < i; j++) {
+        if (!groups[i].length || groups[i].length !== groups[j].length) continue;
+        if (groups[i].every((h, k) => h.node === groups[j][k].node)) {
+          groups[i] = [];
+        }
+      }
+    }
+
+    // 优先选中下标小的分组
+    if (groups[0].length) setGroup(0);
+    else if (groups[1].length) setGroup(1);
+    else setGroup(2);
+
+    setHeadingGroups(groups);
   }, [title]);
 
   if (!settings) return null;
@@ -68,11 +80,11 @@ export function Toc({ hideToc }: Props) {
         data-theme={settings.theme}
       >
         <div className="onetoc-head">
-          <p className="onetoc-title" title={title}>
+          <p className="onetoc-title">
             {headingNames.map((n, i) => {
               if (!headingGroups[i].length) return null;
               return (
-                <a key={n} onClick={() => setMode(i)} className={i === mode ? 'active' : ''}>
+                <a key={n} onClick={() => setGroup(i)} className={i === group ? 'active' : ''}>
                   {n}
                   {import.meta.env.DEV && `[${headingGroups[i].length}]`}
                   &emsp;
@@ -89,7 +101,7 @@ export function Toc({ hideToc }: Props) {
           />
         </div>
 
-        <TocBody headings={headingGroups[mode]} />
+        <TocBody headings={headingGroups[group]} />
       </nav>
     </Draggable>
   );
