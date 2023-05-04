@@ -1,19 +1,19 @@
 import { filterOfficialHeadings } from './heading-std-util';
 import { inferHeadings } from './heading-infer-util';
 import { getAllHeadings, Styles } from './heading-all-util';
-import { getFontSize, isHeading, queryAll } from './dom-util';
+import { getFontSize, getLevel, isHeading, queryAll } from './dom-util';
 import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
   const { allHeadings, styleMap, rectMap } = getAllHeadings();
-  const officialHeadings = filterOfficialHeadings(allHeadings);
-
   const articleNode = resolveArticle();
-  const articleHeadings = allHeadings.filter((n) => articleNode.contains(n));
-  const inferredHeadings = inferHeadings(articleHeadings, styleMap, rectMap);
+  const allArticleHeadings = allHeadings.filter((n) => articleNode.contains(n));
+
+  const officialHeadings = filterOfficialHeadings(allArticleHeadings);
+  const inferredHeadings = inferHeadings(allArticleHeadings, styleMap, rectMap);
 
   return {
-    allHeadings: attachLevel(allHeadings, styleMap),
+    allHeadings: attachLevel(allArticleHeadings, styleMap),
     officialHeadings: attachLevel(officialHeadings, styleMap),
     inferredHeadings: attachLevel(inferredHeadings, styleMap),
   };
@@ -75,31 +75,50 @@ function getValidText(node: HTMLElement) {
 }
 
 function attachLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>): Heading[] {
-  // 记录所有字号
-  const sizeSet = nodes.reduce((set, node) => {
+  let minLevel = Infinity;
+  let maxFontSize = -Infinity;
+  const nodeLevels: NodeLevel[] = nodes.map((node): NodeLevel => {
     const style = styleMap.get(node);
-    const size = style ? +style.fontWeight * getFontSize(style) : -1;
-    return set.add(size);
-  }, new Set<number>());
+    const fontsize = style ? getFontSize(style) : -1;
+    const h = isHeading(node);
+    const level = h ? getLevel(node) : Infinity;
 
-  // 字号过滤、排序、截取
-  const sizeArr = [...sizeSet]
-    .filter((s) => s > 0)
-    .sort((a, b) => b - a)
-    .slice(0, HEADING_SELECTORS.length);
+    minLevel = Math.min(level, minLevel);
+    maxFontSize = Math.max(fontsize, maxFontSize);
 
-  return nodes.map((node) => {
-    const style = styleMap.get(node);
+    return { node, fontsize, level, isHeading: h };
+  });
 
-    const size = style ? +style.fontWeight * getFontSize(style) : -1;
-    const index = sizeArr.findIndex((s) => size >= s);
+  const hasHeading = minLevel < HEADING_SELECTORS.length;
+  if (!hasHeading) minLevel = 0;
 
-    // 计算 level
-    const level = (index >= 0 ? index : sizeArr.length) + (isHeading(node) ? 0 : 1);
-    return { node, level };
+  const stack: Omit<NodeLevel, 'node'>[] = [{ fontsize: maxFontSize, level: minLevel, isHeading: hasHeading }];
+  return nodeLevels.map(({ node, fontsize, level, isHeading }): Heading => {
+    let computedLevel = HEADING_SELECTORS.length;
+
+    while (stack.length) {
+      const st = stack[stack.length - 1];
+
+      if (isHeading) {
+        computedLevel = level - minLevel;
+        if (st.level <= level) break;
+      } else {
+        const isParent = st.isHeading || st.fontsize > fontsize;
+        computedLevel = st.level + (isParent ? 1 : 0);
+        if (isParent || st.fontsize === fontsize) break;
+      }
+
+      stack.pop();
+    }
+
+    stack.push({ fontsize, isHeading, level: computedLevel });
+
+    return { node, level: computedLevel };
   });
 }
 
 type NodeMap = WeakMap<HTMLElement, { textCount: number; rect: DOMRect }>;
 
-export type Heading = { node: HTMLElement; level: number };
+type NodeLevel = { node: HTMLElement; fontsize: number; isHeading: boolean; level: number };
+
+export type Heading = Pick<NodeLevel, 'node' | 'level'>;
