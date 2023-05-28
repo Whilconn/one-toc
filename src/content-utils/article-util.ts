@@ -1,6 +1,6 @@
-import { getRect, isHidden, queryAll } from './dom-util';
+import { genIdClsSelector, getRect, isHidden, queryAll } from './dom-util';
 import { SITES } from '../shared/site-config';
-import { DISPLAY, NODE_NAME, NOISE_SELECTORS, POSITION, SYMBOL } from '../shared/constants';
+import { DISPLAY, NODE_NAME, NOISE_SELECTORS, NOISE_WORDS, POSITION, SYMBOL } from '../shared/constants';
 
 export function resolveArticle(): HTMLElement {
   const bodyRect = getRect(document.body);
@@ -27,13 +27,10 @@ export function resolveArticle(): HTMLElement {
   return articleNode;
 }
 
-const genSelector = (words: string[]) => {
-  return words.map((v) => `[id*=${v}]${SYMBOL.COMMA}[class*=${v}]`).join(SYMBOL.COMMA);
-};
 const articleSelector = ['', '.', '#'].map((s) => s + NODE_NAME.article).join(SYMBOL.COMMA);
 const negativeSelector = NOISE_SELECTORS.join(SYMBOL.COMMA);
-const positiveSelector = genSelector(['content', 'blog', 'markdown', 'main']);
-const noiseSelector = genSelector(['head', 'foot', 'side', 'left', 'right', 'comment', 'recommend']);
+const positiveSelector = genIdClsSelector(['content', 'blog', 'markdown', 'main']);
+const noiseSelector = genIdClsSelector(NOISE_WORDS);
 
 function searchArticle(parent: HTMLElement, bodyRect: DOMRect): HTMLElement {
   const pRect = getRect(parent);

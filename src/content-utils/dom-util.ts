@@ -106,8 +106,8 @@ export function isFixed(node: HTMLElement, style?: CSSStyleDeclaration) {
   return FIXED_POSITIONS.includes(style.position);
 }
 
-export function getDepthAndPath(node: HTMLElement) {
-  const selectors = [];
+export function genNodePath(node: HTMLElement) {
+  const selectors: string[] = [];
 
   while (node && node !== document.body) {
     node = node.parentElement as HTMLElement;
@@ -115,9 +115,13 @@ export function getDepthAndPath(node: HTMLElement) {
     selectors.push([node.tagName, ...cls].join(''));
   }
 
-  return [selectors.length, selectors.reverse().join('>')];
+  return selectors.reverse().join('>');
 }
 
 export function queryAll(selector: string, parent: HTMLElement = document.body) {
   return [...parent.querySelectorAll(selector)] as HTMLElement[];
+}
+
+export function genIdClsSelector(words: string[]) {
+  return words.map((v) => `[id*=${v}]${SYMBOL.COMMA}[class*=${v}]`).join(SYMBOL.COMMA);
 }

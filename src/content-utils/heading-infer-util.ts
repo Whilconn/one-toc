@@ -1,21 +1,17 @@
-import { BOLD_SELECTORS, HEADING_SELECTORS, NODE_NAME, NOISE_SELECTORS, SYMBOL } from '../shared/constants';
-import { getDepthAndPath, getFontSize, getLevel, getText } from './dom-util';
+import { BOLD_SELECTORS, HEADING_SELECTORS, NODE_NAME, NOISE_WORDS } from '../shared/constants';
+import { genIdClsSelector, genNodePath, getFontSize, getLevel, getText } from './dom-util';
 import { RectMap, StyleMap } from './heading-all-util';
 
 const MW = 10;
-const M1 = window.innerWidth / 3;
-const M2 = window.innerWidth / 2;
 
-export function inferHeadings(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
+export function inferHeadings(articleNode: HTMLElement, nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
   nodes = filterByStyleRuleP1(nodes, styleMap, rectMap);
-  nodes = filterByScoreRuleP2(nodes, styleMap, rectMap, 0.9);
+  nodes = filterByScoreRuleP2(articleNode, nodes, styleMap, rectMap, 0.9);
 
   return nodes;
 }
 
 function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
-  let top = -Infinity;
-
   return nodes.filter((node, i) => {
     const rect = rectMap.get(node);
     const style = styleMap.get(node);
@@ -23,13 +19,6 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 
     // 标题之间必须有内容
     if (!hasContent(node, nodes[i + 1], styleMap)) return false;
-
-    // 横跨三分轴或中轴
-    if (M2 < rect.left || M1 > rect.right) return false;
-
-    // 逻辑与视觉上的前后不能冲突，TODO:需要测试
-    if (rect.top < top) return false;
-    top = rect.top;
 
     // 剔除与相邻标题的 top 或 bottom 相等的节点
     const hasParallelNode = [nodes[i - 1], nodes[i + 1]].some((n) => {
@@ -41,20 +30,24 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
   });
 }
 
-function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap, factor: number) {
+function filterByScoreRuleP2(
+  articleNode: HTMLElement,
+  nodes: HTMLElement[],
+  styleMap: StyleMap,
+  rectMap: RectMap,
+  factor: number,
+) {
   const SCORES = {
-    DEPTH: 1,
-    PATH: 1,
+    NODE_PATH: 1,
+    LEFT: 1,
+    WIDTH: 1,
     ID: 3,
     TAG_H: 3,
-    TAG_B: 2,
-    LEFT: 1,
-    MID: 1,
-    WIDTH: 1,
+    TAG_B: 1,
     MX_WIDTH: 3,
     FONT_SIZE: 3,
     FONT_BOLD: 3,
-    ARTICLE_PARENT: 6,
+    ARTICLE_PARENT: 3,
     RECOMMEND_LINK: -10,
     NOISE_PARENT: -10,
     DOC_TITLE: -20,
@@ -71,12 +64,9 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     'fontFamily',
   ];
 
-  const noiseSelector = ['side', 'left', 'right', 'foot', 'comment', 'recommend']
-    .map((v) => `[id*=${v}]${SYMBOL.COMMA}[class*=${v}]`)
-    .concat(NOISE_SELECTORS)
-    .join(SYMBOL.COMMA);
+  const noiseSelector = genIdClsSelector(NOISE_WORDS);
 
-  const maxWidth = Math.min(window.innerWidth / 3, 600);
+  const maxWidth = Math.min(articleNode.scrollWidth / 3, 600);
 
   const featGroup = new Map<string, number[]>();
   const groupByFeat = (feat: string, idx: number, val?: string | number) => {
@@ -94,9 +84,8 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     if (HEADING_SELECTORS.includes(lowerName)) groupByFeat(FEATS.TAG_H, i);
     if (BOLD_SELECTORS.includes(lowerName)) groupByFeat(FEATS.TAG_B, i);
 
-    const [valDepth, valPath] = getDepthAndPath(node);
-    groupByFeat(FEATS.DEPTH, i, valDepth);
-    groupByFeat(FEATS.PATH, i, valPath);
+    const valPath = genNodePath(node);
+    groupByFeat(FEATS.NODE_PATH, i, valPath);
 
     // document.title 包含该节点完整的文本内容，且该节点是 H1，则可以剔除
     const text = getText(node);
@@ -119,7 +108,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 
     groupByFeat(FEATS.LEFT, i, rect.left >> 0);
     groupByFeat(FEATS.WIDTH, i, rect.width >> 0);
-    groupByFeat(FEATS.MID, i, ((rect.left + rect.right) / 2) >> 0);
+
     // width 有最小限制
     if (rect.width >= maxWidth) groupByFeat(FEATS.MX_WIDTH, i);
 
@@ -143,7 +132,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 
     for (const i of idxList) {
       const n = nodes[i];
-      const score = baseScore > 0 ? baseScore * idxList.length : baseScore;
+      const score = baseScore > 0 ? baseScore * Math.min(idxList.length, 5) : baseScore;
       totalScore += score;
       scoreMap.set(n, (scoreMap.get(n) || 0) + score);
     }

@@ -37,6 +37,8 @@ export const BOLD_SELECTORS = [NODE_NAME.b, NODE_NAME.strong];
 
 export const NOISE_SELECTORS = [NODE_NAME.header, NODE_NAME.aside, NODE_NAME.footer, NODE_NAME.nav];
 
+export const NOISE_WORDS = ['head', 'foot', 'side', 'left', 'right', 'comment', 'recommend'];
+
 export const SYMBOL = { HASH: '#', COMMA: ',' };
 
 export const MSG_NAMES = { TOGGLE_TOC: 'toggle-toc' };

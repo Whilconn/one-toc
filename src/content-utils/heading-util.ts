@@ -1,11 +1,14 @@
 import { filterOfficialHeadings } from './heading-std-util';
+import { resolveArticle } from './article-util';
 import { inferHeadings } from './heading-infer-util';
 import { getAllHeadings } from './heading-all-util';
 import { getFontSize, getLevel, isHeading } from './dom-util';
 import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
-  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, styleMap, rectMap } = getAllHeadings();
+  const articleNode = resolveArticle();
+  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, styleMap, rectMap } =
+    getAllHeadings(articleNode);
 
   const officialHeadings = filterOfficialHeadings(hTagHeadings);
   let allHeadings: HTMLElement[] = [...hTagHeadings, ...bTagHeadings];
@@ -14,18 +17,18 @@ export function resolveHeadings() {
   if (officialHeadings.length < 5) {
     // 默认使用h1~h6、b、strong作为精选标题
     const tagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
-    inferredHeadings = inferHeadings(tagHeadings, styleMap, rectMap);
+    inferredHeadings = inferHeadings(articleNode, tagHeadings, styleMap, rectMap);
 
     const MIN = 1;
     // 使用加粗、大字号作为精选标题
     if (inferredHeadings.length <= MIN) {
-      inferredHeadings = inferHeadings(styleHeadings, styleMap, rectMap);
+      inferredHeadings = inferHeadings(articleNode, styleHeadings, styleMap, rectMap);
       allHeadings = [...allHeadings, ...styleHeadings];
     }
 
     // 使用带序号文字作为精选标题
     if (inferredHeadings.length <= MIN) {
-      inferredHeadings = inferHeadings(semanticHeadings, styleMap, rectMap);
+      inferredHeadings = inferHeadings(articleNode, semanticHeadings, styleMap, rectMap);
       allHeadings = [...allHeadings, ...styleHeadings, ...semanticHeadings];
     }
   }
