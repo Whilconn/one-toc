@@ -1,40 +1,19 @@
 import { getRect, isHidden, queryAll } from './dom-util';
 import { SITES } from '../shared/site-config';
+import { DISPLAY, NODE_NAME, NOISE_SELECTORS, POSITION, SYMBOL } from '../shared/constants';
 
 export function resolveArticle(): HTMLElement {
+  const bodyRect = getRect(document.body);
+  const mainNode: HTMLElement = searchMainNode(bodyRect) || document.body;
+
   // 根据配置获取文章节点
-  let mainNode: HTMLElement = document.body;
   const siteConfig = SITES.find((s) => location.href.startsWith(s.url));
   let articleNode = siteConfig?.article ? queryAll(siteConfig?.article)[0] : null;
 
   // 根据算法获取文章节点
   if (!articleNode) {
-    const nodes = queryAll('body :not(:is(script,style,svg))');
-
-    let maxLen = 0;
-    const validNodes: HTMLElement[] = [];
-    const map: NodeMap = new WeakMap();
-    const bodyTextCount = getValidText(document.body).length;
-    const bodyRect = getRect(document.body);
-
-    const MAX = 10;
-    nodes.forEach((node: HTMLElement) => {
-      const textCount = getValidText(node).length;
-      const rect = node.getBoundingClientRect();
-      const style = getComputedStyle(node);
-
-      if (textCount < MAX || isHidden(node, style, rect, bodyRect)) return;
-
-      validNodes.push(node);
-      map.set(node, { textCount, rect });
-
-      if (textCount <= maxLen || textCount / bodyTextCount < 0.8) return;
-
-      maxLen = textCount;
-      mainNode = node;
-    });
-
-    articleNode = validNodes.findLast((node) => validateArticleNode(node, mainNode, map)) || mainNode;
+    articleNode = searchArticle(mainNode, bodyRect);
+    articleNode = fixArticleNode(mainNode, articleNode);
   }
 
   if (import.meta.env.DEV) {
@@ -48,23 +27,92 @@ export function resolveArticle(): HTMLElement {
   return articleNode;
 }
 
-function validateArticleNode(articleNode: HTMLElement, mainNode: HTMLElement, nodeMap: NodeMap) {
-  const info = nodeMap.get(articleNode);
-  const mainInfo = nodeMap.get(mainNode);
+const genSelector = (words: string[]) => {
+  return words.map((v) => `[id*=${v}]${SYMBOL.COMMA}[class*=${v}]`).join(SYMBOL.COMMA);
+};
+const articleSelector = ['', '.', '#'].map((s) => s + NODE_NAME.article).join(SYMBOL.COMMA);
+const negativeSelector = NOISE_SELECTORS.join(SYMBOL.COMMA);
+const positiveSelector = genSelector(['content', 'blog', 'markdown', 'main']);
+const noiseSelector = genSelector(['head', 'foot', 'side', 'left', 'right', 'comment', 'recommend']);
 
-  if (!info || !mainInfo) return false;
-  if (info.rect.top - mainInfo.rect.top > 200) return false;
+function searchArticle(parent: HTMLElement, bodyRect: DOMRect): HTMLElement {
+  const pRect = getRect(parent);
+  const pText = getVisibleText(parent);
+  const pArea = pRect.width * pRect.height;
 
-  const RATE = 0.6;
-  const { width: w1, height: h1 } = info.rect;
-  const { width: w2, height: h2 } = mainInfo.rect;
-  if (info.textCount / mainInfo.textCount < RATE && (w1 * h1) / (w2 * h2) < RATE) return false;
+  const SCORE = 100;
 
-  return mainNode.contains(articleNode);
+  const children = ([...parent.children] as HTMLElement[])
+    .map((child) => {
+      const rect = getRect(child);
+      const style = getComputedStyle(child);
+      const text = getVisibleText(child);
+
+      const heightRate = rect.height / pRect.height || 0;
+      const topRate = rect.top / pRect.height || 0;
+      const areaRate = (rect.width * rect.height) / pArea || 0;
+      const textRate = text.length / pText.length || 0;
+
+      const isTooFar = rect.top - pRect.top > 600;
+      const isTooSmall = Math.max(heightRate, areaRate, textRate) < 0.5;
+      const isFixedPos = [POSITION.fixed, POSITION.sticky].includes(style.position);
+      const isInline = style.display.includes(DISPLAY.inline);
+
+      if (isTooFar || isTooSmall || isFixedPos || isInline || isHidden(child, style, rect, bodyRect)) {
+        return { child, score: -Infinity };
+      }
+
+      let score = SCORE * (textRate + areaRate - topRate);
+
+      if (child.matches(articleSelector)) score += SCORE;
+      if (child.matches(positiveSelector)) score += SCORE / 4;
+      if (child.matches(negativeSelector)) score -= SCORE;
+      if (child.matches(noiseSelector)) score -= SCORE / 2;
+
+      return { child, score };
+    })
+    .filter((n) => n.score > -Infinity)
+    .sort((a, b) => b.score - a.score);
+
+  return children[0] ? searchArticle(children[0].child, bodyRect) : parent;
 }
 
-function getValidText(node: HTMLElement) {
+// 用于修复特殊文章，如：https://mp.weixin.qq.com/s/7hMdPkNcFihKXypKY2DMHg
+function fixArticleNode(mainNode: HTMLElement, articleNode: HTMLElement) {
+  const rect = getRect(articleNode);
+  const text = getVisibleText(articleNode);
+
+  const pRect = getRect(mainNode);
+  const pText = getVisibleText(mainNode);
+
+  const RATE = 0.8;
+  const textRate = text.length / pText.length || 0;
+  const areaRate = (rect.width * rect.height) / (pRect.width * pRect.height) || 0;
+
+  const needFix =
+    rect.top === pRect.top &&
+    rect.left === pRect.left &&
+    rect.right === pRect.right &&
+    textRate < RATE &&
+    areaRate < RATE;
+
+  return needFix ? mainNode : articleNode;
+}
+
+function searchMainNode(bodyRect: DOMRect) {
+  const nodes = queryAll('body :not(:is(script,style,svg))');
+
+  const bodyTextCount = getVisibleText(document.body).length;
+
+  return nodes.findLast((node: HTMLElement) => {
+    const textCount = getVisibleText(node).length;
+    const rect = node.getBoundingClientRect();
+    const style = getComputedStyle(node);
+
+    return rect.top - bodyRect.top <= 400 && textCount / bodyTextCount >= 0.8 && !isHidden(node, style, rect, bodyRect);
+  });
+}
+
+function getVisibleText(node: HTMLElement) {
   return (node.innerText || '').replace(/\s/g, '');
 }
-
-type NodeMap = WeakMap<HTMLElement, { textCount: number; rect: DOMRect }>;
