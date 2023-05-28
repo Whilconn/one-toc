@@ -1,22 +1,32 @@
-import { BOLD_SELECTORS, FIXED_POSITIONS, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
-import { getFontSize, getLineHeight, getNextNode, getPrevNode, getRect, getText, isHeading } from './dom-util';
+import { BOLD_SELECTORS, DISPLAY, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
+import {
+  findAncestor,
+  getFontSize,
+  getLineHeight,
+  getNextNode,
+  getPrevNode,
+  getRect,
+  getText,
+  isFixed,
+  isHeading,
+  isHidden,
+} from './dom-util';
 
-const MW = 10;
 const MIN_FS = 14;
-const INVALID_DISPLAYS = ['none'];
 
 // h1-h6
 const tagHeadingSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
 // b/strong
 const boldHeadingSelector = BOLD_SELECTORS.join(SYMBOL.COMMA);
 
-// TODO: 优先级 h1#id > article h1 > h1 > article b,strong > b,strong > style: bold、fs>=16 > 语义
+// TODO: 优先级 h1#id > article h1 > h1 > article b,strong > b,strong > style: bold、fs>=20 > 语义
 export function getAllHeadings(articleNode: HTMLElement) {
   const hTagHeadings: HTMLElement[] = [];
   const bTagHeadings: HTMLElement[] = [];
   const styleHeadings: HTMLElement[] = [];
   const semanticHeadings: HTMLElement[] = [];
 
+  const bodyRect = document.body.getBoundingClientRect();
   const reg = /^([一二三四五六七八九十百千万零]+|\d+|[a-z])[、.·,，\s].+/i;
 
   const walker = document.createTreeWalker(articleNode, NodeFilter.SHOW_ELEMENT);
@@ -25,7 +35,7 @@ export function getAllHeadings(articleNode: HTMLElement) {
   while ((node = walker.nextNode() as HTMLElement)) {
     const rect = getRect(node);
     const style = getComputedStyle(node);
-    if (!isFitRuleP0(node, style, rect)) continue;
+    if (!isFitRuleP0(node, style, rect, bodyRect)) continue;
 
     if (node.matches(tagHeadingSelector)) {
       hTagHeadings.push(node);
@@ -33,7 +43,7 @@ export function getAllHeadings(articleNode: HTMLElement) {
       if (node.matches(boldHeadingSelector)) bTagHeadings.push(node);
 
       // 样式匹配，样式是加粗或居中对齐
-      const styleFit = +style.fontWeight >= 500 || getFontSize(style) >= 16;
+      const styleFit = +style.fontWeight >= 500 || getFontSize(style) >= 20;
       if (styleFit) styleHeadings.push(node);
 
       // 语义匹配，文本开头是序号
@@ -44,11 +54,11 @@ export function getAllHeadings(articleNode: HTMLElement) {
 
   // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
   const rectMap = new WeakMap<HTMLElement, DOMRect>();
-  const styleMap = new WeakMap<HTMLElement, Styles>();
+  const styleMap = new WeakMap<HTMLElement, CSSStyleDeclaration>();
   const headings = [...hTagHeadings, ...bTagHeadings, ...styleHeadings, ...semanticHeadings];
   for (const node of headings) {
-    if (!rectMap.has(node)) rectMap.set(node, getRect(node));
-    if (!styleMap.has(node)) styleMap.set(node, fixHeadingStyle(node));
+    if (!rectMap.has(node)) rectMap.set(node, resolveHeadingRect(node));
+    if (!styleMap.has(node)) styleMap.set(node, resolveHeadingStyle(node));
   }
 
   return {
@@ -61,38 +71,26 @@ export function getAllHeadings(articleNode: HTMLElement) {
   };
 }
 
-export function mergeHeadings(nodes: HTMLElement[]) {
-  return nodes
-    .sort((a, b) => {
-      if (a === b) return 0;
-      // Node.DOCUMENT_POSITION_FOLLOWING, Node.DOCUMENT_POSITION_CONTAINED_BY
-      return [4, 16].includes(a.compareDocumentPosition(b)) ? -1 : 1;
-    })
-    .filter((n, i, nodes) => {
-      return i === 0 || !(n.contains(nodes[i - 1]) || nodes[i - 1].contains(n));
-    });
-}
-
 const headingSelector = [...HEADING_SELECTORS, ...BOLD_SELECTORS].join(SYMBOL.COMMA);
 
-function isFitRuleP0(node: HTMLElement, style: Styles, rect: DOMRect) {
+function isFitRuleP0(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect, bodyRect: DOMRect) {
   // 必须有文字内容
   if (!getText(node)) return false;
+
+  // 字号不小于 14px 的
+  if (getFontSize(style) < MIN_FS) return false;
+
+  // 不能是隐藏节点
+  if (isHidden(node, style, rect, bodyRect)) return false;
+
+  // 不能是 fixed 节点
+  if (isFixed(node, style)) return false;
 
   // 不能是评论内容
   if (isNoiseNode(node)) return false;
 
   // 不能是嵌套的heading节点，如h1 h2,h1 b,h2 strong 等
   if (node.parentElement?.closest(headingSelector)) return false;
-
-  // 宽高不小于 10px
-  if (Math.min(rect.width, rect.height) < MW) return false;
-
-  // 字号不小于 14px 的
-  if (getFontSize(style) < MIN_FS) return false;
-
-  // 不能是隐藏节点、fixed节点
-  if (INVALID_DISPLAYS.includes(style.display) || FIXED_POSITIONS.includes(style.position)) return false;
 
   // 必须独占一行
   return isOneLine(node, style, rect);
@@ -103,8 +101,8 @@ function isNoiseNode(node: HTMLElement) {
   return !!node.closest(selector);
 }
 
-// 修正 heading 的字体、字号、颜色等样式
-function fixHeadingStyle(node: HTMLElement) {
+// 修正 heading 的字体、字号、颜色等样式（不直接修改节点样式，会导致页面布局改变甚至破坏）
+function resolveHeadingStyle(node: HTMLElement) {
   const text = getText(node);
   const style = getComputedStyle(node);
   if (!text) return style;
@@ -122,8 +120,25 @@ function fixHeadingStyle(node: HTMLElement) {
   return { ...style, color, fontSize, fontFamily, fontWeight };
 }
 
+// 修正布局信息（不直接修改节点样式，会导致页面布局改变甚至破坏）
+function resolveHeadingRect(node: HTMLElement) {
+  const rect = getRect(node);
+
+  const ancestor = findAncestor(node, (n) => {
+    return !getComputedStyle(n).display.includes(DISPLAY.inline);
+  });
+
+  if (ancestor) {
+    const ancestorRect = ancestor.getBoundingClientRect();
+    rect.x = ancestorRect.x;
+    rect.width = ancestorRect.width;
+  }
+
+  return rect;
+}
+
 // 非 h1~h6 的节点，必须独占一行
-function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
+function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
   if (isHeading(node)) return true;
 
   // 文字换行则判定为不是标题
@@ -143,15 +158,10 @@ function isOneLine(node: HTMLElement, style: Styles, rect: DOMRect) {
   return (y1 <= rect.top || /[\r\n]\s*$/.test(prevText)) && (rect.bottom <= y2 || /^\s*[\r\n]/.test(nextText));
 }
 
-function getLineCount(node: HTMLElement, style: Styles, rect: DOMRect) {
+function getLineCount(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
   return Math.ceil(rect.height / Math.max(getLineHeight(style), getFontSize(style)));
 }
 
-export type Styles = Omit<
-  CSSStyleDeclaration,
-  'getPropertyPriority' | 'getPropertyValue' | 'item' | 'removeProperty' | 'setProperty'
->;
-
-export type StyleMap = WeakMap<HTMLElement, Styles>;
+export type StyleMap = WeakMap<HTMLElement, CSSStyleDeclaration>;
 
 export type RectMap = WeakMap<HTMLElement, DOMRect>;

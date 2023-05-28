@@ -1,11 +1,10 @@
-import { HEADING_SELECTORS, NODE_NAME, SYMBOL } from '../shared/constants';
-import { findAncestor, getDepthAndPath, getFontSize, getLevel, getText } from './dom-util';
-import { RectMap, StyleMap, Styles } from './heading-all-util';
+import { HEADING_SELECTORS, NODE_NAME, NOISE_SELECTORS, SYMBOL } from '../shared/constants';
+import { getDepthAndPath, getFontSize, getLevel, getText } from './dom-util';
+import { RectMap, StyleMap } from './heading-all-util';
 
 const MW = 10;
 const M1 = window.innerWidth / 3;
 const M2 = window.innerWidth / 2;
-const INLINE = 'inline';
 
 export function inferHeadings(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
   nodes = filterByStyleRuleP1(nodes, styleMap, rectMap);
@@ -27,8 +26,6 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 
     // 标题之间必须有内容
     if (!hasContent(node, nodes[i + 1], styleMap)) return false;
-
-    updateRect(node, styleMap, rectMap);
 
     // 横跨三分轴或中轴
     if (M2 < rect.left || M1 > rect.right) return false;
@@ -66,7 +63,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     LEVEL_BREAK: 'levelBreak',
   };
 
-  const commonStyleFeats: Array<keyof Styles> = [
+  const commonStyleFeats: Array<keyof CSSStyleDeclaration> = [
     'display',
     'margin',
     'padding',
@@ -89,18 +86,12 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     [`${FEATS.LEVEL_BREAK}-true`]: -10,
   };
 
-  const NOISE_SELECTORS = ['header', 'aside', 'footer', 'nav'];
-  const attrs = ['id', 'class'];
-  const values = ['side', 'left', 'right', 'foot', 'title', 'comment', 'recommend'];
-  for (const a of attrs) {
-    for (const v of values) {
-      NOISE_SELECTORS.push(`[${a}*=${v}]`);
-    }
-  }
+  const noiseSelector = ['side', 'left', 'right', 'foot', 'comment', 'recommend']
+    .map((v) => `[id*=${v}]${SYMBOL.COMMA}[class*=${v}]`)
+    .concat(NOISE_SELECTORS)
+    .join(SYMBOL.COMMA);
 
   const maxWidth = Math.min(window.innerWidth / 3, 600);
-  const noiseSelector = NOISE_SELECTORS.join(SYMBOL.COMMA);
-  const articleSelector = 'article';
 
   const featGroup = new Map<string, number[]>();
   const groupByFeat = (feat: string, val: string | number | boolean, idx: number) => {
@@ -140,7 +131,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     groupByFeat(FEATS.RECOMMEND_LINK, hasRecommendLink(node), i);
 
     // 节点在文章主体中
-    groupByFeat(FEATS.ARTICLE_PARENT, !!node.closest(articleSelector), i);
+    groupByFeat(FEATS.ARTICLE_PARENT, !!node.closest(NODE_NAME.article), i);
 
     // 在footer、sidebar等节点下
     groupByFeat(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
@@ -203,7 +194,7 @@ function hasRecommendLink(node: HTMLElement) {
   return !linkNode?.pathname.startsWith(location.pathname);
 }
 
-function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>) {
+function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>) {
   // 两个heading必须都存在
   if (!n1 || !n2) return true;
 
@@ -222,23 +213,4 @@ function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElem
   range.setEndBefore(n2);
   const { width, height } = range.getBoundingClientRect();
   return width > MW && height > MW;
-}
-
-// 修改计算后的布局信息（直接修改节点样式会导致页面布局改变甚至破坏）
-function updateRect(node: HTMLElement, styleMap: WeakMap<HTMLElement, Styles>, rectMap: WeakMap<HTMLElement, DOMRect>) {
-  const rect = rectMap.get(node);
-  const style = styleMap.get(node);
-  if (!style || !rect) return;
-
-  const ancestor = findAncestor(node, (n) => {
-    return !getComputedStyle(n).display.includes(INLINE);
-  });
-
-  if (!ancestor) return;
-
-  const ar = ancestor.getBoundingClientRect();
-  rect.x = ar.x;
-  rect.width = ar.width;
-
-  if (import.meta.env.DEV) console.debug('修改节点styleMap、rectMap', node);
 }

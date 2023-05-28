@@ -1,7 +1,7 @@
 import { filterOfficialHeadings } from './heading-std-util';
 import { inferHeadings } from './heading-infer-util';
-import { getAllHeadings, mergeHeadings, Styles } from './heading-all-util';
-import { getFontSize, getLevel, isHeading, queryAll } from './dom-util';
+import { getAllHeadings } from './heading-all-util';
+import { getFontSize, getLevel, getRect, isHeading, isHidden, queryAll } from './dom-util';
 import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
@@ -14,21 +14,18 @@ export function resolveHeadings() {
   const MIN = 1;
   let inferredHeadings: HTMLElement[] = [];
   if (officialHeadings.length <= MIN) {
-    const hbTagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
-    const tagHeadings = inferHeadings(hbTagHeadings, styleMap, rectMap);
+    const tagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
+    const iTagResult = inferHeadings(tagHeadings, styleMap, rectMap);
 
-    if (tagHeadings.length > MIN) {
-      inferredHeadings = tagHeadings;
-    } else {
-      const iStyleHeadings = inferHeadings(styleHeadings, styleMap, rectMap);
-      const iSemanticHeadings = inferHeadings(semanticHeadings, styleMap, rectMap);
-      inferredHeadings = iStyleHeadings.length >= iSemanticHeadings.length ? iStyleHeadings : iSemanticHeadings;
-    }
+    const miscHeadings = mergeHeadings([...styleHeadings, ...semanticHeadings]);
+    const iMiscResult = inferHeadings(miscHeadings, styleMap, rectMap);
+
+    inferredHeadings = iTagResult.length > MIN ? iTagResult : iMiscResult;
   }
 
+  let allHeadings: HTMLElement[];
   const F = 5;
-  let allHeadings: HTMLElement[] = [];
-  if (officialHeadings.length > F || inferredHeadings.length > F) {
+  if (officialHeadings.length > F) {
     allHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
   } else {
     allHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings, ...styleHeadings, ...semanticHeadings]);
@@ -49,6 +46,7 @@ function resolveArticle(): HTMLElement {
   const validNodes: HTMLElement[] = [];
   const map: NodeMap = new WeakMap();
   const bodyTextCount = getValidText(document.body).length;
+  const bodyRect = getRect(document.body);
 
   const MAX = 10;
   nodes.forEach((node: HTMLElement) => {
@@ -56,7 +54,7 @@ function resolveArticle(): HTMLElement {
     const rect = node.getBoundingClientRect();
     const style = getComputedStyle(node);
 
-    if (textCount < MAX || rect.width < MAX || rect.height < MAX || /^(none|inline)/.test(style.display)) return;
+    if (textCount < MAX || isHidden(node, style, rect, bodyRect)) return;
 
     validNodes.push(node);
     map.set(node, { textCount, rect });
@@ -67,20 +65,7 @@ function resolveArticle(): HTMLElement {
     mainNode = node;
   });
 
-  const articleNode =
-    validNodes.findLast((node) => {
-      const info = map.get(node);
-      const mainInfo = map.get(mainNode);
-
-      if (!info || !mainInfo) return false;
-      if (info.rect.top - mainInfo.rect.top > 200) return false;
-
-      const { width: w1, height: h1 } = info.rect;
-      const { width: w2, height: h2 } = mainInfo.rect;
-      if (info.textCount / mainInfo.textCount < 0.6 && (w1 * h1) / (w2 * h2) < 0.6) return false;
-
-      return mainNode.contains(node);
-    }) || mainNode;
+  const articleNode = validNodes.findLast((node) => validateArticleNode(node, mainNode, map)) || mainNode;
 
   if (import.meta.env.DEV) {
     mainNode.style.boxShadow = 'inset blue 0 0 0 10px';
@@ -93,11 +78,38 @@ function resolveArticle(): HTMLElement {
   return articleNode;
 }
 
+function validateArticleNode(articleNode: HTMLElement, mainNode: HTMLElement, nodeMap: NodeMap) {
+  const info = nodeMap.get(articleNode);
+  const mainInfo = nodeMap.get(mainNode);
+
+  if (!info || !mainInfo) return false;
+  if (info.rect.top - mainInfo.rect.top > 200) return false;
+
+  const RATE = 0.6;
+  const { width: w1, height: h1 } = info.rect;
+  const { width: w2, height: h2 } = mainInfo.rect;
+  if (info.textCount / mainInfo.textCount < RATE && (w1 * h1) / (w2 * h2) < RATE) return false;
+
+  return mainNode.contains(articleNode);
+}
+
+function mergeHeadings(nodes: HTMLElement[]) {
+  return nodes
+    .sort((a, b) => {
+      if (a === b) return 0;
+      // Node.DOCUMENT_POSITION_FOLLOWING, Node.DOCUMENT_POSITION_CONTAINED_BY
+      return [4, 16].includes(a.compareDocumentPosition(b)) ? -1 : 1;
+    })
+    .filter((n, i, nodes) => {
+      return i === 0 || !(n.contains(nodes[i - 1]) || nodes[i - 1].contains(n));
+    });
+}
+
 function getValidText(node: HTMLElement) {
   return (node.innerText || '').replace(/\s/g, '');
 }
 
-function attachLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, Styles>): Heading[] {
+function attachLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>): Heading[] {
   let minLevel = Infinity;
   let maxFontSize = -Infinity;
   const nodeLevels: NodeLevel[] = nodes.map((node): NodeLevel => {
