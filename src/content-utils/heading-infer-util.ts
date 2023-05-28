@@ -1,4 +1,4 @@
-import { HEADING_SELECTORS, NODE_NAME, NOISE_SELECTORS, SYMBOL } from '../shared/constants';
+import { BOLD_SELECTORS, HEADING_SELECTORS, NODE_NAME, NOISE_SELECTORS, SYMBOL } from '../shared/constants';
 import { getDepthAndPath, getFontSize, getLevel, getText } from './dom-util';
 import { RectMap, StyleMap } from './heading-all-util';
 
@@ -8,10 +8,7 @@ const M2 = window.innerWidth / 2;
 
 export function inferHeadings(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
   nodes = filterByStyleRuleP1(nodes, styleMap, rectMap);
-
-  const invalidNodes = filterByScoreRuleP2(nodes, styleMap, rectMap, 0.9);
-  const invalidNodeSet = new Set(invalidNodes);
-  if (invalidNodeSet.size) nodes = nodes.filter((n) => !invalidNodeSet.has(n));
+  nodes = filterByScoreRuleP2(nodes, styleMap, rectMap, 0.9);
 
   return nodes;
 }
@@ -45,23 +42,25 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 }
 
 function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap, factor: number) {
-  const FEATS = {
-    ID: 'nodeId',
-    TAG: 'nodeTag',
-    DEPTH: 'nodeDepth',
-    PATH: 'nodePath',
-    LEFT: 'nodeLeft',
-    MID: 'nodeMid',
-    WIDTH: 'nodeWidth',
-    MX_WIDTH: 'maxWidth',
-    FONT_SIZE: 'fontSize',
-    FONT_BOLD: 'fontBold',
-    RECOMMEND_LINK: 'recommendLink',
-    NOISE_PARENT: 'noiseParent',
-    ARTICLE_PARENT: 'articleParent',
-    DOC_TITLE: 'docTitle',
-    LEVEL_BREAK: 'levelBreak',
+  const SCORES = {
+    DEPTH: 1,
+    PATH: 1,
+    ID: 3,
+    TAG_H: 3,
+    TAG_B: 2,
+    LEFT: 1,
+    MID: 1,
+    WIDTH: 1,
+    MX_WIDTH: 3,
+    FONT_SIZE: 3,
+    FONT_BOLD: 3,
+    ARTICLE_PARENT: 6,
+    RECOMMEND_LINK: -10,
+    NOISE_PARENT: -10,
+    DOC_TITLE: -20,
   };
+
+  const FEATS = Object.fromEntries(Object.keys(SCORES).map((k) => [k, k])) as Record<keyof typeof SCORES, string>;
 
   const commonStyleFeats: Array<keyof CSSStyleDeclaration> = [
     'display',
@@ -72,20 +71,6 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     'fontFamily',
   ];
 
-  const SPECIAL_SCORE = {
-    [`${FEATS.TAG}-H`]: 3,
-    [`${FEATS.ID}-true`]: 3,
-    [`${FEATS.FONT_BOLD}-true`]: 3,
-    [`${FEATS.LEFT}-true`]: 3,
-    [`${FEATS.MID}-true`]: 3,
-    [`${FEATS.WIDTH}-true`]: 3,
-    [`${FEATS.ARTICLE_PARENT}-true`]: 6,
-    [`${FEATS.RECOMMEND_LINK}-true`]: -10,
-    [`${FEATS.NOISE_PARENT}-true`]: -10,
-    [`${FEATS.DOC_TITLE}-true`]: -10,
-    [`${FEATS.LEVEL_BREAK}-true`]: -10,
-  };
-
   const noiseSelector = ['side', 'left', 'right', 'foot', 'comment', 'recommend']
     .map((v) => `[id*=${v}]${SYMBOL.COMMA}[class*=${v}]`)
     .concat(NOISE_SELECTORS)
@@ -94,70 +79,59 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
   const maxWidth = Math.min(window.innerWidth / 3, 600);
 
   const featGroup = new Map<string, number[]>();
-  const groupByFeat = (feat: string, val: string | number | boolean, idx: number) => {
-    const key = `${feat}-${val.toString()}`;
+  const groupByFeat = (feat: string, idx: number, val?: string | number) => {
+    val = (val ?? '').toString();
+    const key = val ? `${feat}-${val}` : feat;
     if (!featGroup.has(key)) featGroup.set(key, []);
     featGroup.get(key)?.push(idx);
   };
 
-  let h1Count = 0;
-
   nodes.forEach((node, i) => {
     const valId = node.id || node.getAttribute('name');
-    if (valId) groupByFeat(FEATS.ID, true, i);
+    if (valId) groupByFeat(FEATS.ID, i);
 
-    const valTag = node.tagName.startsWith('H') ? 'H' : 'B';
-    groupByFeat(FEATS.TAG, valTag, i);
+    const lowerName = node.tagName.toLowerCase();
+    if (HEADING_SELECTORS.includes(lowerName)) groupByFeat(FEATS.TAG_H, i);
+    if (BOLD_SELECTORS.includes(lowerName)) groupByFeat(FEATS.TAG_B, i);
 
     const [valDepth, valPath] = getDepthAndPath(node);
-    groupByFeat(FEATS.DEPTH, valDepth, i);
-    groupByFeat(FEATS.PATH, valPath, i);
+    groupByFeat(FEATS.DEPTH, i, valDepth);
+    groupByFeat(FEATS.PATH, i, valPath);
 
-    // document.title 包含该节点完整的文本内容，可能是文章标题
+    // document.title 包含该节点完整的文本内容，且该节点是 H1，则可以剔除
     const text = getText(node);
-
-    if (factor !== 1) {
-      groupByFeat(FEATS.DOC_TITLE, !!(text && document.title.includes(text)), i);
-      // 唯一的 H1，可能是文章标题（是否附加：top<300？最大的 heading？）
-      const H1 = 'H1';
-      if (!h1Count && node.tagName === H1) {
-        h1Count++;
-        const h1Node = nodes.filter((n, j) => j > i && n.tagName === H1);
-        if (h1Node) groupByFeat(FEATS.DOC_TITLE, true, i);
-      }
+    const H1 = NODE_NAME.h1.toUpperCase();
+    if (text && document.title.includes(text) && node.tagName === H1) {
+      groupByFeat(FEATS.DOC_TITLE, i);
     }
 
     // 不能是推荐链接
-    groupByFeat(FEATS.RECOMMEND_LINK, hasRecommendLink(node), i);
+    if (hasRecommendLink(node)) groupByFeat(FEATS.RECOMMEND_LINK, i);
 
     // 节点在文章主体中
-    groupByFeat(FEATS.ARTICLE_PARENT, !!node.closest(NODE_NAME.article), i);
+    if (node.closest(NODE_NAME.article)) groupByFeat(FEATS.ARTICLE_PARENT, i);
 
     // 在footer、sidebar等节点下
-    groupByFeat(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
-
-    // level突变，如 h2 -> h5
-    for (let j = i + 1; nodes[j] && getLevel(nodes[j]) - getLevel(node) > 1; j++) {
-      groupByFeat(FEATS.LEVEL_BREAK, true, j);
-    }
+    if (node.closest(noiseSelector)) groupByFeat(FEATS.NOISE_PARENT, i);
 
     const rect = rectMap.get(node) || new DOMRect(-1, -1, -1, -1);
     const style = styleMap.get(node) || new CSSStyleDeclaration();
 
-    groupByFeat(FEATS.LEFT, rect.left, i);
-    groupByFeat(FEATS.WIDTH, rect.width, i);
-    groupByFeat(FEATS.MID, ((rect.left + rect.right) / 2) >> 0, i);
+    groupByFeat(FEATS.LEFT, i, rect.left >> 0);
+    groupByFeat(FEATS.WIDTH, i, rect.width >> 0);
+    groupByFeat(FEATS.MID, i, ((rect.left + rect.right) / 2) >> 0);
     // width 有最小限制
-    if (rect.width >= maxWidth) groupByFeat(FEATS.MX_WIDTH, true, i);
+    if (rect.width >= maxWidth) groupByFeat(FEATS.MX_WIDTH, i);
 
     const fontSize = style ? getFontSize(style) : -1;
-    groupByFeat(FEATS.FONT_SIZE, `${node.tagName}-${fontSize}`, i);
+    // 辅助排除字号异常节点，比如文章标题
+    groupByFeat(FEATS.FONT_SIZE, i, fontSize);
 
     const fontWeight = +(style ? style.fontWeight : -1);
-    if (fontWeight > 400) groupByFeat(FEATS.FONT_BOLD, true, i);
+    if (fontWeight >= 500) groupByFeat(FEATS.FONT_BOLD, i);
 
     for (const p of commonStyleFeats) {
-      groupByFeat(p as string, style[p] as string, i);
+      groupByFeat(p as string, i, style[p] as string);
     }
   });
 
@@ -165,7 +139,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
   const scoreMap = new WeakMap<HTMLElement, number>();
 
   for (const [key, idxList] of featGroup) {
-    const baseScore = SPECIAL_SCORE[key] || 1;
+    const baseScore = SCORES[key as keyof typeof SCORES] || 1;
 
     for (const i of idxList) {
       const n = nodes[i];
@@ -178,7 +152,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
   const avgScore = (totalScore / nodes.length) * factor;
 
   return nodes.filter((node) => {
-    return (scoreMap.get(node) ?? -Infinity) < avgScore;
+    return (scoreMap.get(node) ?? -Infinity) >= avgScore;
   });
 }
 

@@ -1,4 +1,5 @@
 import { BOLD_SELECTORS, DISPLAY, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
+import { resolveArticle } from './article-util';
 import {
   findAncestor,
   getFontSize,
@@ -20,14 +21,16 @@ const tagHeadingSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
 const boldHeadingSelector = BOLD_SELECTORS.join(SYMBOL.COMMA);
 
 // TODO: 优先级 h1#id > article h1 > h1 > article b,strong > b,strong > style: bold、fs>=20 > 语义
-export function getAllHeadings(articleNode: HTMLElement) {
+export function getAllHeadings() {
+  const articleNode = resolveArticle();
+
   const hTagHeadings: HTMLElement[] = [];
   const bTagHeadings: HTMLElement[] = [];
   const styleHeadings: HTMLElement[] = [];
   const semanticHeadings: HTMLElement[] = [];
 
   const bodyRect = document.body.getBoundingClientRect();
-  const reg = /^([一二三四五六七八九十百千万零]+|\d+|[a-z])[、.·,，\s].+/i;
+  const reg = /^([一二三四五六七八九十百千万零]{1,4}|\d{1,3}|[a-z])[、.·,，].+/i;
 
   const walker = document.createTreeWalker(articleNode, NodeFilter.SHOW_ELEMENT);
   let node = walker.root as HTMLElement;

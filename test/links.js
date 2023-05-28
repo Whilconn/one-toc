@@ -14,6 +14,7 @@ module.exports.links = [
   ['微信', 'https://mp.weixin.qq.com/s/7hMdPkNcFihKXypKY2DMHg', '21'],
   ['掘金', 'https://juejin.cn/post/7135756687134162980', '5'],
   ['知乎', 'https://zhuanlan.zhihu.com/p/24650288', '62'],
+  ['知乎-序号', 'https://zhuanlan.zhihu.com/p/434013564', '10'],
   ['开源中国', 'https://my.oschina.net/u/4843764/blog/5528481', '18'],
   ['博客园', 'https://www.cnblogs.com/teach/p/16295605.html', '11'],
   ['CSDN', 'https://blog.csdn.net/csdnnews/article/details/124880259', '2'],
@@ -46,6 +47,7 @@ module.exports.links = [
   // TODO: 识别优化
   // ['雷锋网', 'https://www.leiphone.com/category/zaobao/Jp1XvGFjehpedqja.html', '20'],
   // ['wiki', 'https://en.wikipedia.org/wiki/International_Olympic_Committee', '44'],
+  // ['微信', 'https://mp.weixin.qq.com/s/utGGaAErfbJSA-yw3G7AHA', '16'],
   // ['微信-前端之巅', 'https://mp.weixin.qq.com/s/lA3ApjELCiUHudn9oGxR9Q', '2'],
   // TODO: 内容在 iframe 中；开启content_scripts.all_frames，识别内容区唯一iframe
   // ['threejs', 'https://threejs.org/docs/index.html#manual/en/introduction/Installation', '15'],
