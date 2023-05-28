@@ -26,6 +26,10 @@ export function getFontSize(style: Pick<CSSStyleDeclaration, 'fontSize'>) {
   return +style.fontSize.replace(/[a-z]/gi, '') || 0;
 }
 
+export function getLineHeight(style: Pick<CSSStyleDeclaration, 'lineHeight'>) {
+  return +style.lineHeight.replace(/[a-z]/gi, '') || 0;
+}
+
 // 获取视觉上的前一个节点
 export function getPrevNode(node: HTMLElement) {
   while (node && node !== document.body) {

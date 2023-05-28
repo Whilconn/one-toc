@@ -1,26 +1,48 @@
 import { filterOfficialHeadings } from './heading-std-util';
 import { inferHeadings } from './heading-infer-util';
-import { getAllHeadings, Styles } from './heading-all-util';
+import { getAllHeadings, mergeHeadings, Styles } from './heading-all-util';
 import { getFontSize, getLevel, isHeading, queryAll } from './dom-util';
 import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
-  const { allHeadings, styleMap, rectMap } = getAllHeadings();
   const articleNode = resolveArticle();
-  const allArticleHeadings = allHeadings.filter((n) => articleNode.contains(n));
+  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, styleMap, rectMap } =
+    getAllHeadings(articleNode);
 
-  const officialHeadings = filterOfficialHeadings(allArticleHeadings);
-  const inferredHeadings = inferHeadings(allArticleHeadings, styleMap, rectMap);
+  const officialHeadings = filterOfficialHeadings(hTagHeadings);
+
+  const MIN = 1;
+  let inferredHeadings: HTMLElement[] = [];
+  if (officialHeadings.length <= MIN) {
+    const hbTagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
+    const tagHeadings = inferHeadings(hbTagHeadings, styleMap, rectMap);
+
+    if (tagHeadings.length > MIN) {
+      inferredHeadings = tagHeadings;
+    } else {
+      const iStyleHeadings = inferHeadings(styleHeadings, styleMap, rectMap);
+      const iSemanticHeadings = inferHeadings(semanticHeadings, styleMap, rectMap);
+      inferredHeadings = iStyleHeadings.length >= iSemanticHeadings.length ? iStyleHeadings : iSemanticHeadings;
+    }
+  }
+
+  const F = 5;
+  let allHeadings: HTMLElement[] = [];
+  if (officialHeadings.length > F || inferredHeadings.length > F) {
+    allHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
+  } else {
+    allHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings, ...styleHeadings, ...semanticHeadings]);
+  }
 
   return {
-    allHeadings: attachLevel(allArticleHeadings, styleMap),
+    allHeadings: attachLevel(allHeadings, styleMap),
     officialHeadings: attachLevel(officialHeadings, styleMap),
     inferredHeadings: attachLevel(inferredHeadings, styleMap),
   };
 }
 
 function resolveArticle(): HTMLElement {
-  const nodes = queryAll('body :not(:is(script, style,svg))');
+  const nodes = queryAll('body :not(:is(script,style,svg))');
 
   let maxLen = 0;
   let mainNode: HTMLElement = document.body;
@@ -28,12 +50,13 @@ function resolveArticle(): HTMLElement {
   const map: NodeMap = new WeakMap();
   const bodyTextCount = getValidText(document.body).length;
 
+  const MAX = 10;
   nodes.forEach((node: HTMLElement) => {
     const textCount = getValidText(node).length;
     const rect = node.getBoundingClientRect();
     const style = getComputedStyle(node);
 
-    if (textCount < 10 || rect.width < 10 || rect.height < 10 || /^(none|inline)/.test(style.display)) return;
+    if (textCount < MAX || rect.width < MAX || rect.height < MAX || /^(none|inline)/.test(style.display)) return;
 
     validNodes.push(node);
     map.set(node, { textCount, rect });

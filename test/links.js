@@ -1,4 +1,7 @@
 module.exports.links = [
+  ['虎嗅', 'https://www.huxiu.com/article/1421112.html', '2'],
+  ['搜狐', 'https://www.sohu.com/a/112088292_481816', '18'],
+  ['CSDN', 'https://blog.csdn.net/OKCRoss/article/details/127341037', '11'],
   ['CSDN', 'https://blog.csdn.net/AABBbaby/article/details/130193656', '6'],
   ['少数派', 'https://sspai.com/post/76060', '21'],
   ['36氪金', 'https://36kr.com/p/2231774512672388', '9'],
@@ -24,7 +27,7 @@ module.exports.links = [
   ['React Doc(legacy)', 'https://legacy.reactjs.org/docs/getting-started.html', '19'],
   ['React Native', 'https://reactnative.dev/docs/getting-started', '6'],
   ['Create React App', 'https://create-react-app.dev/docs/getting-started/', '13'],
-  ['Vue3', 'https://vuejs.org/guide/typescript/overview.html', '11'],
+  ['Vue3', 'https://vuejs.org/guide/typescript/overview.html', '13'],
   ['Angular', 'https://angular.io/start/start-data', '14'],
   ['svelte', 'https://svelte.dev/docs', '129'],
   ['Preact', 'https://preactjs.com/guide/v10/getting-started/', '15'],
@@ -42,8 +45,8 @@ module.exports.links = [
   ['张鑫旭博客', 'https://www.zhangxinxu.com/wordpress/2023/04/ai-code-tool-codeium-github-copilot/', '23'],
   // TODO: 识别优化
   // ['雷锋网', 'https://www.leiphone.com/category/zaobao/Jp1XvGFjehpedqja.html', '20'],
-  // TODO: 兼容仅 font-weight > bold 的标题
-  // ['虎嗅', 'https://www.huxiu.com/article/1421112.html', '2'],
+  // ['wiki', 'https://en.wikipedia.org/wiki/International_Olympic_Committee', '44'],
+  // ['微信-前端之巅', 'https://mp.weixin.qq.com/s/lA3ApjELCiUHudn9oGxR9Q', '2'],
   // TODO: 内容在 iframe 中；开启content_scripts.all_frames，识别内容区唯一iframe
   // ['threejs', 'https://threejs.org/docs/index.html#manual/en/introduction/Installation', '15'],
 ];

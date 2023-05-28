@@ -25,9 +25,6 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     const style = styleMap.get(node);
     if (!style || !rect) return true;
 
-    // 不能是推荐链接
-    if (isRecommendLink(node)) return false;
-
     // 标题之间必须有内容
     if (!hasContent(node, nodes[i + 1], styleMap)) return false;
 
@@ -62,8 +59,9 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     MX_WIDTH: 'maxWidth',
     FONT_SIZE: 'fontSize',
     FONT_BOLD: 'fontBold',
-    NOISE_NODE: 'noiseNode',
+    RECOMMEND_LINK: 'recommendLink',
     NOISE_PARENT: 'noiseParent',
+    ARTICLE_PARENT: 'articleParent',
     DOC_TITLE: 'docTitle',
     LEVEL_BREAK: 'levelBreak',
   };
@@ -84,18 +82,25 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     [`${FEATS.LEFT}-true`]: 3,
     [`${FEATS.MID}-true`]: 3,
     [`${FEATS.WIDTH}-true`]: 3,
-    [`${FEATS.NOISE_NODE}-true`]: -10,
+    [`${FEATS.ARTICLE_PARENT}-true`]: 6,
+    [`${FEATS.RECOMMEND_LINK}-true`]: -10,
     [`${FEATS.NOISE_PARENT}-true`]: -10,
     [`${FEATS.DOC_TITLE}-true`]: -10,
     [`${FEATS.LEVEL_BREAK}-true`]: -10,
   };
 
-  const WORDS = ['side', 'left', 'right', 'foot', 'title', 'comment'];
-  const NOISE_SELECTORS = ['header', 'aside', 'footer'];
-  ['id', 'class'].forEach((a) => NOISE_SELECTORS.push(...WORDS.map((w) => `[${a}*=${w}]`)));
+  const NOISE_SELECTORS = ['header', 'aside', 'footer', 'nav'];
+  const attrs = ['id', 'class'];
+  const values = ['side', 'left', 'right', 'foot', 'title', 'comment', 'recommend'];
+  for (const a of attrs) {
+    for (const v of values) {
+      NOISE_SELECTORS.push(`[${a}*=${v}]`);
+    }
+  }
 
   const maxWidth = Math.min(window.innerWidth / 3, 600);
   const noiseSelector = NOISE_SELECTORS.join(SYMBOL.COMMA);
+  const articleSelector = 'article';
 
   const featGroup = new Map<string, number[]>();
   const groupByFeat = (feat: string, val: string | number | boolean, idx: number) => {
@@ -131,11 +136,13 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
       }
     }
 
-    // 包含特殊标点符号
-    const reg = /[,，；;。]|\.$/;
-    if (reg.test(text)) groupByFeat(FEATS.NOISE_NODE, true, i);
-    // 节点不在文章主体中，如footer、sidebar等
-    groupByFeat(FEATS.NOISE_NODE, node.matches(noiseSelector), i);
+    // 不能是推荐链接
+    groupByFeat(FEATS.RECOMMEND_LINK, hasRecommendLink(node), i);
+
+    // 节点在文章主体中
+    groupByFeat(FEATS.ARTICLE_PARENT, !!node.closest(articleSelector), i);
+
+    // 在footer、sidebar等节点下
     groupByFeat(FEATS.NOISE_PARENT, !!node.closest(noiseSelector), i);
 
     // level突变，如 h2 -> h5
@@ -185,7 +192,7 @@ function filterByScoreRuleP2(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
 }
 
 // 是否推荐链接
-function isRecommendLink(node: HTMLElement) {
+function hasRecommendLink(node: HTMLElement) {
   // TODO: https://en.wikipedia.org/wiki/International_Olympic_Committee
   const linkNode = (node.closest(NODE_NAME.a) || node.querySelector(NODE_NAME.a)) as HTMLAnchorElement;
 
