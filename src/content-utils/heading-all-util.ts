@@ -3,8 +3,8 @@ import {
   findAncestor,
   getFontSize,
   getLineHeight,
-  getNextNode,
-  getPrevNode,
+  getNextTextNode,
+  getPrevTextNode,
   getRect,
   getText,
   isFixed,
@@ -39,7 +39,7 @@ export function getAllHeadings(articleNode: HTMLElement) {
 
     if (node.matches(tagHeadingSelector)) {
       hTagHeadings.push(node);
-    } else if (getLineCount(node, style, rect) === 1) {
+    } else if (getLineCount(node, style, rect) <= 1) {
       if (node.matches(boldHeadingSelector)) bTagHeadings.push(node);
 
       // 样式匹配，样式是加粗或居中对齐
@@ -145,8 +145,8 @@ function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect)
   const lineCount = getLineCount(node, style, rect);
   if (lineCount > 1) return false;
 
-  const prevNode = getPrevNode(node);
-  const nextNode = getNextNode(node);
+  const prevNode = getPrevTextNode(node);
+  const nextNode = getNextTextNode(node);
 
   const y1 = prevNode ? getRect(prevNode).bottom : -Infinity;
   const y2 = nextNode ? getRect(nextNode).top : Infinity;
@@ -159,7 +159,7 @@ function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect)
 }
 
 function getLineCount(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
-  return Math.ceil(rect.height / Math.max(getLineHeight(style), getFontSize(style)));
+  return Math.floor(rect.height / Math.max(getLineHeight(style), getFontSize(style)));
 }
 
 export type StyleMap = WeakMap<HTMLElement, CSSStyleDeclaration>;

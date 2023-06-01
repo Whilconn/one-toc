@@ -1,12 +1,11 @@
 import { BOLD_SELECTORS, HEADING_SELECTORS, NODE_NAME, NOISE_WORDS } from '../shared/constants';
-import { genIdClsSelector, genNodePath, getFontSize, getLevel, getText } from './dom-util';
+import { genIdClsSelector, genNodePath, getFontSize, getText, isHeading } from './dom-util';
 import { RectMap, StyleMap } from './heading-all-util';
-
-const MW = 10;
 
 export function inferHeadings(articleNode: HTMLElement, nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
   nodes = filterByStyleRuleP1(nodes, styleMap, rectMap);
   nodes = filterByScoreRuleP2(articleNode, nodes, styleMap, rectMap, 0.9);
+  nodes = filterByStyleRuleP3(nodes);
 
   return nodes;
 }
@@ -16,9 +15,6 @@ function filterByStyleRuleP1(nodes: HTMLElement[], styleMap: StyleMap, rectMap: 
     const rect = rectMap.get(node);
     const style = styleMap.get(node);
     if (!style || !rect) return true;
-
-    // 标题之间必须有内容
-    if (!hasContent(node, nodes[i + 1], styleMap)) return false;
 
     // 剔除与相邻标题的 top 或 bottom 相等的节点
     const hasParallelNode = [nodes[i - 1], nodes[i + 1]].some((n) => {
@@ -145,6 +141,23 @@ function filterByScoreRuleP2(
   });
 }
 
+const noiseSymbolReg = /[,.;!?，。；！？]$/;
+
+// 同时包含 h1~h6、b、strong 时，若数量过多则考虑剔除部分b、strong节点
+function filterByStyleRuleP3(nodes: HTMLElement[]) {
+  if (nodes.length < 30) return nodes;
+
+  const hTagNodes = nodes.filter((n) => isHeading(n));
+  if (hTagNodes.length > 10) return hTagNodes;
+
+  return nodes.filter((node) => {
+    if (isHeading(node)) return true;
+
+    const text = getText(node);
+    return !noiseSymbolReg.test(text);
+  });
+}
+
 // 是否推荐链接
 function hasRecommendLink(node: HTMLElement) {
   // TODO: https://en.wikipedia.org/wiki/International_Olympic_Committee
@@ -155,25 +168,4 @@ function hasRecommendLink(node: HTMLElement) {
 
   // 剔除出自文章内部的链接
   return !linkNode?.pathname.startsWith(location.pathname);
-}
-
-function hasContent(n1: HTMLElement, n2: HTMLElement, styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>) {
-  // 两个heading必须都存在
-  if (!n1 || !n2) return true;
-
-  // 两个都是h1~h6可忽略，n2的层级更大可忽略
-  const l1 = getLevel(n1);
-  const l2 = getLevel(n2);
-  if (Math.max(l1, l2) <= HEADING_SELECTORS.length || l1 < l2) return true;
-
-  // 样式上n1的字号更大可忽略
-  const s1 = styleMap.get(n1);
-  const s2 = styleMap.get(n2);
-  if (!s1 || !s2 || getFontSize(s1) > getFontSize(s2)) return true;
-
-  const range = new Range();
-  range.setStartAfter(n1);
-  range.setEndBefore(n2);
-  const { width, height } = range.getBoundingClientRect();
-  return width > MW && height > MW;
 }

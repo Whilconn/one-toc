@@ -45,13 +45,12 @@ function searchArticle(parent: HTMLElement, bodyRect: DOMRect): HTMLElement {
       const style = getComputedStyle(child);
       const text = getVisibleText(child);
 
-      const heightRate = rect.height / pRect.height || 0;
       const topRate = rect.top / pRect.height || 0;
       const areaRate = (rect.width * rect.height) / pArea || 0;
       const textRate = text.length / pText.length || 0;
 
-      const isTooFar = rect.top - pRect.top > 600;
-      const isTooSmall = Math.max(heightRate, areaRate, textRate) < 0.5;
+      const isTooFar = rect.top - pRect.top > 0.8 * window.outerHeight;
+      const isTooSmall = Math.max(areaRate, textRate) < 0.5;
       const isFixedPos = [POSITION.fixed, POSITION.sticky].includes(style.position);
       const isInline = style.display.includes(DISPLAY.inline);
 

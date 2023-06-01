@@ -30,21 +30,21 @@ export function getLineHeight(style: Pick<CSSStyleDeclaration, 'lineHeight'>) {
   return +style.lineHeight.replace(/[a-z]/gi, '') || 0;
 }
 
-// 获取视觉上的前一个节点
-export function getPrevNode(node: HTMLElement) {
+// 获取视觉上的前一个节点，且文本内容不为空
+export function getPrevTextNode(node: HTMLElement) {
   while (node && node !== document.body) {
-    if (node.previousSibling) return node.previousSibling;
-    node = node.parentElement as HTMLElement;
+    if (node.previousSibling?.textContent) return node.previousSibling;
+    node = (node.previousSibling || node.parentElement) as HTMLElement;
   }
 
   return null;
 }
 
-// 获取视觉上的下一个节点
-export function getNextNode(node: HTMLElement) {
+// 获取视觉上的下一个节点，且文本内容不为空
+export function getNextTextNode(node: HTMLElement) {
   while (node && node !== document.body) {
-    if (node.nextSibling) return node.nextSibling;
-    node = node.parentElement as HTMLElement;
+    if (node.nextSibling?.textContent) return node.nextSibling;
+    node = (node.nextSibling || node.parentElement) as HTMLElement;
   }
 
   return null;
