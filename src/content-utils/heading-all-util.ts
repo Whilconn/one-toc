@@ -1,8 +1,6 @@
 import { BOLD_SELECTORS, DISPLAY, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
 import {
   findAncestor,
-  getFontSize,
-  getLineHeight,
   getNextTextNode,
   getPrevTextNode,
   getRect,
@@ -10,14 +8,13 @@ import {
   isFixed,
   isHeading,
   isHidden,
+  pxToNumber,
 } from './dom-util';
 
 const MIN_FS = 14;
 
-// h1-h6
-const tagHeadingSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
 // b/strong
-const boldHeadingSelector = BOLD_SELECTORS.join(SYMBOL.COMMA);
+const boldTagSelector = BOLD_SELECTORS.join(SYMBOL.COMMA);
 
 // TODO: 优先级 h1#id > article h1 > h1 > article b,strong > b,strong > style: bold、fs>=20 > 语义
 export function getAllHeadings(articleNode: HTMLElement) {
@@ -37,13 +34,14 @@ export function getAllHeadings(articleNode: HTMLElement) {
     const style = getComputedStyle(node);
     if (!isFitRuleP0(node, style, rect, bodyRect)) continue;
 
-    if (node.matches(tagHeadingSelector)) {
+    if (isHeading(node)) {
       hTagHeadings.push(node);
-    } else if (getLineCount(node, style, rect) <= 1) {
-      if (node.matches(boldHeadingSelector)) bTagHeadings.push(node);
+    } else {
+      // 非h1~h6的节点必须保证独占一行 (isFitRuleP0函数已包含该逻辑，此处不再单独判断)
+      if (node.matches(boldTagSelector)) bTagHeadings.push(node);
 
       // 样式匹配，样式是加粗或居中对齐
-      const styleFit = +style.fontWeight >= 500 || getFontSize(style) >= 20;
+      const styleFit = +style.fontWeight >= 500 || pxToNumber(style.fontSize) >= 20;
       if (styleFit) styleHeadings.push(node);
 
       // 语义匹配，文本开头是序号
@@ -78,7 +76,7 @@ function isFitRuleP0(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRec
   if (!getText(node)) return false;
 
   // 字号不小于 14px 的
-  if (getFontSize(style) < MIN_FS) return false;
+  if (pxToNumber(style.fontSize) < MIN_FS) return false;
 
   // 不能是隐藏节点
   if (isHidden(node, style, rect, bodyRect)) return false;
@@ -93,7 +91,7 @@ function isFitRuleP0(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRec
   if (node.parentElement?.closest(headingSelector)) return false;
 
   // 必须独占一行
-  return isOneLine(node, style, rect);
+  return isUniqueInOneLine(node, style, rect);
 }
 
 function isNoiseNode(node: HTMLElement) {
@@ -138,12 +136,11 @@ function resolveHeadingRect(node: HTMLElement) {
 }
 
 // 非 h1~h6 的节点，必须独占一行
-function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
+function isUniqueInOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
   if (isHeading(node)) return true;
 
   // 文字换行则判定为不是标题
-  const lineCount = getLineCount(node, style, rect);
-  if (lineCount > 1) return false;
+  if (hasMultiline(node, style)) return false;
 
   const prevNode = getPrevTextNode(node);
   const nextNode = getNextTextNode(node);
@@ -158,8 +155,20 @@ function isOneLine(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect)
   return (y1 <= rect.top || /[\r\n]\s*$/.test(prevText)) && (rect.bottom <= y2 || /^\s*[\r\n]/.test(nextText));
 }
 
-function getLineCount(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect) {
-  return Math.floor(rect.height / Math.max(getLineHeight(style), getFontSize(style)));
+// 借助 Range.getClientRects 判断是否多行
+// 使用高度除以行高、字号判断是否多行存在bug，会出现误判
+function hasMultiline(node: HTMLElement, style: CSSStyleDeclaration) {
+  const range = new Range();
+  // 如下设置range起止位置，可以最大程度保证首尾rect的y值与实际首尾节点一致
+  // 若仍存在问题，可考虑使用最大最小y值求差值进行判断
+  range.setStart(node, 0);
+  range.setEndAfter(node);
+
+  const rects = range.getClientRects();
+  if (rects.length < 2) return false;
+
+  const fontsize = pxToNumber(style.fontSize);
+  return Math.abs(rects[rects.length - 1].y - rects[0].y) >= fontsize;
 }
 
 export type StyleMap = WeakMap<HTMLElement, CSSStyleDeclaration>;

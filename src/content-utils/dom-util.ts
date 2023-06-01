@@ -18,16 +18,14 @@ export function getLevel(node: HTMLElement) {
 }
 
 const headSelector = HEADING_SELECTORS.join(SYMBOL.COMMA);
+
 export function isHeading(node: HTMLElement) {
   return node.matches(headSelector);
 }
 
-export function getFontSize(style: Pick<CSSStyleDeclaration, 'fontSize'>) {
-  return +style.fontSize.replace(/[a-z]/gi, '') || 0;
-}
-
-export function getLineHeight(style: Pick<CSSStyleDeclaration, 'lineHeight'>) {
-  return +style.lineHeight.replace(/[a-z]/gi, '') || 0;
+export function pxToNumber(val: string) {
+  // 若单位不是px，可使用 CSS API 转换单位为px
+  return +val.replace(/px|\s/gi, '') || 0;
 }
 
 // 获取视觉上的前一个节点，且文本内容不为空

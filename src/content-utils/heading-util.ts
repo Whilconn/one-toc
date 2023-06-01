@@ -2,7 +2,7 @@ import { filterOfficialHeadings } from './heading-std-util';
 import { resolveArticle } from './article-util';
 import { inferHeadings } from './heading-infer-util';
 import { getAllHeadings } from './heading-all-util';
-import { getFontSize, getLevel, isHeading } from './dom-util';
+import { getLevel, isHeading, pxToNumber } from './dom-util';
 import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
@@ -57,7 +57,7 @@ function attachLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSSty
   let maxFontSize = -Infinity;
   const nodeLevels: NodeLevel[] = nodes.map((node): NodeLevel => {
     const style = styleMap.get(node);
-    const fontsize = style ? getFontSize(style) : -1;
+    const fontsize = style ? pxToNumber(style.fontSize) : -1;
     const h = isHeading(node);
     const level = h ? getLevel(node) : Infinity;
 

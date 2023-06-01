@@ -1,5 +1,5 @@
 import { BOLD_SELECTORS, HEADING_SELECTORS, NODE_NAME, NOISE_WORDS } from '../shared/constants';
-import { genIdClsSelector, genNodePath, getFontSize, getText, isHeading } from './dom-util';
+import { genIdClsSelector, genNodePath, getLevel, getText, isHeading, pxToNumber } from './dom-util';
 import { RectMap, StyleMap } from './heading-all-util';
 
 export function inferHeadings(articleNode: HTMLElement, nodes: HTMLElement[], styleMap: StyleMap, rectMap: RectMap) {
@@ -108,7 +108,7 @@ function filterByScoreRuleP2(
     // width 有最小限制
     if (rect.width >= maxWidth) groupByFeat(FEATS.MX_WIDTH, i);
 
-    const fontSize = style ? getFontSize(style) : -1;
+    const fontSize = style ? pxToNumber(style.fontSize) : -1;
     // 辅助排除字号异常节点，比如文章标题
     groupByFeat(FEATS.FONT_SIZE, i, fontSize);
 
@@ -143,15 +143,18 @@ function filterByScoreRuleP2(
 
 const noiseSymbolReg = /[,.;!?，。；！？]$/;
 
-// 同时包含 h1~h6、b、strong 时，若数量过多则考虑剔除部分b、strong节点
+// 同时包含 h1~h6、b、strong 时，剔除部分b、strong节点
 function filterByStyleRuleP3(nodes: HTMLElement[]) {
-  if (nodes.length < 30) return nodes;
-
   const hTagNodes = nodes.filter((n) => isHeading(n));
-  if (hTagNodes.length > 10) return hTagNodes;
+  if (hTagNodes.length < 4) return nodes;
+
+  const maxHeadingLevel = Math.max(...hTagNodes.map((n) => getLevel(n)));
 
   return nodes.filter((node) => {
     if (isHeading(node)) return true;
+
+    const level = getLevel(node);
+    if (level - maxHeadingLevel > 3) return false;
 
     const text = getText(node);
     return !noiseSymbolReg.test(text);
