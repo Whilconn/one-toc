@@ -3,6 +3,8 @@ import { loadStorage, saveStorage } from './api';
 export interface Settings {
   position: string;
   theme: string;
+  // 已读版本号，用于判断是否已经查看releaseNote
+  knownVersion: string;
 }
 
 export const THEME_OPTIONS = [
@@ -21,6 +23,7 @@ export const POSITION_OPTIONS = [
 export const DEFAULT_SETTINGS: Settings = {
   position: POSITION_OPTIONS[0].value,
   theme: THEME_OPTIONS[0].value,
+  knownVersion: '',
 };
 
 export const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);

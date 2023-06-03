@@ -4,8 +4,9 @@ import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { changeLayout } from '../content-utils/layout-util';
-import { loadSettings, POS_EMBED, Settings } from '../extension-utils/settings';
+import { DEFAULT_SETTINGS, loadSettings, POS_EMBED, saveSettings, Settings } from '../extension-utils/settings';
 import { Heading, resolveHeadings } from '../content-utils/heading-util';
+import pkg from '../../package.json';
 import closeSvg from '../assets/close.svg?raw';
 import './toc.less';
 
@@ -69,6 +70,10 @@ export function Toc({ hideToc }: Props) {
     setHeadingGroups(groups);
   }, [title]);
 
+  function updateKnownVersion() {
+    void saveSettings({ ...DEFAULT_SETTINGS, ...settings, knownVersion: pkg.version }).then();
+  }
+
   if (!settings) return null;
 
   return (
@@ -93,6 +98,19 @@ export function Toc({ hideToc }: Props) {
             })}
             {headingGroups.every((g) => !g.length) && title}
           </p>
+
+          {pkg.version !== settings.knownVersion ? (
+            <a
+              className="onetoc-new"
+              href="https://github.com/Whilconn/one-toc/releases"
+              target="_blank"
+              rel="noreferrer"
+              onClick={updateKnownVersion}
+            >
+              NEW
+            </a>
+          ) : null}
+
           <span
             onClick={hideToc}
             dangerouslySetInnerHTML={{ __html: closeSvg }}

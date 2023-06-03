@@ -47,8 +47,13 @@ function Options() {
   }
 
   function reset() {
-    form.setFieldsValue(DEFAULT_SETTINGS);
-    void saveSettings(DEFAULT_SETTINGS).then();
+    const st = {
+      ...DEFAULT_SETTINGS,
+      // knownVersion 不需要重置
+      knownVersion: form.getFieldValue('knownVersion') as string,
+    };
+    form.setFieldsValue(st);
+    void saveSettings(st).then();
   }
 
   return (
