@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useEventListener } from './hooks';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { scrollByApi } from '../content-utils/scroll-util';
-import { getText } from '../content-utils/dom-util';
 import { Heading } from '../content-utils/heading-util';
 import { TOC_LEVEL } from '../shared/constants';
 import './toc-body.less';
@@ -55,7 +54,9 @@ export function TocBody({ headings }: Props) {
   return (
     <div className="onetoc-body">
       {headings.map(({ node, level }, i) => {
-        const text = getText(node);
+        // 修复标题存在隐藏内容的问题
+        // https://baike.baidu.com/item/Java%20%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/10263609
+        const text = (node.innerText || node.textContent || '').trim();
         const cls = [`${TOC_LEVEL}${level}`, i === current ? 'active' : ''].join(' ');
 
         return (
