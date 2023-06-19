@@ -10,27 +10,27 @@ export function resolveHeadings() {
   const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, styleMap, rectMap } =
     getAllHeadings(articleNode);
 
+  // 自带标题
   const officialHeadings = filterOfficialHeadings(hTagHeadings);
+
+  // 所有标题
   let allHeadings: HTMLElement[] = [...hTagHeadings, ...bTagHeadings];
-  let inferredHeadings: HTMLElement[] = [];
 
-  if (officialHeadings.length < 5) {
-    // 默认使用h1~h6、b、strong作为精选标题
-    const tagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
-    inferredHeadings = inferHeadings(articleNode, tagHeadings, styleMap, rectMap);
+  // 精选标题：默认使用h1~h6、b、strong作为精选标题
+  const tagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
+  let inferredHeadings: HTMLElement[] = inferHeadings(articleNode, tagHeadings, styleMap, rectMap);
 
-    const MIN = 1;
-    // 使用加粗、大字号作为精选标题
-    if (inferredHeadings.length <= MIN) {
-      inferredHeadings = inferHeadings(articleNode, styleHeadings, styleMap, rectMap);
-      allHeadings = [...allHeadings, ...styleHeadings];
-    }
+  const MIN = 1;
+  // 使用加粗、大字号作为精选标题
+  if (inferredHeadings.length <= MIN) {
+    inferredHeadings = inferHeadings(articleNode, styleHeadings, styleMap, rectMap);
+    allHeadings = [...allHeadings, ...styleHeadings];
+  }
 
-    // 使用带序号文字作为精选标题
-    if (inferredHeadings.length <= MIN) {
-      inferredHeadings = inferHeadings(articleNode, semanticHeadings, styleMap, rectMap);
-      allHeadings = [...allHeadings, ...styleHeadings, ...semanticHeadings];
-    }
+  // 使用带序号文字作为精选标题
+  if (inferredHeadings.length <= MIN) {
+    inferredHeadings = inferHeadings(articleNode, semanticHeadings, styleMap, rectMap);
+    allHeadings = [...allHeadings, ...styleHeadings, ...semanticHeadings];
   }
 
   return {
