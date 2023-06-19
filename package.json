@@ -58,7 +58,7 @@
     "puppeteer-core": "^16.1.1",
     "release-it": "^15.6.0",
     "typescript": "^5.0.4",
-    "vite": "^4.0.3"
+    "vite": "^4.3.9"
   },
   "engines": {
     "node": ">=19.2",
