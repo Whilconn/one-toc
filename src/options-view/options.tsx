@@ -10,6 +10,7 @@ import {
   DEFAULT_SETTINGS,
   loadSettings,
   saveSettings,
+  STRATEGY_OPTIONS,
 } from '../extension-utils/settings';
 import pkg from '../../package.json';
 import './options.less';
@@ -57,7 +58,7 @@ function Options() {
   }
 
   return (
-    <Form form={form} onFinish={save} labelAlign="right" labelCol={{ flex: '80px' }} className="settings-container">
+    <Form form={form} onFinish={save} labelAlign="right" labelCol={{ flex: '90px' }} className="settings-container">
       <div className="settings-title">设置</div>
       <Form.Item name={SETTINGS_KEYMAP.theme} label="🌈️&ensp;主题">
         <Radio.Group options={THEME_OPTIONS} optionType="button" buttonStyle="solid" />
@@ -67,12 +68,16 @@ function Options() {
         <Radio.Group options={POSITION_OPTIONS} optionType="button" buttonStyle="solid" />
       </Form.Item>
 
+      <Form.Item name={SETTINGS_KEYMAP.strategy} label="🌐&ensp;优先显示">
+        <Radio.Group options={STRATEGY_OPTIONS} optionType="button" buttonStyle="solid" />
+      </Form.Item>
+
       {commands?.map((c) => {
         if (!c.description) return null;
 
         return (
           <Form.Item key={c.name} label="🚀&ensp;快捷键">
-            {c.shortcut}&ensp;
+            <b>{c.shortcut}</b>
             <span className="shortcut-desc">{c.description}</span>
             <Button onClick={openShortcutsPage} type="link">
               去设置

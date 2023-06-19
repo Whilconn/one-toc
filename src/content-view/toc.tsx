@@ -45,30 +45,38 @@ export function Toc({ hideToc }: Props) {
   }, [isEmbed]);
 
   const [group, setGroup] = useState(0);
-  const [headingGroups, setHeadingGroups] = useState<Heading[][]>([]);
-  const headingNames = ['自带', '精选', '所有'];
+  const [headingGroups, setHeadingGroups] = useState<Group[]>([]);
 
   useEffect(() => {
     const { inferredHeadings, allHeadings, officialHeadings } = resolveHeadings();
-    const groups = [officialHeadings, inferredHeadings, allHeadings];
+    const groups = [
+      { name: '自带', headings: officialHeadings },
+      { name: '精选', headings: inferredHeadings },
+      { name: '所有', headings: allHeadings },
+    ];
+
+    // 默认策略不是official时，交换前两个分组位置
+    if (settings?.strategy !== DEFAULT_SETTINGS.strategy) {
+      [groups[0], groups[1]] = [groups[1], groups[0]];
+    }
 
     // 两组heading相同时，仅保留下标小的分组
     for (let i = groups.length - 1; i > 0; i--) {
       for (let j = 0; j < i; j++) {
-        if (!groups[i].length || groups[i].length !== groups[j].length) continue;
-        if (groups[i].every((h, k) => h.node === groups[j][k].node)) {
-          groups[i] = [];
+        if (!groups[i].headings.length || groups[i].headings.length !== groups[j].headings.length) continue;
+        if (groups[i].headings.every((h, k) => h.node === groups[j].headings[k].node)) {
+          groups[i].headings = [];
         }
       }
     }
 
     // 优先选中下标小的分组
-    if (groups[0].length) setGroup(0);
-    else if (groups[1].length) setGroup(1);
+    if (groups[0].headings.length) setGroup(0);
+    else if (groups[1].headings.length) setGroup(1);
     else setGroup(2);
 
     setHeadingGroups(groups);
-  }, [title]);
+  }, [settings, title]);
 
   function updateKnownVersion() {
     void saveSettings({ ...DEFAULT_SETTINGS, ...settings, knownVersion: pkg.version }).then();
@@ -86,17 +94,18 @@ export function Toc({ hideToc }: Props) {
       >
         <div className="onetoc-head">
           <p className="onetoc-title">
-            {headingNames.map((n, i) => {
-              if (!headingGroups[i].length) return null;
+            {headingGroups.map((g, i) => {
+              if (!g.headings.length) return null;
+
               return (
-                <a key={n} onClick={() => setGroup(i)} className={i === group ? 'active' : ''}>
-                  {n}
-                  {import.meta.env.DEV && `[${headingGroups[i].length}]`}
+                <a key={g.name} onClick={() => setGroup(i)} className={i === group ? 'active' : ''}>
+                  {g.name}
+                  {import.meta.env.DEV && `[${g.headings.length}]`}
                   &emsp;
                 </a>
               );
             })}
-            {headingGroups.every((g) => !g.length) && title}
+            {headingGroups.every((g) => !g.headings.length) && title}
           </p>
 
           {pkg.version !== settings.knownVersion ? (
@@ -119,7 +128,7 @@ export function Toc({ hideToc }: Props) {
           />
         </div>
 
-        <TocBody headings={headingGroups[group]} />
+        <TocBody headings={headingGroups[group].headings} />
       </nav>
     </Draggable>
   );
@@ -133,4 +142,9 @@ function equals(a: object | undefined | null, b: object | undefined | null) {
 
 type Props = {
   hideToc: () => void;
+};
+
+type Group = {
+  name: string;
+  headings: Heading[];
 };
