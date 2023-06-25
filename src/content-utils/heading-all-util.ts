@@ -11,8 +11,6 @@ import {
   pxToNumber,
 } from './dom-util';
 
-const MIN_FS = 14;
-
 // b/strong
 const boldTagSelector = BOLD_SELECTORS.join(SYMBOL.COMMA);
 
@@ -75,8 +73,7 @@ function isFitRuleP0(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRec
   // 必须有文字内容
   if (!getText(node)) return false;
 
-  // 字号不小于 14px 的
-  if (pxToNumber(style.fontSize) < MIN_FS) return false;
+  // warning: 不再限制字号（存在字号较小的标题 https://www.mdpi.com/2075-1729/13/7/1425）
 
   // 不能是隐藏节点
   if (isHidden(node, style, rect, bodyRect)) return false;

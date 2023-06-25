@@ -10,6 +10,11 @@ export function resolveArticle(): HTMLElement {
   const siteConfig = SITES.find((s) => location.href.startsWith(s.url));
   let articleNode = siteConfig?.article ? queryAll(siteConfig?.article)[0] : null;
 
+  // 找唯一的 article 标签节点
+  if (!articleNode) {
+    articleNode = searchArticleByTag(mainNode);
+  }
+
   // 根据算法获取文章节点
   if (!articleNode) {
     articleNode = searchArticle(mainNode, bodyRect);
@@ -23,6 +28,24 @@ export function resolveArticle(): HTMLElement {
 
   mainNode.toggleAttribute('onetoc-main', true);
   articleNode.toggleAttribute('onetoc-article', true);
+
+  return articleNode;
+}
+
+function searchArticleByTag(mainNode: HTMLElement) {
+  const nodes = queryAll(NODE_NAME.article);
+  if (nodes.length !== 1) return null;
+
+  const RATE = 0.8;
+  const articleNode = nodes[0];
+
+  const rect = getRect(articleNode);
+  const mRect = getRect(mainNode);
+  if (((rect.width * rect.height) / (mRect.width * mRect.height) || 0) < RATE) return null;
+
+  const text = getVisibleText(articleNode);
+  const mText = getVisibleText(mainNode);
+  if ((text.length / mText.length || 0) < RATE) return null;
 
   return articleNode;
 }
