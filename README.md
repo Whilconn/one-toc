@@ -1,6 +1,4 @@
-<div align="center">
-<h1>OneToc</h1>
-<p>Table of contents for websites.</p>
+# OneToc
 
 ![react](https://badges.aleen42.com/src/react.svg)
 ![typescript](https://badges.aleen42.com/src/typescript.svg)
@@ -8,27 +6,13 @@
 ![jest](https://badges.aleen42.com/src/jest_1.svg)
 ![eslint](https://badges.aleen42.com/src/eslint.svg)
 
-</div>
+一键生成网页大纲，无论是新闻、博客、教程、文档还是论文。提供清晰的结构和导航，助你快速浏览和定位信息。
 
-为文档、博客、论文等网站添加导航目录的浏览器插件，提供更好的阅读体验。
-<br>
-It's a browser extension which can append table of contents to the websites such as docs、 blogs and papers, to provide better reading experience.
+<br/>
 
-## 插件效果
+Generating a table of contents on web page. Whether it’s news, blogs, tutorials, documents or essays. Providing a clear structure and navigation to help you easily browse and locate information.
 
-![screenshots](screenshots/content.png)
-
-## 特性
-
-- 解析网页中的标题：包括 `H1 ~ H6`、`b`、`strong` 等标签
-- 生成多层级导航目录，便于阅读和跳转
-- 随页面滚动自动高亮当前标题
-- 支持浅色、深色主题
-- 支持浮动或内嵌等呈现方式
-- 可自由拖拽
-- 可自由开关，支持快捷键
-
-## 插件安装
+## 快速开始
 
 ### Edge 浏览器
 
@@ -42,15 +26,36 @@ It's a browser extension which can append table of contents to the websites such
 - 点击页面右上角开启 `开发者模式`
 - 点击页面左上角 `加载已解压的扩展程序`，最后选择上述解压目录
 
-## 插件使用
-- 安装插件后打开任意网页，如：https://reactjs.org/docs/getting-started.html
-- 点击地址栏右侧的 `OneToc` 图标显示目录
-- 按下快捷键 `Ctrl+B` 显示目录（Mac `Command+B`，windows/linux `Ctrl+B`）
-- 效果参考前文[插件效果](#插件效果)
+### 如何使用
+
+- 打开任意网页，如：https://reactjs.org/docs/getting-started.html
+- 按下快捷键 `Ctrl+B` 或 `Command+B` (Mac) 或单击地址栏右侧的 `OneToc` 插件图标
+
+### 效果
+
+![screenshots](screenshots/content.png)
+
+## 特性
+
+- 可以反映文档的逻辑层次和内容重点，方便快速浏览全文结构和定位章节、理解文档的主旨和目的
+- 可以作为文档的导航工具，提高查找和使用文档的效率
+- 可以提取网页中的标签化标题：包括 `H1 ~ H6`、`b`、`strong` 等 `HTML` 标签
+- 可以提取网页中的加粗标题、序号标题
+- 提供自带、精选、所有等3种策略的解析结果以供选择
+- 点击目录标题可快速跳转到对应内容
+- 页面滚动时自动高亮当前目录标题
+- 支持多层级目录
+- 支持浅色、深色主题
+- 支持浮动、内嵌的定位方式
+- 支持自由拖拽
+- 支持快捷键开关
+- 在本地分析网页内容并生成目录，不会收集或上传任何个人信息和浏览数据
 
 ## 配置说明
 
-右键点击地址栏右侧的 `OneToc` 图标，再点击选项按钮即可打开配置页面，修改配置后点击保存会立即生效。
+- 1、右键点击地址栏右侧的 `OneToc` 图标
+- 2、点击弹出菜单中的选项按钮打开配置页面
+- 3、修改配置后点击保存按钮会立即生效
 
 ![options](screenshots/open-options-page.png)
 
@@ -58,36 +63,34 @@ It's a browser extension which can append table of contents to the websites such
 
 ### 主题
 
-插件提供默认、浅色、深色等3种主题
+插件提供默认、浅色、深色3种主题
 
 ### 定位
 
-插件提供浮动、嵌入等2种定位
+插件提供浮动、嵌入2种定位方式
 
 - 浮动定位：默认选项，浮动于内容上方，可能会遮挡网页内容，可自由拖拽
-- 嵌入定位：嵌入网页左侧，将网页内容整体右移，不会遮挡网页内容，目前可拖拽
+- 嵌入定位：嵌入网页左侧，将网页内容整体右移，不会遮挡网页内容，不可拖拽
 
 > 嵌入效果与 `vscode` 左侧目录边栏类似，同样使用 `Command+B` 快捷键开启或关闭
 
+### 优先显示
+
+插件提供自带、精选和所有3种解析策略，可选择优先显示自带或精选。
+
+自带是指网页已标识且符合规范的目录节点，精选是指程序筛选出更优的目录节点，所有则包含了自带、精选以及其他可能的目录节点。
+
+- 自带：默认选项，优先显示自带目录
+- 精选：优先显示精选目录
+
 ### 快捷键
-- 显示目录的快捷键默认为 Mac `Command+B`，windows/linux `Ctrl+B`
+
+- 显示目录的快捷键默认为 `Command+B` (Mac) 或 `Ctrl+B` (windows/linux)
 - 可点击 `去设置` 跳转到快捷键设置页面自行修改
 
-## 适配情况
+## 支持情况
 
-- 知乎：https://zhuanlan.zhihu.com
-- 简书：https://www.jianshu.com
-- 开源中国：https://my.oschina.net
-- React 文档：https://zh-hans.reactjs.org
-- Eslint 文档：https://eslint.org
-- Github：https://github.com
-- 博客园：https://www.cnblogs.com
-- CSDN：https://blog.csdn.net
-- 51cto：https://blog.51cto.com
-- 掘金：https://juejin.cn
-- 思否：https://segmentfault.com
-- NCBI：https://www.ncbi.nlm.nih.gov
-- 其他...
+支持绝大部分网页
 
 ## 感谢
 

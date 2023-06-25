@@ -61,6 +61,7 @@ module.exports.links = [
   ['NCBI(EN)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6742634/', '11'],
   ['阮一峰博客', 'https://www.ruanyifeng.com/blog/2021/08/weekly-issue-170.html', '12'],
   ['张鑫旭博客', 'https://www.zhangxinxu.com/wordpress/2023/04/ai-code-tool-codeium-github-copilot/', '23'],
+  ['vitest-性能', 'https://cn.vitest.dev/api/', '166'],
   // TODO: 识别优化
   // ['wiki', 'https://en.wikipedia.org/wiki/International_Olympic_Committee', '44'],
   // ['微信-前端之巅', 'https://mp.weixin.qq.com/s/utGGaAErfbJSA-yw3G7AHA', '16'],

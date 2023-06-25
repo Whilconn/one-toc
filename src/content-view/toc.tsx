@@ -46,9 +46,11 @@ export function Toc({ hideToc }: Props) {
 
   const [group, setGroup] = useState(0);
   const [headingGroups, setHeadingGroups] = useState<Group[]>([]);
+  const { inferredHeadings, allHeadings, officialHeadings } = useMemo(resolveHeadings, [title]);
 
   useEffect(() => {
-    const { inferredHeadings, allHeadings, officialHeadings } = resolveHeadings();
+    if (!settings) return;
+
     const groups = [
       { name: '自带', headings: officialHeadings },
       { name: '精选', headings: inferredHeadings },
@@ -76,13 +78,13 @@ export function Toc({ hideToc }: Props) {
     else setGroup(2);
 
     setHeadingGroups(groups);
-  }, [settings, title]);
+  }, [settings, inferredHeadings, allHeadings, officialHeadings]);
 
   function updateKnownVersion() {
     void saveSettings({ ...DEFAULT_SETTINGS, ...settings, knownVersion: pkg.version }).then();
   }
 
-  if (!settings) return null;
+  if (!settings || !headingGroups[group]) return null;
 
   return (
     <Draggable nodeRef={dragRef} disabled={isEmbed} bounds="html" cancel=".onetoc-body">
