@@ -56,5 +56,6 @@ function inferHeadingSelectorMap() {
 }
 
 function hrefToId(href: string) {
-  return href.replace(/^[^#]*#/, '').replace(/([^0-9a-z])/gi, '\\$1');
+  const str = href.replace(/^[^#]*#/, '');
+  return CSS.escape(str);
 }
