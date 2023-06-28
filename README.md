@@ -6,19 +6,19 @@
 ![jest](https://badges.aleen42.com/src/jest_1.svg)
 ![eslint](https://badges.aleen42.com/src/eslint.svg)
 
-一键生成网页大纲，无论是新闻、博客、教程、文档还是论文。提供清晰的结构和导航，助你快速浏览和定位信息。
+生成网页大纲，提供清晰的结构和便捷的导航，提升阅读体验和效率。适用于新闻、博客、教程、文档、论文等各种网页。
 
 <br/>
 
-Generating a table of contents on web page. Whether it’s news, blogs, tutorials, documents or essays. Providing a clear structure and navigation to help you easily browse and locate information.
+Generating a table of contents on web page. Whether it’s news, blogs, tutorials, documents or essays. Providing a clear structure and convenient navigation to help you improve reading experience and efficiency.
 
 ## 快速开始
 
-### Edge 浏览器
+### Edge 浏览器安装
 
 打开[Edge插件商店](https://microsoftedge.microsoft.com/addons/detail/onetoc/jkgapfniamkoblbmbhdjlnfklihlpjmc)页面，点击获取进行安装
 
-### Chrome 浏览器
+### Chrome 浏览器安装
 
 - 下载[zip包](https://github.com/Whilconn/one-toc/releases)（注意下载的是包名形式为 OneToc-vx.x.x.zip 的包，不要下载Source Code包）
 - 解压到任意目录，如 `~/one-toc/`
@@ -26,10 +26,11 @@ Generating a table of contents on web page. Whether it’s news, blogs, tutorial
 - 点击页面右上角开启 `开发者模式`
 - 点击页面左上角 `加载已解压的扩展程序`，最后选择上述解压目录
 
-### 如何使用
+### 使用步骤
 
-- 打开任意网页，如：https://reactjs.org/docs/getting-started.html
-- 按下快捷键 `Ctrl+B` 或 `Command+B` (Mac) 或单击地址栏右侧的 `OneToc` 插件图标
+- 打开任意网页
+- 生成目录：只需要按下快捷键 `Ctrl+B` 或 `Command+B` (Mac)，也可以单击地址栏右侧的 `OneToc` 插件图标
+- 页内跳转：点击目录中的任意一个标题，就可以跳转到对应的内容位置
 
 ### 效果
 
@@ -38,7 +39,7 @@ Generating a table of contents on web page. Whether it’s news, blogs, tutorial
 ## 特性
 
 - 可以反映文档的逻辑层次和内容重点，方便快速浏览全文结构和定位章节、理解文档的主旨和目的
-- 可以作为文档的导航工具，提高查找和使用文档的效率
+- 可以作为文档的导航工具，提高阅读文档的效率
 - 可以提取网页中的标签化标题：包括 `H1 ~ H6`、`b`、`strong` 等 `HTML` 标签
 - 可以提取网页中的加粗标题、序号标题
 - 提供自带、精选、所有等3种策略的解析结果以供选择
@@ -88,9 +89,8 @@ Generating a table of contents on web page. Whether it’s news, blogs, tutorial
 - 显示目录的快捷键默认为 `Command+B` (Mac) 或 `Ctrl+B` (windows/linux)
 - 可点击 `去设置` 跳转到快捷键设置页面自行修改
 
-## 支持情况
-
-支持绝大部分网页
+## 适用范围
+目前只支持 `Edge` 和 `Chrome` 浏览器，在绝大部分文字为主的网页上都能使用。
 
 ## 感谢
 

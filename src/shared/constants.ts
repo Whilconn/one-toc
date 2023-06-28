@@ -19,6 +19,8 @@ const nodeNames = [
   'aside',
   'footer',
   'nav',
+  'svg',
+  'figure',
 ] as const;
 export const NODE_NAME = Object.fromEntries(nodeNames.map((k) => [k, k])) as Record<(typeof nodeNames)[number], string>;
 

@@ -7,49 +7,74 @@ import { HEADING_SELECTORS } from '../shared/constants';
 
 export function resolveHeadings() {
   const articleNode = resolveArticle();
-  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, styleMap, rectMap } =
+  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, oneLineHeadings, styleMap, rectMap } =
     getAllHeadings(articleNode);
 
   // 自带标题
   const officialHeadings = filterOfficialHeadings(hTagHeadings);
 
   // 所有标题
-  let allHeadings: HTMLElement[] = [...hTagHeadings, ...bTagHeadings];
+  let allHeadings: HTMLElement[] = mergeAllHeadings([...hTagHeadings, ...bTagHeadings]);
 
   // 精选标题：默认使用h1~h6、b、strong作为精选标题
-  const tagHeadings = mergeHeadings([...hTagHeadings, ...bTagHeadings]);
+  const tagHeadings = [...allHeadings];
   let inferredHeadings: HTMLElement[] = inferHeadings(articleNode, tagHeadings, styleMap, rectMap);
 
   const MIN = 1;
-  // 使用加粗、大字号作为精选标题
+  // 使用加粗、大号字作为精选标题
   if (inferredHeadings.length <= MIN) {
-    inferredHeadings = inferHeadings(articleNode, styleHeadings, styleMap, rectMap);
-    allHeadings = [...allHeadings, ...styleHeadings];
+    const tempHeadings = dropChildren(styleHeadings);
+    allHeadings = mergeAllHeadings([...allHeadings, ...tempHeadings]);
+    inferredHeadings = inferHeadings(articleNode, tempHeadings, styleMap, rectMap);
   }
 
   // 使用带序号文字作为精选标题
   if (inferredHeadings.length <= MIN) {
-    inferredHeadings = inferHeadings(articleNode, semanticHeadings, styleMap, rectMap);
-    allHeadings = [...allHeadings, ...styleHeadings, ...semanticHeadings];
+    const tempHeadings = dropChildren(semanticHeadings);
+    allHeadings = mergeAllHeadings([...allHeadings, ...tempHeadings]);
+    inferredHeadings = inferHeadings(articleNode, tempHeadings, styleMap, rectMap);
+  }
+
+  // 使用单行文本作为精选标题
+  if (inferredHeadings.length <= MIN) {
+    const tempHeadings = dropSiblings(dropChildren(oneLineHeadings));
+    allHeadings = mergeAllHeadings([...allHeadings, ...tempHeadings]);
+    inferredHeadings = inferHeadings(articleNode, tempHeadings, styleMap, rectMap);
   }
 
   return {
-    allHeadings: attachLevel(mergeHeadings(allHeadings), styleMap),
+    allHeadings: attachLevel(allHeadings, styleMap),
     officialHeadings: attachLevel(officialHeadings, styleMap),
     inferredHeadings: attachLevel(inferredHeadings, styleMap),
   };
 }
 
-function mergeHeadings(nodes: HTMLElement[]) {
-  return nodes
-    .sort((a, b) => {
-      if (a === b) return 0;
-      // Node.DOCUMENT_POSITION_FOLLOWING, Node.DOCUMENT_POSITION_CONTAINED_BY
-      return [4, 16].includes(a.compareDocumentPosition(b)) ? -1 : 1;
-    })
-    .filter((n, i, nodes) => {
-      return i === 0 || !(n.contains(nodes[i - 1]) || nodes[i - 1].contains(n));
-    });
+function mergeAllHeadings(nodes: HTMLElement[]) {
+  nodes = nodes.sort((a, b) => {
+    if (a === b) return 0;
+    // Node.DOCUMENT_POSITION_FOLLOWING, Node.DOCUMENT_POSITION_CONTAINED_BY
+    return [4, 16].includes(a.compareDocumentPosition(b)) ? -1 : 1;
+  });
+
+  return dropChildren(nodes);
+}
+
+// 过滤子孙节点
+function dropChildren(nodes: HTMLElement[]) {
+  const stack: HTMLElement[] = [];
+  nodes.forEach((node) => {
+    if (!stack.at(-1)?.contains(node)) stack.push(node);
+  });
+  return stack;
+}
+
+// 过滤兄弟节点
+function dropSiblings(nodes: HTMLElement[]) {
+  const stack: HTMLElement[] = [];
+  nodes.forEach((node) => {
+    if (stack.at(-1)?.nextElementSibling !== node) stack.push(node);
+  });
+  return stack;
 }
 
 function attachLevel(nodes: HTMLElement[], styleMap: WeakMap<HTMLElement, CSSStyleDeclaration>): Heading[] {

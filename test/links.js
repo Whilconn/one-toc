@@ -1,4 +1,8 @@
 module.exports.links = [
+  ['知乎-单行', 'https://zhuanlan.zhihu.com/p/26008219', '13'],
+  ['知乎-单行', 'https://zhuanlan.zhihu.com/p/23411438', '10'],
+  ['豆瓣-单行', 'https://book.douban.com/review/15125637/', '3'],
+  ['豆瓣-单行', 'https://book.douban.com/review/15239792/', '5'],
   ['MDPI', 'https://www.mdpi.com/2075-1729/13/7/1425', '15'],
   ['虎嗅-样式', 'https://www.huxiu.com/article/1421112.html', '2'],
   ['虎嗅', 'https://www.huxiu.com/article/1621190.html', '2'],
@@ -22,6 +26,7 @@ module.exports.links = [
   ['知乎', 'https://zhuanlan.zhihu.com/p/24650288', '62'],
   ['知乎-粗体过多', 'https://www.zhihu.com/tardis/zm/art/109463499', '14'],
   ['知乎-序号', 'https://zhuanlan.zhihu.com/p/434013564', '10'],
+  ['知乎-序号', 'https://zhuanlan.zhihu.com/p/639361091', '20'],
   ['豆瓣-序号', 'https://book.douban.com/review/15193973/', '3'],
   ['钛媒体', 'https://www.tmtpost.com/6555757.html', '6'],
   ['雪球-中文序号', 'https://xueqiu.com/9292606979/252055225', '4'],

@@ -1,4 +1,4 @@
-import { BOLD_SELECTORS, DISPLAY, HEADING_SELECTORS, SYMBOL } from '../shared/constants';
+import { BOLD_SELECTORS, DISPLAY, HEADING_SELECTORS, NODE_NAME, SYMBOL } from '../shared/constants';
 import {
   findAncestor,
   getNextTextNode,
@@ -20,9 +20,11 @@ export function getAllHeadings(articleNode: HTMLElement) {
   const bTagHeadings: HTMLElement[] = [];
   const styleHeadings: HTMLElement[] = [];
   const semanticHeadings: HTMLElement[] = [];
+  const oneLineHeadings: HTMLElement[] = [];
 
   const bodyRect = document.body.getBoundingClientRect();
   const reg = /^([一二三四五六七八九十百千万零]{1,4}|\d{1,3}|[a-z])[、.·,，].+/i;
+  const oneLineReg = /[^、.。·,，!！?？]$/i;
 
   const walker = document.createTreeWalker(articleNode, NodeFilter.SHOW_ELEMENT);
   let node = walker.root as HTMLElement;
@@ -45,13 +47,16 @@ export function getAllHeadings(articleNode: HTMLElement) {
       // 语义匹配，文本开头是序号
       const text = getText(node);
       if (reg.test(text)) semanticHeadings.push(node);
+
+      // 单行文本
+      if (oneLineReg.test(text)) oneLineHeadings.push(node);
     }
   }
 
   // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
   const rectMap = new WeakMap<HTMLElement, DOMRect>();
   const styleMap = new WeakMap<HTMLElement, CSSStyleDeclaration>();
-  const headings = [...hTagHeadings, ...bTagHeadings, ...styleHeadings, ...semanticHeadings];
+  const headings = [...hTagHeadings, ...bTagHeadings, ...styleHeadings, ...semanticHeadings, ...oneLineHeadings];
   for (const node of headings) {
     if (!rectMap.has(node)) rectMap.set(node, resolveHeadingRect(node));
     if (!styleMap.has(node)) styleMap.set(node, resolveHeadingStyle(node));
@@ -62,11 +67,13 @@ export function getAllHeadings(articleNode: HTMLElement) {
     bTagHeadings,
     styleHeadings,
     semanticHeadings,
+    oneLineHeadings,
     styleMap,
     rectMap,
   };
 }
 
+const invalidTags = [NODE_NAME.svg, NODE_NAME.figure];
 const headingSelector = [...HEADING_SELECTORS, ...BOLD_SELECTORS].join(SYMBOL.COMMA);
 
 function isFitRuleP0(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRect, bodyRect: DOMRect) {
@@ -86,6 +93,10 @@ function isFitRuleP0(node: HTMLElement, style: CSSStyleDeclaration, rect: DOMRec
 
   // 不能是嵌套的heading节点，如h1 h2,h1 b,h2 strong 等
   if (node.parentElement?.closest(headingSelector)) return false;
+
+  // 不能是特殊标签节点
+  const tagName = node.tagName.toLowerCase();
+  if (invalidTags.includes(tagName)) return false;
 
   // 必须独占一行
   return isUniqueInOneLine(node, style, rect);
