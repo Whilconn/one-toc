@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Draggable from 'react-draggable';
 import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
+import { useDragResize } from './use-drag-resize';
 import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { changeLayout } from '../content-utils/layout-util';
 import { DEFAULT_SETTINGS, loadSettings, POS_EMBED, saveSettings, Settings } from '../extension-utils/settings';
@@ -11,8 +11,6 @@ import closeSvg from '../assets/close.svg?raw';
 import './toc.less';
 
 export function Toc({ hideToc }: Props) {
-  const dragRef = useRef(null);
-
   const [settings, setSettings] = useState<Settings>();
 
   // 初始化获取配置，页面切换获取最新配置
@@ -84,55 +82,55 @@ export function Toc({ hideToc }: Props) {
     void saveSettings({ ...DEFAULT_SETTINGS, ...settings, knownVersion: pkg.version }).then();
   }
 
+  useDragResize({
+    containerSelector: '.onetoc-container',
+    dragSelector: '.onetoc-head',
+    dragDisabled: isEmbed,
+    resizeDisabled: isEmbed,
+  });
+
   if (!settings || !headingGroups[group]) return null;
 
   return (
-    <Draggable nodeRef={dragRef} disabled={isEmbed} bounds="html" cancel=".onetoc-body">
-      <nav
-        ref={dragRef}
-        className={`onetoc-container ${isEmbed ? 'onetoc-embed no-drag' : ''}`}
-        style={style}
-        data-theme={settings.theme}
-      >
-        <div className="onetoc-head">
-          <p className="onetoc-title">
-            {headingGroups.map((g, i) => {
-              if (!g.headings.length) return null;
+    <nav className={`onetoc-container ${isEmbed ? 'onetoc-embed' : ''}`} style={style} data-theme={settings.theme}>
+      <div className="onetoc-head">
+        <p className="onetoc-title">
+          {headingGroups.map((g, i) => {
+            if (!g.headings.length) return null;
 
-              return (
-                <a key={g.name} onClick={() => setGroup(i)} className={i === group ? 'active' : ''}>
-                  {g.name}
-                  {import.meta.env.DEV && `[${g.headings.length}]`}
-                  &emsp;
-                </a>
-              );
-            })}
-            {headingGroups.every((g) => !g.headings.length) && title}
-          </p>
+            return (
+              <a key={g.name} onClick={() => setGroup(i)} className={i === group ? 'active' : ''}>
+                {g.name}
+                {import.meta.env.DEV && `[${g.headings.length}]`}
+                &emsp;
+              </a>
+            );
+          })}
+          {headingGroups.every((g) => !g.headings.length) && title}
+        </p>
 
-          {pkg.version !== settings.knownVersion ? (
-            <a
-              className="onetoc-new"
-              href="https://github.com/Whilconn/one-toc/releases"
-              target="_blank"
-              rel="noreferrer"
-              onClick={updateKnownVersion}
-            >
-              NEW
-            </a>
-          ) : null}
+        {pkg.version !== settings.knownVersion ? (
+          <a
+            className="onetoc-new"
+            href="https://github.com/Whilconn/one-toc/releases"
+            target="_blank"
+            rel="noreferrer"
+            onClick={updateKnownVersion}
+          >
+            NEW
+          </a>
+        ) : null}
 
-          <span
-            onClick={hideToc}
-            dangerouslySetInnerHTML={{ __html: closeSvg }}
-            className="onetoc-close-icon"
-            title="关闭"
-          />
-        </div>
+        <span
+          onClick={hideToc}
+          dangerouslySetInnerHTML={{ __html: closeSvg }}
+          className="onetoc-close-icon"
+          title="关闭"
+        />
+      </div>
 
-        <TocBody headings={headingGroups[group].headings} />
-      </nav>
-    </Draggable>
+      <TocBody headings={headingGroups[group].headings} />
+    </nav>
   );
 }
 

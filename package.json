@@ -29,13 +29,14 @@
   "homepage": "https://github.com/Whilconn/one-toc",
   "dependencies": {
     "antd": "^4.22.8",
+    "interactjs": "^1.10.18",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-draggable": "^4.4.5"
+    "react-dom": "^18.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
+    "@interactjs/types": "^1.10.18",
     "@types/jest": "^28.1.7",
     "@types/node": "^18.7.4",
     "@types/react": "^18.0.0",

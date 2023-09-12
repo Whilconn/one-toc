@@ -1,0 +1,9 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>Layer 1</title>
+  <rect rx="40" stroke="#00bfbf" id="svg_1" height="300" width="300" y="0" x="0" fill="#00bfbf"/>
+  <text transform="matrix(1 0 0 1 0 0)" font-weight="bold" xml:space="preserve" text-anchor="start" font-family="'JetBrains Mono'" font-size="160" id="svg_3" y="207.5" x="6" stroke="#ffffff" fill="#ffffff">Toc</text>
+  <text font-weight="normal" fill="#ffffff" stroke="#ffffff" x="218" y="43.5" id="svg_4" font-size="20" font-family="'JetBrains Mono'" text-anchor="start" xml:space="preserve">OneToc</text>
+ </g>
+
+</svg>
