@@ -17,7 +17,8 @@ export const THEME_OPTIONS = [
 export const POS_EMBED = 'embed';
 
 export const POSITION_OPTIONS = [
-  { label: '浮动', value: 'fixed' },
+  { label: '右浮动', value: 'fixed-right' },
+  { label: '左浮动', value: 'fixed-left' },
   { label: '内嵌', value: POS_EMBED },
 ];
 

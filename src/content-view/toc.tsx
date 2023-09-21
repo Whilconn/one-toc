@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { TocBody } from './toc-body';
 import { useTitle } from './hooks';
 import { useDragResize } from './use-drag-resize';
@@ -11,6 +11,7 @@ import closeSvg from '../assets/close.svg?raw';
 import './toc.less';
 
 export function Toc({ hideToc }: Props) {
+  const tocRef = useRef<HTMLElement>(null);
   const [settings, setSettings] = useState<Settings>();
 
   // 初始化获取配置，页面切换获取最新配置
@@ -32,7 +33,11 @@ export function Toc({ hideToc }: Props) {
 
   const title = useTitle();
   const top = useMemo(getFixedHeaderHeight, [title]);
-  const style = isEmbed ? {} : { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
+
+  // onetoc-embed | onetoc-fixed-right | onetoc-fixed-left
+  const positionClass = `onetoc-${settings?.position ?? DEFAULT_SETTINGS.position}`;
+
+  const positionStyle: CSSProperties = isEmbed ? {} : { top: `${top}px`, maxHeight: `calc(100vh - ${top}px - 20px)` };
 
   // 内嵌模式下修改源网页的布局
   useEffect(() => {
@@ -41,6 +46,13 @@ export function Toc({ hideToc }: Props) {
     const restoreLayout = changeLayout();
     return () => restoreLayout();
   }, [isEmbed]);
+
+  // 定位选项变化时，重置因拖拽而改变的样式
+  useEffect(() => {
+    if (tocRef.current) {
+      Object.assign(tocRef.current.style, { transform: null, width: null, height: null });
+    }
+  }, [settings?.position]);
 
   const [group, setGroup] = useState(0);
   const [headingGroups, setHeadingGroups] = useState<Group[]>([]);
@@ -51,7 +63,10 @@ export function Toc({ hideToc }: Props) {
 
     const groups = [
       { name: '自带', headings: officialHeadings },
-      { name: '精选', headings: inferredHeadings },
+      {
+        name: '精选',
+        headings: inferredHeadings,
+      },
       { name: '所有', headings: allHeadings },
     ];
 
@@ -92,7 +107,7 @@ export function Toc({ hideToc }: Props) {
   if (!settings || !headingGroups[group]) return null;
 
   return (
-    <nav className={`onetoc-container ${isEmbed ? 'onetoc-embed' : ''}`} style={style} data-theme={settings.theme}>
+    <nav ref={tocRef} className={`onetoc-container ${positionClass}`} style={positionStyle} data-theme={settings.theme}>
       <div className="onetoc-head">
         <p className="onetoc-title">
           {headingGroups.map((g, i) => {

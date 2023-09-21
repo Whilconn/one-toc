@@ -86,6 +86,7 @@ export function addClickActionListener(callback: (tab: Tab) => void) {
 }
 
 export const INSTALL_REASON = chrome.runtime.OnInstalledReason.INSTALL;
+export const UPDATE_REASON = chrome.runtime.OnInstalledReason.UPDATE;
 
 /** types */
 export interface Command {

@@ -39,7 +39,10 @@ export function useDragResize(opts: Options) {
       enabled: !dragDisabled,
       modifiers: [
         interact.modifiers.restrictRect({
-          restriction: new DOMRect(0, 0, MW, MH),
+          restriction: () => {
+            const { pageLeft, pageTop } = window.visualViewport ?? {};
+            return new DOMRect(pageLeft, pageTop, MW, MH);
+          },
         }),
       ],
       listeners: {
