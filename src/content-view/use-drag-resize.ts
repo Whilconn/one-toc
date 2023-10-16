@@ -32,6 +32,11 @@ export function useDragResize(opts: Options) {
       if (!translate) setTranslate(node, 0, 0);
     }
 
+    function calcViewportRect() {
+      const { pageLeft, pageTop } = window.visualViewport ?? {};
+      return new DOMRect(pageLeft, pageTop, MW, MH);
+    }
+
     const interactable = interact(containerSelector);
 
     interactable.draggable({
@@ -39,10 +44,7 @@ export function useDragResize(opts: Options) {
       enabled: !dragDisabled,
       modifiers: [
         interact.modifiers.restrictRect({
-          restriction: () => {
-            const { pageLeft, pageTop } = window.visualViewport ?? {};
-            return new DOMRect(pageLeft, pageTop, MW, MH);
-          },
+          restriction: calcViewportRect,
         }),
       ],
       listeners: {
@@ -62,11 +64,14 @@ export function useDragResize(opts: Options) {
     // Warning: box-sizing 需要设置为 border-box！否则会出现宽高跳跃性变化！
     interactable.resizable({
       enabled: !resizeDisabled,
-      edges: { left: true, right: true },
+      edges: { left: true, right: true, top: true, bottom: true },
       modifiers: [
         interact.modifiers.restrictSize({
           min: { width: 300, height: 100 },
-          max: { width: 0.8 * MW, height: 0.8 * MH },
+          max: { width: 0.9 * MW, height: 0.9 * MH },
+        }),
+        interact.modifiers.restrictEdges({
+          outer: calcViewportRect,
         }),
       ],
       listeners: {
