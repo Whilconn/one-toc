@@ -1,25 +1,39 @@
+import React from 'react';
+import ReactDOM, { Root } from 'react-dom/client';
 import { Toc } from './toc';
 import { CID, MSG_NAMES } from '../shared/constants';
-import { addMessageListener, Message } from '../extension-utils/api';
-import ReactDOM, { Root } from 'react-dom/client';
-import React from 'react';
 import { ErrorBoundary } from '../shared/error-boundary';
+import { addMessageListener, Message } from '../extension-utils/api';
+import { loadSettings } from '../extension-utils/settings';
 
-let oneTocRoot: Root | null = null;
+let visible = false;
+let reactRoot: Root | null = null;
 
-function toggleToc() {
-  const rootNode = document.getElementById(CID) || document.createElement('div');
-  if (!rootNode.isConnected) {
-    rootNode.id = CID;
-    rootNode.classList.add('onetoc-root');
-    document.documentElement.append(rootNode);
+function getRoot() {
+  const container = document.getElementById(CID) || document.createElement('div');
+  if (!container.isConnected) {
+    container.id = CID;
+    container.classList.add('onetoc-root');
+    document.documentElement.append(container);
   }
 
-  if (!oneTocRoot) oneTocRoot = ReactDOM.createRoot(rootNode);
+  if (!reactRoot) reactRoot = ReactDOM.createRoot(container);
 
-  if (rootNode.children.length) return hideToc();
+  return reactRoot;
+}
 
-  oneTocRoot.render(
+function hideToc() {
+  const root = getRoot();
+  visible = false;
+
+  root.render(<></>);
+}
+
+function showToc() {
+  const root = getRoot();
+  visible = true;
+
+  root.render(
     <React.StrictMode>
       <ErrorBoundary className="onetoc-container onetoc-embed">
         <Toc hideToc={hideToc} />
@@ -28,8 +42,8 @@ function toggleToc() {
   );
 }
 
-function hideToc() {
-  oneTocRoot?.render(<></>);
+function toggleToc() {
+  visible ? hideToc() : showToc();
 }
 
 // 监听后台消息，用于监听开启、关闭快捷键 Command+B
@@ -37,4 +51,7 @@ addMessageListener((msg: Message) => {
   if (msg.name === MSG_NAMES.TOGGLE_TOC) toggleToc();
 });
 
-if (import.meta.env.DEV) setTimeout(toggleToc, 1000);
+void loadSettings().then((s) => {
+  // if (import.meta.env.DEV) setTimeout(showToc, 1000);
+  if (s.autoOpen) showToc();
+});

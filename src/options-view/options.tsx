@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { Button, Form, message, Radio, Space } from 'antd';
+import { Button, Form, Input, message, Radio, Space, Switch } from 'antd';
 import { Command, createTab, getAllCommands } from '../extension-utils/api';
 import {
   THEME_OPTIONS,
@@ -85,6 +85,20 @@ function Options() {
           </Form.Item>
         );
       })}
+
+      <Form.Item name={SETTINGS_KEYMAP.autoOpen} label="🚁&ensp;自动打开" valuePropName="checked">
+        <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+      </Form.Item>
+
+      <p>📝&ensp;自动打开白名单：</p>
+
+      <Form.Item name={SETTINGS_KEYMAP.whitelist}>
+        <Input.TextArea
+          placeholder="自动打开白名单"
+          autoSize={{ minRows: 3, maxRows: 20 }}
+          disabled={!form.getFieldValue(SETTINGS_KEYMAP.autoOpen)}
+        />
+      </Form.Item>
 
       <Form.Item label=" " colon={false}>
         <Space size="large">

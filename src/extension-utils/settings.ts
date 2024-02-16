@@ -4,6 +4,8 @@ export interface Settings {
   position: string;
   theme: string;
   strategy: string;
+  autoOpen: boolean;
+  whitelist: string;
   // 已读版本号，用于判断是否已经查看releaseNote
   knownVersion: string;
 }
@@ -31,14 +33,15 @@ export const DEFAULT_SETTINGS: Settings = {
   position: POSITION_OPTIONS[0].value,
   theme: THEME_OPTIONS[0].value,
   strategy: STRATEGY_OPTIONS[0].value,
+  autoOpen: false,
+  whitelist: '**',
   knownVersion: '',
 };
 
 export const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);
 export const SETTINGS_KEYMAP = {
-  ...DEFAULT_SETTINGS,
   ...Object.fromEntries(SETTINGS_KEYS.map((s) => [s, s])),
-};
+} as Record<keyof Settings, string>;
 
 export function loadSettings() {
   return loadStorage(SETTINGS_KEYS) as Promise<Settings>;
