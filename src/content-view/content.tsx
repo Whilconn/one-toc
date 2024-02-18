@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM, { Root } from 'react-dom/client';
+import * as micromatch from 'micromatch';
 import { Toc } from './toc';
 import { CID, MSG_NAMES } from '../shared/constants';
 import { ErrorBoundary } from '../shared/error-boundary';
 import { addMessageListener, Message } from '../extension-utils/api';
-import { loadSettings } from '../extension-utils/settings';
+import { loadSettings, Settings } from '../extension-utils/settings';
 
 let visible = false;
 let reactRoot: Root | null = null;
@@ -51,7 +52,23 @@ addMessageListener((msg: Message) => {
   if (msg.name === MSG_NAMES.TOGGLE_TOC) toggleToc();
 });
 
+/** 自动打开相关逻辑 **/
+function findAutoOpenRule(settings: Settings) {
+  if (!settings.whitelist) return null;
+
+  const pathInUrl = location.host + location.pathname;
+
+  return (settings.whitelist || '')
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .find((w) => location.href.startsWith(w) || micromatch.isMatch(pathInUrl, w));
+}
+
 void loadSettings().then((s) => {
+  if (!s.autoOpen) return;
+
+  const rule = findAutoOpenRule(s) || '';
+  if (rule) showToc();
   // if (import.meta.env.DEV) setTimeout(showToc, 1000);
-  if (s.autoOpen) showToc();
 });
