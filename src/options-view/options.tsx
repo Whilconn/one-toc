@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { Button, Form, Input, message, Radio, Space, Switch } from 'antd';
+import { Button, Col, Form, Input, message, Radio, Row } from 'antd';
+import { splitTextByLine } from '../content-utils/text-util';
 import { Command, createTab, getAllCommands } from '../extension-utils/api';
 import {
   THEME_OPTIONS,
@@ -42,6 +43,9 @@ function Options() {
   }, []);
 
   function save(st: Settings) {
+    st.autoOpenRules = splitTextByLine(st.autoOpenRules).join('\n');
+    form.setFieldValue(SETTINGS_KEYMAP.autoOpenRules, st.autoOpenRules);
+
     void saveSettings(st).then(() => {
       return message.success('保存成功');
     });
@@ -58,18 +62,25 @@ function Options() {
   }
 
   return (
-    <Form form={form} onFinish={save} labelAlign="right" labelCol={{ flex: '90px' }} className="settings-container">
+    <Form
+      form={form}
+      onFinish={save}
+      colon={false}
+      labelAlign="left"
+      labelCol={{ flex: '90px' }}
+      className="settings-container"
+    >
       <div className="settings-title">设置</div>
       <Form.Item name={SETTINGS_KEYMAP.theme} label="🌈️&ensp;主题">
-        <Radio.Group options={THEME_OPTIONS} optionType="button" buttonStyle="solid" />
+        <Radio.Group options={THEME_OPTIONS} optionType="button" />
       </Form.Item>
 
       <Form.Item name={SETTINGS_KEYMAP.position} label="📌️&ensp;定位">
-        <Radio.Group options={POSITION_OPTIONS} optionType="button" buttonStyle="solid" />
+        <Radio.Group options={POSITION_OPTIONS} optionType="button" />
       </Form.Item>
 
       <Form.Item name={SETTINGS_KEYMAP.strategy} label="🌐&ensp;优先显示">
-        <Radio.Group options={STRATEGY_OPTIONS} optionType="button" buttonStyle="solid" />
+        <Radio.Group options={STRATEGY_OPTIONS} optionType="button" />
       </Form.Item>
 
       {commands?.map((c) => {
@@ -86,28 +97,24 @@ function Options() {
         );
       })}
 
-      <Form.Item name={SETTINGS_KEYMAP.autoOpen} label="🚁&ensp;自动打开" valuePropName="checked">
-        <Switch checkedChildren="开启" unCheckedChildren="关闭" />
+      <p>🚁&ensp;自动打开规则</p>
+
+      <Form.Item name={SETTINGS_KEYMAP.autoOpenRules}>
+        <Input.TextArea placeholder="自动打开白名单" autoSize={{ minRows: 3, maxRows: 20 }} />
       </Form.Item>
 
-      <p>📝&ensp;自动打开白名单：</p>
-
-      <Form.Item name={SETTINGS_KEYMAP.whitelist}>
-        <Input.TextArea
-          placeholder="自动打开白名单"
-          autoSize={{ minRows: 3, maxRows: 20 }}
-          disabled={!form.getFieldValue(SETTINGS_KEYMAP.autoOpen)}
-        />
-      </Form.Item>
-
-      <Form.Item label=" " colon={false}>
-        <Space size="large">
-          <Button htmlType="submit" type="primary">
+      <Row justify="space-between">
+        <Col span={10}>
+          <Button htmlType="submit" type="primary" block>
             保存
           </Button>
-          <Button onClick={reset}>重置</Button>
-        </Space>
-      </Form.Item>
+        </Col>
+        <Col span={10}>
+          <Button onClick={reset} block>
+            重置
+          </Button>
+        </Col>
+      </Row>
 
       <div className="settings-footer">
         <p className="space-between">

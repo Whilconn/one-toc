@@ -4,8 +4,7 @@ export interface Settings {
   position: string;
   theme: string;
   strategy: string;
-  autoOpen: boolean;
-  whitelist: string;
+  autoOpenRules: string;
   // 已读版本号，用于判断是否已经查看releaseNote
   knownVersion: string;
 }
@@ -33,8 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
   position: POSITION_OPTIONS[0].value,
   theme: THEME_OPTIONS[0].value,
   strategy: STRATEGY_OPTIONS[0].value,
-  autoOpen: false,
-  whitelist: '**',
+  autoOpenRules: import.meta.env.DEV ? '**' : '',
   knownVersion: '',
 };
 

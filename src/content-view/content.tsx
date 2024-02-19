@@ -6,6 +6,7 @@ import { CID, MSG_NAMES } from '../shared/constants';
 import { ErrorBoundary } from '../shared/error-boundary';
 import { addMessageListener, Message } from '../extension-utils/api';
 import { loadSettings, Settings } from '../extension-utils/settings';
+import { splitTextByLine } from '../content-utils/text-util';
 
 let visible = false;
 let reactRoot: Root | null = null;
@@ -53,22 +54,26 @@ addMessageListener((msg: Message) => {
 });
 
 /** 自动打开相关逻辑 **/
-function findAutoOpenRule(settings: Settings) {
-  if (!settings.whitelist) return null;
+function findAutoOpenRule(settings: Settings): [string, number] | void {
+  if (!settings.autoOpenRules) return;
 
   const pathInUrl = location.host + location.pathname;
 
-  return (settings.whitelist || '')
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .find((w) => location.href.startsWith(w) || micromatch.isMatch(pathInUrl, w));
+  return splitTextByLine(settings.autoOpenRules || '')
+    .map((s) => {
+      const [glob, t] = s.split(/\s+/);
+      return [glob, +t] as [string, number];
+    })
+    .find(([glob]) => {
+      return micromatch.some([location.href, pathInUrl], glob);
+    });
 }
 
 void loadSettings().then((s) => {
-  if (!s.autoOpen) return;
+  const rule = findAutoOpenRule(s);
+  if (!rule) return;
 
-  const rule = findAutoOpenRule(s) || '';
-  if (rule) showToc();
-  // if (import.meta.env.DEV) setTimeout(showToc, 1000);
+  if (rule[1]) return setTimeout(showToc, rule[1]);
+
+  showToc();
 });
