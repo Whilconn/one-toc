@@ -6,6 +6,7 @@ import { getFixedHeaderHeight } from '../content-utils/header-util';
 import { changeLayout } from '../content-utils/layout-util';
 import { DEFAULT_SETTINGS, loadSettings, POS_EMBED, saveSettings, Settings } from '../extension-utils/settings';
 import { Heading, resolveHeadings } from '../content-utils/heading-util';
+import { matchResolveRule } from '../shared/resolve-rules';
 import pkg from '../../package.json';
 import closeSvg from '../assets/close.svg?raw';
 import './toc.less';
@@ -13,6 +14,7 @@ import './toc.less';
 export function Toc({ hideToc }: Props) {
   const tocRef = useRef<HTMLElement>(null);
   const [settings, setSettings] = useState<Settings>();
+  const [loading, setLoading] = useState(true);
 
   // 初始化获取配置，页面切换获取最新配置
   useEffect(() => {
@@ -56,7 +58,17 @@ export function Toc({ hideToc }: Props) {
 
   const [group, setGroup] = useState(0);
   const [headingGroups, setHeadingGroups] = useState<Group[]>([]);
-  const { inferredHeadings, allHeadings, officialHeadings } = useMemo(resolveHeadings, [title]);
+  const { inferredHeadings, allHeadings, officialHeadings } = useMemo(() => {
+    if (!settings) return { inferredHeadings: [], allHeadings: [], officialHeadings: [] };
+
+    const resolveRule = matchResolveRule(settings.resolveRules);
+    setTimeout(() => {
+      resolveHeadings(resolveRule);
+      setLoading(false);
+    }, 200);
+
+    return { inferredHeadings: [], allHeadings: [], officialHeadings: [] };
+  }, [title, settings?.resolveRules]);
 
   useEffect(() => {
     if (!settings) return;
@@ -104,7 +116,7 @@ export function Toc({ hideToc }: Props) {
     resizeDisabled: isEmbed,
   });
 
-  if (!settings || !headingGroups[group]) return null;
+  if (!settings) return null;
 
   return (
     <nav ref={tocRef} className={`onetoc-container ${positionClass}`} style={positionStyle} data-theme={settings.theme}>
@@ -144,7 +156,18 @@ export function Toc({ hideToc }: Props) {
         />
       </div>
 
-      <TocBody headings={headingGroups[group].headings} />
+      {loading ? (
+        <center>
+          <p>loading...</p>
+          <p>loading...</p>
+          <p>loading...</p>
+          <p>loading...</p>
+          <p>loading...</p>
+          <p>loading...</p>
+        </center>
+      ) : (
+        <TocBody headings={headingGroups[group]?.headings || []} />
+      )}
     </nav>
   );
 }

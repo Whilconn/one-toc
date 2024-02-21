@@ -23,16 +23,16 @@ import {
 function fixSettings(st: Settings) {
   if (!st) return st;
 
-  const optionsMap: Partial<Record<keyof Settings, Option[]>> = {
-    position: POSITION_OPTIONS,
-    theme: THEME_OPTIONS,
-    strategy: STRATEGY_OPTIONS,
-  };
+  const list: [Key1, Option[]][] = [
+    ['position', POSITION_OPTIONS],
+    ['theme', THEME_OPTIONS],
+    ['strategy', STRATEGY_OPTIONS],
+  ];
 
   const settings = { ...st };
 
-  for (const key of Object.keys(optionsMap) as Array<keyof Settings>) {
-    if (optionsMap[key]?.find((o) => o.value === st[key])) continue;
+  for (const [key, opts] of list) {
+    if (opts.some((o) => o.value === st[key])) continue;
     settings[key] = DEFAULT_SETTINGS[key];
   }
 
@@ -64,3 +64,5 @@ addClickActionListener((tab: Tab) => {
 });
 
 type Option = { label: string; value: string };
+
+type Key1 = keyof Omit<Settings, 'resolveRules'>;

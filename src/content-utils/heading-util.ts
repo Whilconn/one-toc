@@ -1,20 +1,32 @@
 import { filterOfficialHeadings } from './heading-std-util';
 import { resolveArticle } from './article-util';
 import { inferHeadings } from './heading-infer-util';
-import { getAllHeadings } from './heading-all-util';
+import { genStyleInfo, getAllHeadings } from './heading-all-util';
 import { getLevel, isHeading, pxToNumber } from './dom-util';
 import { HEADING_SELECTORS } from '../shared/constants';
+import { ResolveRule } from '../shared/resolve-rules';
 
-export function resolveHeadings() {
-  const articleNode = resolveArticle();
-  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, oneLineHeadings, styleMap, rectMap } =
-    getAllHeadings(articleNode);
+export function resolveHeadings(resolveRule?: ResolveRule) {
+  const articleNode = resolveArticle(resolveRule);
+  const { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, oneLineHeadings, ruleHeadings } = getAllHeadings(
+    articleNode,
+    resolveRule,
+  );
+
+  const { styleMap, rectMap } = genStyleInfo([
+    ...hTagHeadings,
+    ...bTagHeadings,
+    ...styleHeadings,
+    ...semanticHeadings,
+    ...oneLineHeadings,
+    ...ruleHeadings,
+  ]);
 
   // 自带标题
   const officialHeadings = filterOfficialHeadings(hTagHeadings);
 
   // 所有标题
-  let allHeadings: HTMLElement[] = mergeAllHeadings([...hTagHeadings, ...bTagHeadings]);
+  let allHeadings: HTMLElement[] = mergeAllHeadings([...hTagHeadings, ...bTagHeadings, ...ruleHeadings]);
 
   // 精选标题：默认使用h1~h6、b、strong作为精选标题
   const tagHeadings = [...allHeadings];

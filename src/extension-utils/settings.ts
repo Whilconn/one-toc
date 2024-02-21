@@ -1,4 +1,5 @@
 import { loadStorage, saveStorage } from './api';
+import { RESOLVE_RULES, ResolveRule } from '../shared/resolve-rules';
 
 export interface Settings {
   position: string;
@@ -7,6 +8,7 @@ export interface Settings {
   autoOpenRules: string;
   // 已读版本号，用于判断是否已经查看releaseNote
   knownVersion: string;
+  resolveRules: ResolveRule[];
 }
 
 export const THEME_OPTIONS = [
@@ -34,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   strategy: STRATEGY_OPTIONS[0].value,
   autoOpenRules: import.meta.env.DEV ? '**' : '',
   knownVersion: '',
+  resolveRules: RESOLVE_RULES,
 };
 
 export const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);

@@ -1,14 +1,13 @@
 import { genIdClsSelector, getRect, isHidden, queryAll } from './dom-util';
-import { SITES } from '../shared/site-config';
+import { ResolveRule } from '../shared/resolve-rules';
 import { DISPLAY, NODE_NAME, NOISE_SELECTORS, NOISE_WORDS, POSITION, SYMBOL } from '../shared/constants';
 
-export function resolveArticle(): HTMLElement {
+export function resolveArticle(resolveRule?: ResolveRule): HTMLElement {
   const bodyRect = getRect(document.body);
   const mainNode: HTMLElement = searchMainNode(bodyRect) || document.body;
 
   // 根据配置获取文章节点
-  const siteConfig = SITES.find((s) => location.href.startsWith(s.url));
-  let articleNode = siteConfig?.article ? queryAll(siteConfig?.article)[0] : null;
+  let articleNode = resolveRule?.article ? queryAll(resolveRule?.article)[0] : null;
 
   // 找唯一的 article 标签节点
   if (!articleNode) {

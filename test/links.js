@@ -1,4 +1,5 @@
 module.exports.links = [
+  ['虎嗅-解析异常', 'https://www.huxiu.com/article/2679234.html', '8'],
   ['知乎-单行', 'https://zhuanlan.zhihu.com/p/26008219', '13'],
   ['知乎-单行', 'https://zhuanlan.zhihu.com/p/23411438', '10'],
   ['豆瓣-单行', 'https://book.douban.com/review/15125637/', '3'],
@@ -69,7 +70,6 @@ module.exports.links = [
   ['张鑫旭博客', 'https://www.zhangxinxu.com/wordpress/2023/04/ai-code-tool-codeium-github-copilot/', '23'],
   ['vitest-性能', 'https://cn.vitest.dev/api/', '166'],
   // TODO: 识别优化
-  // ['虎嗅-解析异常', 'https://www.huxiu.com/article/2679234.html', '16'],
   // ['知乎-层级异常', 'https://zhuanlan.zhihu.com/p/38813482', '6'],
   // ['github-自带toc过滤','https://github.com/vpncn/vpncn.github.io',79]
   // ['wiki', 'https://en.wikipedia.org/wiki/International_Olympic_Committee', '44'],

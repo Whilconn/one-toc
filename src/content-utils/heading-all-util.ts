@@ -9,18 +9,32 @@ import {
   isHeading,
   isHidden,
   pxToNumber,
+  queryAll,
 } from './dom-util';
+import { ResolveRule } from '../shared/resolve-rules';
 
 // b/strong
 const boldTagSelector = BOLD_SELECTORS.join(SYMBOL.COMMA);
 
+function getHeadingsByResolveRules(resolveRule?: ResolveRule) {
+  if (!resolveRule?.headings?.length) return [];
+  const selector = resolveRule?.headings.join(',');
+
+  return queryAll(selector) || [];
+}
+
 // TODO: 优先级 h1#id > article h1 > h1 > article b,strong > b,strong > style: bold、fs>=20 > 语义
-export function getAllHeadings(articleNode: HTMLElement) {
+export function getAllHeadings(articleNode: HTMLElement, resolveRule?: ResolveRule) {
   const hTagHeadings: HTMLElement[] = [];
   const bTagHeadings: HTMLElement[] = [];
   const styleHeadings: HTMLElement[] = [];
   const semanticHeadings: HTMLElement[] = [];
   const oneLineHeadings: HTMLElement[] = [];
+  const ruleHeadings: HTMLElement[] = getHeadingsByResolveRules(resolveRule) || [];
+
+  if (ruleHeadings.length) {
+    return { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, oneLineHeadings, ruleHeadings };
+  }
 
   const bodyRect = document.body.getBoundingClientRect();
   const reg = /^([一二三四五六七八九十百千万零]{1,4}|\d{1,3}|[a-z])[、.·,，].+/i;
@@ -53,24 +67,20 @@ export function getAllHeadings(articleNode: HTMLElement) {
     }
   }
 
+  return { hTagHeadings, bTagHeadings, styleHeadings, semanticHeadings, oneLineHeadings, ruleHeadings };
+}
+
+export function genStyleInfo(headings: HTMLElement[]) {
   // 注意：rectMap与styleMap是全局状态，且存在改变该状态的逻辑，容易产生bug
   const rectMap = new WeakMap<HTMLElement, DOMRect>();
   const styleMap = new WeakMap<HTMLElement, CSSStyleDeclaration>();
-  const headings = [...hTagHeadings, ...bTagHeadings, ...styleHeadings, ...semanticHeadings, ...oneLineHeadings];
+
   for (const node of headings) {
     if (!rectMap.has(node)) rectMap.set(node, resolveHeadingRect(node));
     if (!styleMap.has(node)) styleMap.set(node, resolveHeadingStyle(node));
   }
 
-  return {
-    hTagHeadings,
-    bTagHeadings,
-    styleHeadings,
-    semanticHeadings,
-    oneLineHeadings,
-    styleMap,
-    rectMap,
-  };
+  return { styleMap, rectMap };
 }
 
 const invalidTags = [NODE_NAME.svg, NODE_NAME.figure];
