@@ -52,10 +52,10 @@ function Options() {
   }
 
   function reset() {
-    const st = {
+    const st: Settings = {
       ...DEFAULT_SETTINGS,
       // knownVersion 不需要重置
-      knownVersion: form.getFieldValue('knownVersion') as string,
+      knownVersion: form.getFieldValue(SETTINGS_KEYMAP.knownVersion) as string,
     };
     form.setFieldsValue(st);
     void saveSettings(st).then();
