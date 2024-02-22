@@ -31,7 +31,11 @@ export function useTitle() {
   return title;
 }
 
-export function useEventListener(target: EventTarget, eventName: string, handler: EventListener) {
+export function useEventListener(
+  target: EventTarget,
+  eventName: string,
+  handler: (evt: Event) => unknown | Promise<unknown>,
+) {
   useEffect(() => {
     target.addEventListener(eventName, handler);
     return () => target.removeEventListener(eventName, handler);

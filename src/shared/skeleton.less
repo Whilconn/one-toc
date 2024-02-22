@@ -1,0 +1,25 @@
+@import '../assets/variables';
+
+.onetoc-skeleton {
+  padding: 10px;
+  transform: translate(0);
+
+  @keyframes skeleton-animation {
+    from {
+      background-position: right;
+    }
+
+    to {
+      background-position: left;
+    }
+  }
+
+  .onetoc-skeleton-item {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    background: var(--onetoc-skeleton-bg);
+    animation: skeleton-animation 1.2s ease infinite;
+    background-size: 400%;
+  }
+}

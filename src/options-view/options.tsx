@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Button, Col, Form, Input, message, Radio, Row } from 'antd';
 import { splitTextByLine } from '../content-utils/text-util';
 import { Command, createTab, getAllCommands } from '../extension-utils/api';
+import { useEventListener } from '../content-view/hooks';
 import {
   THEME_OPTIONS,
   POSITION_OPTIONS,
@@ -32,15 +33,10 @@ function Options() {
   }, [form]);
 
   // 获取最新快捷键
-  useEffect(() => {
-    const eventName = 'visibilitychange';
-    const handler = () => {
-      if (document.visibilityState === 'hidden') return;
-      void getAllCommands().then(setCommands);
-    };
-    document.addEventListener(eventName, handler);
-    return () => document.removeEventListener(eventName, handler);
-  }, []);
+  useEventListener(document, 'visibilitychange', () => {
+    if (document.visibilityState === 'hidden') return;
+    void getAllCommands().then(setCommands);
+  });
 
   function save(st: Settings) {
     st.autoOpenRules = splitTextByLine(st.autoOpenRules).join('\n');

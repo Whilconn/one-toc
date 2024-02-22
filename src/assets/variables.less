@@ -2,16 +2,24 @@
   --onetoc-color: #333;
   --onetoc-bg-color: #ffffff80;
   --onetoc-bg-filter: blur(50px);
+  --onetoc-skeleton-bg: linear-gradient(90deg, rgba(0, 0, 0, 0.1) 30%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.1));
 }
 
 .var-light() {
   --onetoc-color: #333;
   --onetoc-bg-color: #fff;
   --onetoc-bg-filter: unset;
+  --onetoc-skeleton-bg: linear-gradient(90deg, rgba(0, 0, 0, 0.1) 30%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0.1));
 }
 
 .var-dark() {
   --onetoc-color: #eee;
   --onetoc-bg-color: #333;
   --onetoc-bg-filter: unset;
+  --onetoc-skeleton-bg: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.6) 30%,
+    rgba(255, 255, 255, 0.1) 70%,
+    rgba(255, 255, 255, 0.6)
+  );
 }
