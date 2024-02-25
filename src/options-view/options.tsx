@@ -100,7 +100,10 @@ function Options() {
       <p>🚁&ensp;自动打开规则</p>
 
       <Form.Item name={SETTINGS_KEYMAP.autoOpenRules}>
-        <Input.TextArea placeholder="自动打开白名单" autoSize={{ minRows: 3, maxRows: 20 }} />
+        <Input.TextArea
+          placeholder="该配置项是多行文本，每一行是一个匹配规则（必选）和一个毫秒数（可选），二者使用空格隔开"
+          autoSize={{ minRows: 3, maxRows: 20 }}
+        />
       </Form.Item>
 
       <Row justify="space-between">

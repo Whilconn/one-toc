@@ -89,7 +89,20 @@ Generating a table of contents on web page. Whether it’s news, blogs, tutorial
 - 显示目录的快捷键默认为 `Command+B` (Mac) 或 `Ctrl+B` (windows/linux)
 - 可点击 `去设置` 跳转到快捷键设置页面自行修改
 
+### 自动打开规则
+
+该配置项可以指定在哪些网页自动显示目录。该配置项是多行文本，每一行是一个匹配规则（必选）和一个毫秒数（可选），二者使用空格隔开。符合匹配规则的页面打开后会自动显示目录，如果配置了毫秒数，则会在页面加载完成后等待若干毫秒再自动显示目录。如果存在多条匹配规则与当前页面链接匹配，只会应用最靠前的那条规则。
+
+匹配规则请使用 [glob](https://en.wikipedia.org/wiki/Glob_(programming)) 编写，源代码中用于匹配的第三方库是 [micromatch](https://github.com/micromatch/micromatch)。
+
+以下是一些匹配规则示例：
+
+- 示例规则1：`**` 匹配所有页面，即打开任意页面都会自动显示目录。
+- 示例规则2：`https://zhuanlan.zhihu.com/p/**` 表示匹配所有以 `https://zhuanlan.zhihu.com/p/` 开头的页面，即打开任意以 `https://zhuanlan.zhihu.com/p/` 开头的页面都会自动显示目录。
+- 示例规则3：`** 1000` 匹配所有页面并且延迟 `1000ms` 自动显示目录，即打开任意页面 `1000ms` 后都会自动显示目录。延迟配置常用于解决 `Ajax` 加载数据导致解析目录为空的问题，大部分场景不需要。
+
 ## 适用范围
+
 目前只支持 `Edge` 和 `Chrome` 浏览器，在绝大部分文字为主的网页上都能使用。
 
 ## 感谢
