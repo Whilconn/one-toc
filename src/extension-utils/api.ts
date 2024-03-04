@@ -50,7 +50,7 @@ export function sendTabMessage(tab: Tab, name: string) {
   chrome.tabs
     .sendMessage(tab.id, { name })
     .then((response: any) => {
-      if (import.meta.env.DEV) console.log('[sendTabMessage Success]:', response.response);
+      if (import.meta.env.DEV) console.log('[sendTabMessage Success]:', response);
     })
     .catch((error: any) => {
       if (import.meta.env.DEV) console.error('[sendTabMessage Error]:', error);

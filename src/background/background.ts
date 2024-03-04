@@ -20,19 +20,19 @@ import {
 
 // 将变更的配置项重置为默认值，仅用于插件更新的场景
 // 当配置项的选项值发生变化，原来的值在现有备选项中不存在，则将该配置项重置为默认的选项值
-function fixSettings(st: Settings) {
-  if (!st) return st;
+function fixSettings(localSettings: Settings): Settings {
+  if (!localSettings) return localSettings;
 
-  const list: [Key1, Option[]][] = [
+  const keyAndOptions: [Key1, Option[]][] = [
     ['position', POSITION_OPTIONS],
     ['theme', THEME_OPTIONS],
     ['strategy', STRATEGY_OPTIONS],
   ];
 
-  const settings = { ...st };
+  const settings = { ...DEFAULT_SETTINGS, ...localSettings };
 
-  for (const [key, opts] of list) {
-    if (opts.some((o) => o.value === st[key])) continue;
+  for (const [key, opts] of keyAndOptions) {
+    if (opts.some((o) => o.value === localSettings[key])) continue;
     settings[key] = DEFAULT_SETTINGS[key];
   }
 

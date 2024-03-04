@@ -14,11 +14,22 @@ import {
   saveSettings,
   STRATEGY_OPTIONS,
 } from '../extension-utils/settings';
+import { updateResolveRules } from '../shared/resolve-rules';
 import pkg from '../../package.json';
 import './options.less';
 
 function openShortcutsPage() {
   createTab('chrome://extensions/shortcuts');
+}
+
+function onUpdateResolveRules() {
+  updateResolveRules()
+    .then(() => {
+      return message.success('更新成功');
+    })
+    .catch((err: Error) => {
+      return message.error(err.message || '更新失败');
+    });
 }
 
 function Options() {
@@ -92,6 +103,12 @@ function Options() {
           </Form.Item>
         );
       })}
+
+      <Form.Item label="🌐&ensp;解析规则">
+        <Button onClick={onUpdateResolveRules} type="link">
+          更新
+        </Button>
+      </Form.Item>
 
       <p>🚁&ensp;自动打开规则</p>
 

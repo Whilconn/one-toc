@@ -7,6 +7,7 @@ import { ErrorBoundary } from '../shared/error-boundary';
 import { addMessageListener, Message } from '../extension-utils/api';
 import { loadSettings, Settings } from '../extension-utils/settings';
 import { splitTextByLine } from '../content-utils/text-util';
+import { updateResolveRules } from '../shared/resolve-rules';
 
 let visible = false;
 let reactRoot: Root | null = null;
@@ -70,6 +71,8 @@ function findAutoOpenRule(settings: Settings): [string, number] | void {
 }
 
 void loadSettings().then((s) => {
+  void updateResolveRules();
+
   const rule = findAutoOpenRule(s);
   if (!rule) return;
 

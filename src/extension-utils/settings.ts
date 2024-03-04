@@ -1,5 +1,5 @@
 import { loadStorage, saveStorage } from './api';
-import { RESOLVE_RULES, ResolveRule } from '../shared/resolve-rules';
+import { RESOLVE_RULES, RESOLVE_RULES_VERSION, ResolveRule } from '../shared/resolve-rules';
 
 export interface Settings {
   position: string;
@@ -9,6 +9,7 @@ export interface Settings {
   // 已读版本号，用于判断是否已经查看releaseNote
   knownVersion: string;
   resolveRules: ResolveRule[];
+  resolveRulesVersion: string;
 }
 
 export const THEME_OPTIONS = [
@@ -37,6 +38,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoOpenRules: import.meta.env.DEV ? '**' : '',
   knownVersion: '',
   resolveRules: RESOLVE_RULES,
+  resolveRulesVersion: RESOLVE_RULES_VERSION,
 };
 
 export const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS);
@@ -48,6 +50,6 @@ export function loadSettings() {
   return loadStorage(SETTINGS_KEYS) as Promise<Settings>;
 }
 
-export function saveSettings(settings: Settings) {
+export function saveSettings(settings: Partial<Settings>) {
   return saveStorage(settings) as Promise<void>;
 }
