@@ -2,7 +2,7 @@ import * as micromatch from 'micromatch';
 import resolveRuleJson from './resolve-rules.json';
 import { saveSettings } from '../extension-utils/settings';
 
-export const RESOLVE_RULES_VERSION = resolveRuleJson.version as string;
+export const RESOLVE_RULES_VERSION: string = resolveRuleJson.version;
 export const RESOLVE_RULES: ResolveRule[] = resolveRuleJson.rules;
 
 export function matchResolveRule(rules: ResolveRule[]) {
@@ -21,10 +21,12 @@ export async function updateResolveRules() {
 
   if (!resolveConfigJson?.version || !resolveConfigJson?.rules) return Promise.reject(resolveConfigJson);
 
-  return saveSettings({
+  await saveSettings({
     resolveRules: resolveConfigJson.rules,
     resolveRulesVersion: resolveConfigJson.version,
   });
+
+  return resolveConfigJson;
 }
 
 export type ResolveRule = {

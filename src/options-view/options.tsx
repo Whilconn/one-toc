@@ -18,17 +18,19 @@ import { updateResolveRules } from '../shared/resolve-rules';
 import pkg from '../../package.json';
 import './options.less';
 
+const resolveUrl = import.meta.env.VITE_RESOLVE_URL as string;
+
 function openShortcutsPage() {
   createTab('chrome://extensions/shortcuts');
 }
 
 function onUpdateResolveRules() {
   updateResolveRules()
-    .then(() => {
-      return message.success('更新成功');
+    .then((rules) => {
+      return message.success(`更新成功！(新版本号: ${rules.version})`);
     })
     .catch((err: Error) => {
-      return message.error(err.message || '更新失败');
+      return message.error(`更新失败！(${err?.message || '未知错误'})`);
     });
 }
 
@@ -104,7 +106,10 @@ function Options() {
         );
       })}
 
-      <Form.Item label="🌐&ensp;解析规则">
+      <Form.Item label="📝&ensp;解析规则">
+        <Button href={resolveUrl} type="link" target="_blank">
+          查看
+        </Button>
         <Button onClick={onUpdateResolveRules} type="link">
           更新
         </Button>
