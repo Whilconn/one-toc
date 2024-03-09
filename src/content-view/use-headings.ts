@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { matchResolveRule } from '../shared/resolve-rules';
+import { matchResolveRule } from '../shared/resolve-rules-util';
 import { Heading, resolveHeadings } from '../content-utils/heading-util';
 import { DEFAULT_SETTINGS, Settings } from '../extension-utils/settings';
 

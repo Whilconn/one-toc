@@ -7,7 +7,7 @@ import { ErrorBoundary } from '../shared/error-boundary';
 import { addMessageListener, Message } from '../extension-utils/api';
 import { loadSettings, Settings } from '../extension-utils/settings';
 import { splitTextByLine } from '../content-utils/text-util';
-import { updateResolveRules } from '../shared/resolve-rules';
+import { updateResolveRules } from '../shared/resolve-rules-util';
 
 let visible = false;
 let reactRoot: Root | null = null;

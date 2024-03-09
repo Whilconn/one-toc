@@ -14,7 +14,7 @@ import {
   saveSettings,
   STRATEGY_OPTIONS,
 } from '../extension-utils/settings';
-import { updateResolveRules } from '../shared/resolve-rules';
+import { updateResolveRules } from '../shared/resolve-rules-util';
 import pkg from '../../package.json';
 import './options.less';
 
